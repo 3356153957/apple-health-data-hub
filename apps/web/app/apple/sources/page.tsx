@@ -120,7 +120,7 @@ function privacyLabel(privacy: Privacy | null): string {
 function privacyHelper(privacy: Privacy | null): string {
   if (!privacy) return "暂时无法读取隐私状态，但页面不会主动上传健康明细。";
   if (privacy.raw_observations_leave_host) return "建议到隐私设置里核对外发范围。";
-  return privacy.cloud_active ? "当前启用了云端摘要，但健康明细不会直接离开本机。" : "健康明细只保留在你的设备和私密记录里。";
+  return privacy.cloud_active ? "当前启用了云端摘要，健康明细仍会被保护在私密范围内。" : "健康明细只保留在你的设备和私密记录里。";
 }
 
 function providerLabel(provider: string | null | undefined): string {
@@ -229,13 +229,13 @@ export default async function AppleSourcesPage() {
           <div>
             <span>Apple Watch 与 iPhone</span>
             <strong>健康记录来源</strong>
-            <p>心率、活动、睡眠、训练和身体指标会按类别汇总到本机健康记录。</p>
+            <p>心率、活动、睡眠、训练和身体指标会按类别汇总到私密健康记录。</p>
           </div>
         </article>
         <article className="apple-source-device-card">
           <AppleCategoryIcon name="data" />
           <div>
-            <span>本机健康记录</span>
+            <span>私密健康记录</span>
             <strong>{providerLabel(privacy?.provider)}</strong>
             <p>{privacyHelper(privacy)}</p>
           </div>

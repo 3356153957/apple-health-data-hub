@@ -142,10 +142,10 @@ function healthItems(summary: AppleDailySummary | null, status: AppleStatus | nu
     {
       title: "隐私状态",
       body: privacy?.raw_observations_leave_host
-        ? "检测到健康明细可能离开本机，建议进入隐私设置核对。"
+        ? "检测到健康明细可能外发，建议进入隐私设置核对。"
         : privacy?.cloud_active
-          ? "当前可能使用云端摘要能力，但健康明细不会直接离开本机。"
-          : "当前读取和分析在本机完成，健康明细保留在你的私密记录里。",
+          ? "当前可能使用云端摘要能力，但健康明细仍会被保护在私密范围内。"
+          : "当前读取和分析只面向你自己，健康明细保留在私密记录里。",
       href: "/privacy",
       icon: "body",
       tone: privacyTone(privacy),
@@ -204,7 +204,7 @@ export default async function AppleChecklistPage() {
         <div className="apple-kpi">
           <span>来源</span>
           <strong>{readiness?.sources.length ?? 0}</strong>
-          <small>本机可见同步来源</small>
+          <small>仅自己可见的同步来源</small>
         </div>
       </section>
 

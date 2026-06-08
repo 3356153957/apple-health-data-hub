@@ -180,7 +180,7 @@ function buildHighlights({
       stats: [
         { label: "记录类别", value: `${Object.keys(status ?? {}).length} 类` },
         { label: "最近", value: relativeZh(syncNewest) },
-        { label: "位置", value: "本机" },
+        { label: "隐私", value: "仅自己可见" },
       ],
     },
   ];
@@ -232,7 +232,7 @@ export default async function AppleHighlightsPage() {
         <div className="apple-kpi">
           <span>最近同步</span>
           <strong className="compact">{relativeZh(rawNewest(status)).replace("同步", "")}</strong>
-          <small>本机健康记录</small>
+          <small>私密记录</small>
         </div>
       </section>
 

@@ -339,7 +339,7 @@ function buildHomeFavorites(
     {
       title: "健康记录",
       value: `${coreReadyCount}/${CORE_METRICS.length}`,
-      helper: `${observationRows.toLocaleString("zh-CN")} 条本机记录`,
+      helper: `${observationRows.toLocaleString("zh-CN")} 条私密记录`,
       href: "/apple/sources",
       icon: "data",
     },
