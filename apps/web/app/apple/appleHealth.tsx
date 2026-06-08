@@ -13,6 +13,28 @@ export type AppleMetric = {
   description: string;
 };
 
+export type AppleIconName = "activity" | "heart" | "sleep" | "recovery" | "body" | "cardio" | "data";
+
+export type AppleBrowseCategory = {
+  slug: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: AppleIconName;
+  metricIds: string[];
+  rawTables: string[];
+};
+
+export const APPLE_ICON_PATHS: Record<AppleIconName, string[]> = {
+  activity: ["M13 5l3 6h5", "M11 19l-3-6H3", "M16 11l-4 8", "M8 13l4-8"],
+  heart: ["M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8"],
+  sleep: ["M21 12.8A8 8 0 1 1 11.2 3a6 6 0 1 0 9.8 9.8"],
+  recovery: ["M12 3v6l4 2", "M21 12a9 9 0 1 1-3.3-7", "M21 4v6h-6"],
+  body: ["M12 5a3 3 0 1 0 0.01 0", "M5 21v-2a7 7 0 0 1 14 0v2", "M8 14h8"],
+  cardio: ["M4 17l4-4 3 3 7-8", "M14 8h4v4"],
+  data: ["M5 5h14", "M5 12h14", "M5 19h14", "M8 5v14", "M16 5v14"],
+};
+
 export const APPLE_METRICS: AppleMetric[] = [
   {
     id: "vital.heart_rate",
@@ -135,6 +157,84 @@ export const RAW_TABLES: Record<string, { label: string; description: string }> 
   sleep_sessions: { label: "睡眠记录", description: "睡眠时段和各睡眠阶段时长。" },
   workouts: { label: "体能训练", description: "Apple Watch 体能训练记录。" },
 };
+
+export const BROWSE_CATEGORIES: AppleBrowseCategory[] = [
+  {
+    slug: "activity",
+    title: "活动",
+    subtitle: "步数、能量、站立时间",
+    description: "把每日活动量、训练和站立时间放在一起看，适合判断今天是否需要补活动或降低强度。",
+    icon: "activity",
+    metricIds: ["activity.steps", "activity.active_energy", "activity.stand_minutes"],
+    rawTables: ["daily_activity", "workouts"],
+  },
+  {
+    slug: "heart",
+    title: "心脏",
+    subtitle: "心率、HRV、静息心率",
+    description: "集中查看心率、HRV、静息心率和血氧，适合观察训练压力、恢复和日常状态。",
+    icon: "heart",
+    metricIds: ["vital.heart_rate", "vital.resting_heart_rate", "vital.hrv_sdnn", "vital.blood_oxygen"],
+    rawTables: ["heart_rate", "hrv", "blood_oxygen", "quantity_samples"],
+  },
+  {
+    slug: "sleep",
+    title: "睡眠",
+    subtitle: "睡眠阶段、效率、呼吸频率",
+    description: "把睡眠时长、睡眠阶段和夜间呼吸放在一起看，优先判断恢复是否够用。",
+    icon: "sleep",
+    metricIds: ["vital.respiratory_rate", "body.wrist_temperature", "vital.hrv_sdnn"],
+    rawTables: ["sleep_sessions", "quantity_samples"],
+  },
+  {
+    slug: "recovery",
+    title: "恢复",
+    subtitle: "HRV、静息心率、呼吸",
+    description: "用 HRV、静息心率、呼吸频率和血氧组合观察身体压力，帮助决定训练强度。",
+    icon: "recovery",
+    metricIds: ["vital.hrv_sdnn", "vital.resting_heart_rate", "vital.respiratory_rate", "vital.blood_oxygen"],
+    rawTables: ["hrv", "heart_rate", "blood_oxygen", "quantity_samples"],
+  },
+  {
+    slug: "body",
+    title: "身体",
+    subtitle: "腕温和其他身体指标",
+    description: "查看腕温等身体指标的长期变化，适合和睡眠、恢复状态一起判断。",
+    icon: "body",
+    metricIds: ["body.wrist_temperature"],
+    rawTables: ["quantity_samples"],
+  },
+  {
+    slug: "cardio",
+    title: "心肺",
+    subtitle: "VO2 max 与训练能力",
+    description: "查看心肺适能和训练相关记录，适合观察长期体能变化。",
+    icon: "cardio",
+    metricIds: ["cardio.vo2_max", "vital.heart_rate"],
+    rawTables: ["workouts", "quantity_samples", "heart_rate"],
+  },
+  {
+    slug: "data",
+    title: "同步数据",
+    subtitle: "查看原始同步分类",
+    description: "按同步表查看最近记录，适合核对 Apple Watch 和 iPhone 是否持续上传。",
+    icon: "data",
+    metricIds: [],
+    rawTables: ["daily_activity", "sleep_sessions", "workouts", "heart_rate", "hrv", "blood_oxygen", "quantity_samples"],
+  },
+];
+
+export function AppleCategoryIcon({ name }: { name: AppleIconName }) {
+  return (
+    <span className={`apple-category-icon ${name}`} aria-hidden>
+      <svg viewBox="0 0 24 24" focusable="false">
+        {APPLE_ICON_PATHS[name].map((path) => (
+          <path d={path} key={path} />
+        ))}
+      </svg>
+    </span>
+  );
+}
 
 export function zhTime(iso: string | null | undefined): string {
   if (!iso) return "暂无";

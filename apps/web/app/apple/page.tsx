@@ -12,6 +12,8 @@ import {
 } from "../lib/load";
 import {
   APPLE_METRICS,
+  AppleCategoryIcon,
+  BROWSE_CATEGORIES,
   CORE_METRICS,
   RAW_TABLES,
   Sparkline,
@@ -29,33 +31,6 @@ import {
 
 export const metadata: Metadata = { title: "健康概览 · HealthSave" };
 export const dynamic = "force-dynamic";
-
-type AppleIconName = "activity" | "heart" | "sleep" | "recovery" | "body" | "cardio" | "data";
-
-const APPLE_ICON_PATHS: Record<AppleIconName, string[]> = {
-  activity: ["M13 5l3 6h5", "M11 19l-3-6H3", "M16 11l-4 8", "M8 13l4-8"],
-  heart: ["M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8"],
-  sleep: ["M21 12.8A8 8 0 1 1 11.2 3a6 6 0 1 0 9.8 9.8"],
-  recovery: ["M12 3v6l4 2", "M21 12a9 9 0 1 1-3.3-7", "M21 4v6h-6"],
-  body: ["M12 5a3 3 0 1 0 0.01 0", "M5 21v-2a7 7 0 0 1 14 0v2", "M8 14h8"],
-  cardio: ["M4 17l4-4 3 3 7-8", "M14 8h4v4"],
-  data: ["M5 5h14", "M5 12h14", "M5 19h14", "M8 5v14", "M16 5v14"],
-};
-
-const BROWSE_CATEGORIES: Array<{
-  title: string;
-  subtitle: string;
-  href: string;
-  icon: AppleIconName;
-}> = [
-  { title: "活动", subtitle: "步数、能量、站立时间", href: "/apple/raw/daily_activity", icon: "activity" },
-  { title: "心脏", subtitle: "心率、HRV、静息心率", href: "/apple/metrics/heart-rate", icon: "heart" },
-  { title: "睡眠", subtitle: "睡眠阶段、效率、呼吸频率", href: "/apple/raw/sleep_sessions", icon: "sleep" },
-  { title: "恢复", subtitle: "HRV、静息心率、呼吸", href: "/apple/metrics/hrv", icon: "recovery" },
-  { title: "身体", subtitle: "腕温和其他身体指标", href: "/apple/metrics/wrist-temperature", icon: "body" },
-  { title: "心肺", subtitle: "VO2 max 与训练能力", href: "/apple/metrics/vo2-max", icon: "cardio" },
-  { title: "同步数据", subtitle: "查看原始同步分类", href: "/apple/raw/quantity_samples", icon: "data" },
-];
 
 function totalRows(status: AppleStatus | null): number {
   return Object.values(status ?? {}).reduce((sum, row) => sum + (row.count ?? 0), 0);
@@ -93,18 +68,6 @@ function ringStyle(value: number | null | undefined, goal: number, color: string
     "--ring-pct": `${pct(value, goal) * 100}%`,
     "--ring-color": color,
   } as CSSProperties;
-}
-
-function AppleIcon({ name }: { name: AppleIconName }) {
-  return (
-    <span className={`apple-category-icon ${name}`} aria-hidden>
-      <svg viewBox="0 0 24 24" focusable="false">
-        {APPLE_ICON_PATHS[name].map((path) => (
-          <path d={path} key={path} />
-        ))}
-      </svg>
-    </span>
-  );
 }
 
 function ActivityRing({
@@ -251,7 +214,7 @@ export default async function AppleHealthPage() {
           <div className="apple-highlight-list">
             {highlights.map(({ metric, latest, trend, tone }) => (
               <Link className="apple-highlight-row" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
-                <AppleIcon name={metric.id.startsWith("activity.") ? "activity" : metric.id.startsWith("cardio.") ? "cardio" : "heart"} />
+                <AppleCategoryIcon name={metric.id.startsWith("activity.") ? "activity" : metric.id.startsWith("cardio.") ? "cardio" : "heart"} />
                 <div>
                   <span>{metric.label}</span>
                   <strong>
@@ -354,8 +317,8 @@ export default async function AppleHealthPage() {
       </div>
       <section className="apple-category-grid">
         {BROWSE_CATEGORIES.map((category) => (
-          <Link className="apple-category-card" href={category.href} key={category.title}>
-            <AppleIcon name={category.icon} />
+          <Link className="apple-category-card" href={`/apple/categories/${category.slug}`} key={category.title}>
+            <AppleCategoryIcon name={category.icon} />
             <div>
               <span>{category.title}</span>
               <small>{category.subtitle}</small>

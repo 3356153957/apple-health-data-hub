@@ -2035,6 +2035,138 @@ html {
   line-height: 1.4;
 }
 
+.apple-category-hero {
+  align-items: center;
+}
+
+.apple-category-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+}
+
+.apple-category-title .apple-category-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  margin-top: 34px;
+}
+
+.apple-category-title .apple-category-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.apple-kpi strong.compact {
+  font-family: var(--sans);
+  font-size: 22px;
+  line-height: 1.18;
+}
+
+.apple-category-section {
+  margin-top: 14px;
+}
+
+.apple-category-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.apple-category-metric-card {
+  display: block;
+  min-height: 176px;
+  padding: 16px 18px 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-category-metric-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-category-metric-card:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-source-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.apple-source-card {
+  display: block;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-source-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-source-card:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-source-card span,
+.apple-source-card small {
+  display: block;
+}
+
+.apple-source-card span {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.apple-source-card strong {
+  display: block;
+  margin-top: 12px;
+  color: var(--signal);
+  font-family: var(--mono);
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-source-card small {
+  margin-top: 9px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.apple-source-card p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .apple-category-icon {
   display: inline-grid;
   place-items: center;
@@ -2534,6 +2666,8 @@ html {
   .apple-brief-metrics,
   .apple-sleep-extra,
   .apple-category-grid,
+  .apple-category-metric-grid,
+  .apple-source-grid,
   .apple-period-grid.four,
   .apple-record-grid.raw {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2564,11 +2698,22 @@ html {
   .apple-brief-metrics,
   .apple-sleep-extra,
   .apple-category-grid,
+  .apple-category-metric-grid,
+  .apple-source-grid,
   .apple-period-grid,
   .apple-period-grid.four,
   .apple-record-grid,
   .apple-record-grid.raw {
     grid-template-columns: 1fr;
+  }
+  .apple-category-hero {
+    align-items: stretch;
+  }
+  .apple-category-title {
+    flex-direction: column;
+  }
+  .apple-category-title .apple-category-icon {
+    margin-top: 0;
   }
   .apple-hero,
   .apple-detail-hero {
