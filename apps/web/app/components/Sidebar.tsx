@@ -119,7 +119,7 @@ const ICONS: Record<string, ReactNode> = {
   privacy: <path d="M8 2.2l4.5 1.8v3.6c0 2.8-1.9 4.7-4.5 5.6-2.6-.9-4.5-2.8-4.5-5.6V4z" />,
 };
 
-type NavItem = {
+export type NavItem = {
   href: string;
   label: string;
   icon: string;
@@ -127,7 +127,7 @@ type NavItem = {
   activePrefixes?: readonly string[];
 };
 
-const NAV: readonly NavItem[] = [
+export const NAV: readonly NavItem[] = [
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
   { href: "/apple/daily", label: "每日总结", icon: "daily" },
   { href: "/apple/highlights", label: "亮点", icon: "highlight" },
@@ -146,7 +146,23 @@ const NAV: readonly NavItem[] = [
   { href: "/privacy", label: "隐私设置", icon: "privacy" },
 ];
 
-function NavIcon({ name }: { name: string }) {
+export const MOBILE_NAV: readonly NavItem[] = [
+  { href: "/apple", label: "概览", icon: "apple", exact: true },
+  { href: "/apple/daily", label: "总结", icon: "daily", activePrefixes: ["/apple/days/"] },
+  { href: "/apple/browse", label: "浏览", icon: "overview", activePrefixes: ["/apple/categories/", "/apple/metrics/"] },
+  { href: "/apple/trends", label: "趋势", icon: "trend" },
+  { href: "/apple/sources", label: "同步", icon: "experiments", activePrefixes: ["/apple/raw/", "/apple/categories/data"] },
+];
+
+export function isNavItemActive(item: NavItem, pathname: string): boolean {
+  return item.exact
+    ? pathname === item.href
+    : pathname === item.href ||
+        pathname.startsWith(`${item.href}/`) ||
+        Boolean(item.activePrefixes?.some((prefix) => pathname.startsWith(prefix)));
+}
+
+export function NavIcon({ name }: { name: string }) {
   return (
     <svg
       className="nav-icon"
@@ -194,11 +210,7 @@ export function Sidebar({
 
       <nav className="nav">
         {NAV.map((item) => {
-          const active = item.exact
-            ? pathname === item.href
-            : pathname === item.href ||
-              pathname.startsWith(`${item.href}/`) ||
-              Boolean(item.activePrefixes?.some((prefix) => pathname.startsWith(prefix)));
+          const active = isNavItemActive(item, pathname);
           return (
             <Link
               key={item.href}

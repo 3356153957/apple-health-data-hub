@@ -2,9 +2,28 @@
 
 import type { ReactNode } from "react";
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { Sidebar } from "./Sidebar";
+import { MOBILE_NAV, NavIcon, Sidebar, isNavItemActive } from "./Sidebar";
 import { Topbar } from "./Topbar";
+
+function MobileTabs() {
+  const pathname = usePathname();
+  return (
+    <nav className="mobile-tabs" aria-label="常用健康入口">
+      {MOBILE_NAV.map((item) => {
+        const active = isNavItemActive(item, pathname);
+        return (
+          <Link className={`mobile-tab ${active ? "active" : ""}`} href={item.href} key={item.href}>
+            <NavIcon name={item.icon} />
+            <span>{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 
 // Client shell so the sidebar can become a slide-over drawer on small screens.
 // On desktop it's a normal fixed sidebar; the menu button + scrim are CSS-hidden.
@@ -45,6 +64,7 @@ export function Shell({
         />
         <main className="content">{children}</main>
       </div>
+      <MobileTabs />
     </div>
   );
 }

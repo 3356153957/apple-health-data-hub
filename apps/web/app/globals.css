@@ -256,6 +256,10 @@ a {
   padding: 0;
 }
 
+.mobile-tabs {
+  display: none;
+}
+
 .topbar {
   position: sticky;
   top: 0;
@@ -399,7 +403,7 @@ a {
     padding: 16px 18px 13px;
   }
   .content {
-    padding: 22px 18px 56px;
+    padding: 22px 18px calc(104px + env(safe-area-inset-bottom));
   }
   .topbar-title h1 {
     font-size: 19px;
@@ -409,6 +413,60 @@ a {
   }
   .topbar-status .pill {
     display: none;
+  }
+  .mobile-tabs {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 25;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 -16px 42px rgba(0, 0, 0, 0.28);
+  }
+  .mobile-tab {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 0;
+    min-height: 50px;
+    padding: 6px 2px 4px;
+    border-radius: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    transition:
+      background 0.14s ease,
+      color 0.14s ease,
+      transform 0.14s ease;
+  }
+  .mobile-tab:hover,
+  .mobile-tab.active {
+    color: var(--ink);
+    background: var(--accent-weak);
+  }
+  .mobile-tab:active {
+    transform: translateY(1px);
+  }
+  .mobile-tab .nav-icon {
+    width: 18px;
+    height: 18px;
+    color: currentColor;
+  }
+  .mobile-tab.active .nav-icon {
+    color: var(--signal);
+  }
+  .mobile-tab span {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
