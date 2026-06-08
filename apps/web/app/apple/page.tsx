@@ -21,6 +21,7 @@ import {
   RAW_TABLES,
   Sparkline,
   formatHours,
+  formatRespiratoryRate,
   formatValue,
   latestValue,
   metricSeriesValues,
@@ -236,7 +237,7 @@ function buildSummaryFeed(summary: AppleDailySummary | null): SummaryFeedItem[] 
     {
       title: sleepSummaryTitle(sleep),
       body: sleep
-        ? `睡眠效率 ${formatValue(sleep.efficiency_pct, 1)}%，呼吸次数 ${formatValue(sleep.respiratory_rate, 1)} 次/分。`
+        ? `睡眠效率 ${formatValue(sleep.efficiency_pct, 1)}%，呼吸次数 ${formatRespiratoryRate(sleep.respiratory_rate)}。`
         : "还没有同步到这一天的睡眠阶段和呼吸数据。",
       meta: sleep ? `${formatHours(sleep.total_sleep_min)} · ${sleep.level}` : "睡眠摘要",
       href: dayHref,
@@ -296,7 +297,7 @@ function buildHomeFavorites(
     },
     {
       title: "呼吸次数",
-      value: `${formatValue(sleep?.respiratory_rate, 1)} 次/分`,
+      value: formatRespiratoryRate(sleep?.respiratory_rate),
       helper: "睡眠期间记录",
       href: "/apple/metrics/respiratory-rate",
       icon: "sleep",

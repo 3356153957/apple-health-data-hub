@@ -284,6 +284,16 @@ export function formatValue(value: number | null | undefined, digits = 0): strin
   }).format(value);
 }
 
+export function cleanRespiratoryRate(value: number | null | undefined): number | null {
+  if (value === null || value === undefined || !Number.isFinite(value) || value <= 0) return null;
+  return value;
+}
+
+export function formatRespiratoryRate(value: number | null | undefined): string {
+  const cleaned = cleanRespiratoryRate(value);
+  return cleaned === null ? "暂无" : `${formatValue(cleaned, 1)} 次/分`;
+}
+
 export function formatHours(minutes: number | null | undefined): string {
   if (minutes === null || minutes === undefined || !Number.isFinite(minutes)) return "暂无";
   return `${formatValue(minutes / 60, 1)} 小时`;

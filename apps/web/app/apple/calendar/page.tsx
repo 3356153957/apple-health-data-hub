@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 import type { AppleRawDetail } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleRawDetail } from "../../lib/load";
-import { AppleCategoryIcon, formatHours, formatValue, workoutLabel } from "../appleHealth";
+import { AppleCategoryIcon, cleanRespiratoryRate, formatHours, formatValue, workoutLabel } from "../appleHealth";
 
 export const metadata: Metadata = { title: "健康日历 · 健康" };
 export const dynamic = "force-dynamic";
@@ -175,7 +175,7 @@ function buildDays(activityRows: RawRow[], sleepRows: RawRow[], workoutRows: Raw
     const currentSleep = day.sleepMinutes ?? 0;
     if (nextSleep !== null && nextSleep >= currentSleep) {
       day.sleepMinutes = nextSleep;
-      day.respiratoryRate = rawNumber(row, "respiratory_rate");
+      day.respiratoryRate = cleanRespiratoryRate(rawNumber(row, "respiratory_rate"));
     }
   });
 

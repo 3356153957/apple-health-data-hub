@@ -4,7 +4,15 @@ import type { Metadata } from "next";
 
 import type { AppleDailySummary } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleRawDetail } from "../../lib/load";
-import { AppleCategoryIcon, formatHours, formatValue, workoutLabel, zhTime } from "../appleHealth";
+import {
+  AppleCategoryIcon,
+  cleanRespiratoryRate,
+  formatHours,
+  formatRespiratoryRate,
+  formatValue,
+  workoutLabel,
+  zhTime,
+} from "../appleHealth";
 
 export const metadata: Metadata = { title: "每日总结 · 健康" };
 export const dynamic = "force-dynamic";
@@ -83,6 +91,11 @@ function minutes(value: number | null | undefined): string {
   return `${formatValue(value)} 分钟`;
 }
 
+function respirationBrief(value: number | null | undefined): string {
+  const cleaned = cleanRespiratoryRate(value);
+  return cleaned === null ? "暂无呼吸记录" : `${formatValue(cleaned, 1)} 次/分呼吸`;
+}
+
 function dailyTone(summary: AppleDailySummary | null): Tone {
   if (!summary) return "neutral";
   if (summary.sleep?.level === "偏少") return "warn";
@@ -142,7 +155,7 @@ function recentDays(
       activeMinutes: rawNumber(row, "active_minutes"),
       standMinutes: rawNumber(row, "stand_minutes"),
       sleepMinutes,
-      respiratoryRate: rawNumber(sleep, "respiratory_rate"),
+      respiratoryRate: cleanRespiratoryRate(rawNumber(sleep, "respiratory_rate")),
       tone,
     };
   }).filter((day) => day.date);
@@ -235,7 +248,7 @@ export default async function AppleDailyPage() {
           <div className="apple-daily-mini-row">
             <em>{formatValue(activity?.active_minutes)} 分钟活动</em>
             <em>{formatHours(activity?.stand_minutes)} 站立</em>
-            <em>{formatValue(sleep?.respiratory_rate, 1)} 次/分呼吸</em>
+            <em>{respirationBrief(sleep?.respiratory_rate)}</em>
           </div>
         </article>
       </section>
@@ -263,8 +276,8 @@ export default async function AppleDailyPage() {
         </div>
         <div className="apple-kpi">
           <span>呼吸次数</span>
-          <strong>{formatValue(sleep?.respiratory_rate, 1)}</strong>
-          <small>次/分 · 睡眠期间</small>
+          <strong>{formatRespiratoryRate(sleep?.respiratory_rate)}</strong>
+          <small>睡眠期间</small>
         </div>
         <div className="apple-kpi">
           <span>训练记录</span>
@@ -327,7 +340,7 @@ export default async function AppleDailyPage() {
             </div>
             <div>
               <span>呼吸次数</span>
-              <strong>{formatValue(sleep?.respiratory_rate, 1)} 次/分</strong>
+              <strong>{formatRespiratoryRate(sleep?.respiratory_rate)}</strong>
             </div>
           </div>
         </article>

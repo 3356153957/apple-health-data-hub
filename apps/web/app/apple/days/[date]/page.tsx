@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 import type { AppleDailySummary } from "../../../lib/api";
 import { safeAppleDailySummary } from "../../../lib/load";
-import { AppleCategoryIcon, formatHours, formatValue, workoutLabel, zhTime } from "../../appleHealth";
+import { AppleCategoryIcon, formatHours, formatRespiratoryRate, formatValue, workoutLabel, zhTime } from "../../appleHealth";
 
 export const dynamic = "force-dynamic";
 
@@ -288,7 +288,7 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
           <div className="apple-sleep-extra">
             <div>
               <span>呼吸次数</span>
-              <strong>{formatValue(sleep?.respiratory_rate, 1)} 次/分</strong>
+              <strong>{formatRespiratoryRate(sleep?.respiratory_rate)}</strong>
             </div>
             <div>
               <span>在床时间</span>

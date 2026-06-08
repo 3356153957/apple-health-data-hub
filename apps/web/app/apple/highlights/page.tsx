@@ -8,6 +8,7 @@ import {
   type AppleIconName,
   AppleCategoryIcon,
   formatHours,
+  formatRespiratoryRate,
   formatValue,
   latestValue,
   metricSeriesValues,
@@ -125,7 +126,7 @@ function buildHighlights({
     {
       title: sleep?.level === "偏少" ? "睡眠恢复偏少" : "睡眠恢复记录",
       body: sleep
-        ? `昨夜睡眠 ${formatHours(sleep.total_sleep_min)}，效率 ${formatValue(sleep.efficiency_pct, 1)}%，呼吸次数 ${formatValue(sleep.respiratory_rate, 1)} 次/分。`
+        ? `昨夜睡眠 ${formatHours(sleep.total_sleep_min)}，效率 ${formatValue(sleep.efficiency_pct, 1)}%，呼吸次数 ${formatRespiratoryRate(sleep.respiratory_rate)}。`
         : "还没有同步到睡眠阶段和呼吸记录。",
       meta: "睡眠",
       href: "/apple/categories/sleep",

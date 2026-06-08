@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 import type { AppleRawDetail } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleRawDetail } from "../../lib/load";
-import { AppleCategoryIcon, formatHours, formatValue, workoutLabel } from "../appleHealth";
+import { AppleCategoryIcon, cleanRespiratoryRate, formatHours, formatRespiratoryRate, formatValue, workoutLabel } from "../appleHealth";
 
 export const metadata: Metadata = { title: "健康报告 · 健康" };
 export const dynamic = "force-dynamic";
@@ -141,7 +141,7 @@ function buildDays(activityRows: RawRow[], sleepRows: RawRow[], workoutRows: Raw
     const sleepMinutes = rawNumber(row, "total_sleep_min");
     if (sleepMinutes !== null && sleepMinutes >= (day.sleepMinutes ?? 0)) {
       day.sleepMinutes = sleepMinutes;
-      day.respiratoryRate = rawNumber(row, "respiratory_rate");
+      day.respiratoryRate = cleanRespiratoryRate(rawNumber(row, "respiratory_rate"));
     }
   });
 
@@ -286,7 +286,10 @@ function buildInsights(stats: ReportStats, previous: ReportStats): InsightCard[]
     },
     {
       title: "恢复",
-      body: `夜间呼吸平均 ${formatValue(stats.avgRespiration, 1)} 次/分，适合和睡眠质量一起看。`,
+      body:
+        stats.avgRespiration === null
+          ? "本周暂时没有可用的夜间呼吸记录，先结合睡眠时长和 HRV 看恢复。"
+          : `夜间呼吸平均 ${formatRespiratoryRate(stats.avgRespiration)}，适合和睡眠质量一起看。`,
       href: "/apple/categories/recovery",
       icon: "recovery",
       tone: respiratoryChange.tone,
