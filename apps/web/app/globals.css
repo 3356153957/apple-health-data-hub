@@ -2636,6 +2636,50 @@ a.apple-summary-card:active {
   margin-top: 14px;
 }
 
+.apple-context-note {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: var(--raise);
+}
+
+.apple-context-note strong {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.apple-context-note p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.apple-context-note a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  font-size: 12px;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.apple-context-note a:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
 .apple-panel-head {
   display: flex;
   align-items: flex-start;
@@ -4337,6 +4381,14 @@ a.apple-summary-card:active {
   }
   .apple-hero-badges {
     justify-content: flex-start;
+  }
+  .apple-context-note {
+    grid-template-columns: 38px minmax(0, 1fr);
+    align-items: start;
+  }
+  .apple-context-note a {
+    grid-column: 2;
+    justify-self: start;
   }
   .apple-kpis,
   .apple-focus-grid,

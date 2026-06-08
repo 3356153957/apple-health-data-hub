@@ -65,6 +65,14 @@ type RecordCard = {
   details: string[];
 };
 
+type TableNotice = {
+  icon: IconName;
+  title: string;
+  body: string;
+  href: string;
+  action: string;
+};
+
 type IconName = "activity" | "sleep" | "workout" | "heart" | "records" | "energy";
 
 const ICON_PATHS: Record<IconName, string[]> = {
@@ -108,6 +116,7 @@ function formatCell(key: string, value: string | number | null): string {
 
 function numeric(row: RawRow, key: string): number | null {
   const value = row[key];
+  if (value === null || value === undefined || value === "") return null;
   const parsed = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(parsed)) return null;
   if (key === "respiratory_rate" && parsed <= 0) return null;
@@ -396,6 +405,40 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
   });
 }
 
+function tableNotice(decodedTable: string, rows: RawRow[]): TableNotice | null {
+  if (decodedTable === "daily_activity") {
+    const latestRow = rows[0];
+    const hasStandMinutes = rows.some((row) => numeric(row, "stand_minutes") !== null);
+    const hasStandHours = latestRow ? numeric(latestRow, "stand_hours") !== null : false;
+    return {
+      icon: "activity",
+      title: hasStandHours ? "站立数据已同步" : "站立时间按分钟展示",
+      body: hasStandHours
+        ? "这里同时保留 Apple 站立小时和 Apple Watch 站立时间。趋势页会优先使用更细的站立分钟。"
+        : hasStandMinutes
+          ? "Apple Watch 当前同步到了站立时间分钟数；表格里的站立小时是另一种健身圆环口径，所以这一列暂时为空。"
+          : "这张表还没有站立分钟记录。保持 Apple Watch 佩戴并手动同步一次后，这里会显示站立时间。",
+      href: "/apple/metrics/stand-time",
+      action: "查看站立时间",
+    };
+  }
+
+  if (decodedTable === "sleep_sessions") {
+    const hasRespiration = rows.some((row) => numeric(row, "respiratory_rate") !== null);
+    return {
+      icon: "sleep",
+      title: hasRespiration ? "呼吸次数来自睡眠期间" : "等待睡眠呼吸记录",
+      body: hasRespiration
+        ? "呼吸次数通常由 Apple Watch 在睡眠时记录，白天不会像心率一样连续出现。"
+        : "这几条睡眠记录里暂时没有呼吸次数；开启睡眠追踪并佩戴 Apple Watch 入睡后会逐步补齐。",
+      href: "/apple/metrics/respiratory-rate",
+      action: "查看呼吸次数",
+    };
+  }
+
+  return null;
+}
+
 export default async function AppleRawTablePage({ params }: PageProps) {
   const { table } = await params;
   const decodedTable = decodeURIComponent(table);
@@ -410,6 +453,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
   const monthRows = rowsSince(rows, startOfMonth(now), now);
   const cards = summaryCards(decodedTable, rows, weekRows, monthRows);
   const records = recordCards(decodedTable, rows);
+  const notice = tableNotice(decodedTable, rows);
 
   return (
     <>
@@ -427,6 +471,17 @@ export default async function AppleRawTablePage({ params }: PageProps) {
           <span className="apple-badge good">{rows.length.toLocaleString("zh-CN")} 条</span>
         </div>
       </section>
+
+      {notice && (
+        <section className="apple-context-note">
+          <RawIcon name={notice.icon} />
+          <div>
+            <strong>{notice.title}</strong>
+            <p>{notice.body}</p>
+          </div>
+          <Link href={notice.href}>{notice.action}</Link>
+        </section>
+      )}
 
       <section className="apple-panel apple-period-overview">
         <div className="apple-panel-head">

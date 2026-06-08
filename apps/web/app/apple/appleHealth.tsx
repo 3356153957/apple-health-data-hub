@@ -71,7 +71,7 @@ export const APPLE_METRICS: AppleMetric[] = [
     digits: 0,
     higherIsBetter: true,
     note: "日常活动",
-    description: "Apple Watch 记录的站立和活动时间，适合和久坐、运动分钟一起看。",
+    description: "Apple Watch 记录的站立分钟数，和健身圆环里的站立小时口径不同，适合和久坐、运动分钟一起看。",
   },
   {
     id: "vital.hrv_sdnn",
@@ -111,7 +111,7 @@ export const APPLE_METRICS: AppleMetric[] = [
     unit: "次/分",
     digits: 1,
     note: "睡眠呼吸频率",
-    description: "睡眠期间每分钟呼吸次数，适合和睡眠质量、疲劳状态一起看。",
+    description: "Apple Watch 通常在睡眠期间记录每分钟呼吸次数，适合和睡眠质量、疲劳状态一起看。",
   },
   {
     id: "body.wrist_temperature",
