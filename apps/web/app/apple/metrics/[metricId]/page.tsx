@@ -216,6 +216,31 @@ function pointsBetween(points: DetailPoint[], start: Date, end: Date): DetailPoi
   });
 }
 
+function startForRange(key: RangeKey, now: Date): Date {
+  if (key === "24h") return shiftDays(now, -1);
+  if (key === "7d") return shiftDays(now, -7);
+  if (key === "30d") return shiftDays(now, -30);
+  if (key === "90d") return shiftDays(now, -90);
+  return shiftDays(now, -365);
+}
+
+function pointKey(point: DetailPoint): string {
+  return [point.t, point.value ?? "null", point.unit ?? "", point.source_id ?? ""].join("|");
+}
+
+function mergePoints(...groups: DetailPoint[][]): DetailPoint[] {
+  const byKey = new Map<string, DetailPoint>();
+  groups.flat().forEach((point) => {
+    const key = pointKey(point);
+    if (!byKey.has(key)) byKey.set(key, point);
+  });
+  return Array.from(byKey.values()).sort((a, b) => {
+    const aDate = pointDate(a)?.getTime() ?? 0;
+    const bDate = pointDate(b)?.getTime() ?? 0;
+    return aDate - bDate;
+  });
+}
+
 function statsFor(points: DetailPoint[]): PeriodStats {
   const values = points.map((point) => point.value).filter((value): value is number => value !== null);
   const range = minMax(values);
@@ -477,17 +502,20 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
     source_id: point.source_id,
   }));
   const selectedPointsDesc = [...selectedPointsAsc].reverse();
-  const detailPointsAsc = seriesPoints.length ? seriesPoints : [...rawPoints].reverse();
-  const chartPoints = selectedPointsAsc.length ? selectedPointsAsc : detailPointsAsc;
-  const nums = metricSeriesValues(metric, selectedSeries);
-  const longNums = metricSeriesValues(metric, series90);
+  const now = new Date();
+  const rawPointsAsc = [...rawPoints].reverse();
+  const selectedRawPoints = pointsBetween(rawPointsAsc, startForRange(activeRange, now), now);
+  const selectedDetailPointsAsc = mergePoints(selectedPointsAsc, selectedRawPoints);
+  const detailPointsAsc = mergePoints(seriesPoints, rawPointsAsc);
+  const chartPoints = selectedDetailPointsAsc.length ? selectedDetailPointsAsc : detailPointsAsc;
+  const nums = selectedDetailPointsAsc.map((point) => point.value).filter((value): value is number => value !== null);
+  const longNums = detailPointsAsc.map((point) => point.value).filter((value): value is number => value !== null);
   const latest = rawPoints[0]?.value ?? (nums.length ? nums[nums.length - 1] : latestValue(selectedSeries));
   const avg = average(nums);
   const range = minMax(nums);
   const trend = recentTrend(nums);
   const tone = trendTone(metric, trend.delta);
   const windowLabel = rangeTitle(activeRange);
-  const now = new Date();
   const weekStart = startOfWeek(now);
   const monthStart = startOfMonth(now);
   const weekStats = statsFor(pointsBetween(detailPointsAsc, weekStart, now));
@@ -542,9 +570,9 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
       <section className="apple-related-metrics" aria-label="相关指标">
         <div className="apple-related-copy">
           <span>相关指标</span>
-          <strong>站立和呼吸有单独页面</strong>
+          <strong>不同指标分开展示</strong>
           <p>
-            Apple Health 会把这些项目分开记录。当前页只看{metric.label}，站立时间在活动里，呼吸次数在睡眠和恢复里。
+            当前页只展示{metric.label}。站立时间在活动里，呼吸次数在睡眠和恢复里，点下面卡片可以直接查看。
           </p>
         </div>
         {relatedCards.map((item) => (
@@ -555,7 +583,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
               <strong>{item.metric.label}</strong>
               <p>{item.description}</p>
               <em>
-                最近 {item.latest === null ? "暂无" : formatValue(item.latest, item.metric.digits ?? 0)}
+                {item.latest === null ? "暂无近期记录" : `已同步 ${formatValue(item.latest, item.metric.digits ?? 0)}`}
                 {item.latest === null ? "" : ` ${item.metric.unit}`}
               </em>
             </div>
