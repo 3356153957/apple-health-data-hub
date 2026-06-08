@@ -6,7 +6,6 @@ import type { AppleMetric } from "../../appleHealth";
 import { safeAppleRawDetail, safeSeries } from "../../../lib/load";
 import {
   APPLE_METRICS,
-  Sparkline,
   average,
   formatValue,
   latestValue,
@@ -30,6 +29,10 @@ type DetailPoint = {
   value: number | null;
   unit: string;
   source_id: string | null;
+};
+
+type ChartPoint = DetailPoint & {
+  value: number;
 };
 
 const RAW_METRIC_MAP: Record<string, { table: string; time: string; value: string; unit?: string; metricName?: string }> = {
@@ -331,6 +334,99 @@ function rangeTitle(key: RangeKey): string {
   return RANGE_OPTIONS.find((option) => option.key === key)?.title ?? "30 天";
 }
 
+function compactDate(iso: string | null | undefined): string {
+  if (!iso) return "暂无";
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T12:00:00+08:00`) : new Date(iso);
+  if (Number.isNaN(date.getTime())) return "暂无";
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Shanghai",
+  }).format(date);
+}
+
+function sampleChartPoints(points: ChartPoint[], target = 180): ChartPoint[] {
+  if (points.length <= target) return points;
+  const step = points.length / target;
+  const sampled: ChartPoint[] = [];
+  for (let index = 0; index < target; index += 1) {
+    sampled.push(points[Math.min(points.length - 1, Math.floor(index * step))]);
+  }
+  return sampled;
+}
+
+function MetricDetailChart({
+  metric,
+  points,
+  avg,
+}: {
+  metric: AppleMetric;
+  points: DetailPoint[];
+  avg: number | null;
+}) {
+  const values = points.filter((point): point is ChartPoint => point.value !== null && Number.isFinite(point.value));
+  const sampled = sampleChartPoints(values);
+  if (sampled.length < 2) return <div className="apple-empty-chart">暂无趋势</div>;
+
+  const nums = sampled.map((point) => point.value);
+  const min = Math.min(...nums);
+  const max = Math.max(...nums);
+  const span = max - min || 1;
+  const highIndex = nums.indexOf(max);
+  const lowIndex = nums.indexOf(min);
+  const xFor = (index: number) => (index / Math.max(1, sampled.length - 1)) * 100;
+  const yFor = (value: number) => 64 - ((value - min) / span) * 50;
+  const linePoints = sampled.map((point, index) => `${xFor(index).toFixed(2)},${yFor(point.value).toFixed(2)}`).join(" ");
+  const areaPoints = `0,68 ${linePoints} 100,68`;
+  const avgY = avg === null ? null : yFor(avg);
+  const start = values[0];
+  const end = values[values.length - 1];
+
+  return (
+    <div className="apple-detail-chart">
+      <div className="apple-detail-chart-top">
+        <div>
+          <span>图表范围</span>
+          <strong>
+            {formatValue(min, metric.digits ?? 0)}-{formatValue(max, metric.digits ?? 0)}
+            <small>{metric.unit}</small>
+          </strong>
+        </div>
+        <div>
+          <span>平均值</span>
+          <strong>
+            {formatValue(avg, metric.digits ?? 0)}
+            <small>{metric.unit}</small>
+          </strong>
+        </div>
+      </div>
+      <svg className="apple-detail-chart-svg" viewBox="0 0 100 72" preserveAspectRatio="none" aria-hidden>
+        <line x1="0" x2="100" y1="14" y2="14" className="grid" />
+        <line x1="0" x2="100" y1="39" y2="39" className="grid" />
+        <line x1="0" x2="100" y1="64" y2="64" className="grid" />
+        {avgY !== null && <line x1="0" x2="100" y1={avgY} y2={avgY} className="avg" />}
+        <polygon points={areaPoints} className="area" />
+        <polyline points={linePoints} className="line" />
+        <circle cx={xFor(highIndex)} cy={yFor(max)} r="1.35" className="marker high" />
+        <circle cx={xFor(lowIndex)} cy={yFor(min)} r="1.35" className="marker low" />
+      </svg>
+      <div className="apple-chart-axis">
+        <span>{compactDate(start.t)}</span>
+        <span>{values.length.toLocaleString("zh-CN")} 个点</span>
+        <span>{compactDate(end.t)}</span>
+      </div>
+      <div className="apple-chart-extremes">
+        <span>
+          最高 {formatValue(max, metric.digits ?? 0)} {metric.unit} · {compactDate(sampled[highIndex]?.t)}
+        </span>
+        <span>
+          最低 {formatValue(min, metric.digits ?? 0)} {metric.unit} · {compactDate(sampled[lowIndex]?.t)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default async function AppleMetricDetailPage({ params, searchParams }: PageProps) {
   const { metricId } = await params;
   const query = searchParams ? await searchParams : {};
@@ -352,13 +448,15 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
     unit: point.unit ?? metric.unit,
     source_id: point.source_id,
   }));
-  const selectedPointsDesc = orderedSeriesPoints(selectedSeries, "desc").map((point) => ({
+  const selectedPointsAsc = orderedSeriesPoints(selectedSeries).map((point) => ({
     t: point.t,
     value: normalizeMetricValue(metric, point.value),
     unit: point.unit ?? metric.unit,
     source_id: point.source_id,
   }));
+  const selectedPointsDesc = [...selectedPointsAsc].reverse();
   const detailPointsAsc = seriesPoints.length ? seriesPoints : [...rawPoints].reverse();
+  const chartPoints = selectedPointsAsc.length ? selectedPointsAsc : detailPointsAsc;
   const nums = metricSeriesValues(metric, selectedSeries);
   const longNums = metricSeriesValues(metric, series90);
   const latest = rawPoints[0]?.value ?? (nums.length ? nums[nums.length - 1] : latestValue(selectedSeries));
@@ -512,7 +610,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
             {`90 天总计 ${longNums.length.toLocaleString("zh-CN")} 点`}
           </span>
         </div>
-        <Sparkline nums={nums} tall />
+        <MetricDetailChart metric={metric} points={chartPoints} avg={avg} />
       </section>
 
       <section className="apple-panel">

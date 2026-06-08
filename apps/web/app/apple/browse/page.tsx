@@ -2,13 +2,21 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import type { AppleStatus } from "../../lib/api";
-import { safeAppleStatus } from "../../lib/load";
+import { safeAppleStatus, safeSeries } from "../../lib/load";
 import {
   APPLE_METRICS,
   AppleCategoryIcon,
   BROWSE_CATEGORIES,
   RAW_TABLES,
+  Sparkline,
+  formatValue,
+  latestValue,
+  metricSeriesValues,
+  orderedSeriesPoints,
+  recentTrend,
   relativeZh,
+  trendTone,
+  zhDate,
   zhTime,
 } from "../appleHealth";
 
@@ -40,11 +48,30 @@ function metricLabels(metricIds: string[]): string[] {
     .slice(0, 4);
 }
 
+const QUICK_METRIC_IDS = ["activity.stand_minutes", "vital.respiratory_rate", "activity.steps", "vital.heart_rate"];
+
+function trendLabel(pct: number | null): string {
+  if (pct === null) return "暂无趋势";
+  return `${pct > 0 ? "+" : ""}${formatValue(pct, 1)}%`;
+}
+
+function metricHint(metricId: string): string {
+  if (metricId === "activity.stand_minutes") return "按天汇总 Apple Watch 站立与活动时间。";
+  if (metricId === "vital.respiratory_rate") return "睡眠期间记录，白天通常不会持续产生读数。";
+  return "点进去查看本周、本月和最近记录。";
+}
+
 export default async function AppleBrowsePage() {
-  const status = await safeAppleStatus();
   const userCategories = BROWSE_CATEGORIES.filter((category) => category.slug !== "data");
   const metricCount = new Set(userCategories.flatMap((category) => category.metricIds)).size;
   const sourceTables = Object.keys(RAW_TABLES);
+  const quickMetrics = QUICK_METRIC_IDS.map((id) => APPLE_METRICS.find((metric) => metric.id === id)).filter(
+    (metric): metric is (typeof APPLE_METRICS)[number] => Boolean(metric),
+  );
+  const [status, quickSeriesList] = await Promise.all([
+    safeAppleStatus(),
+    Promise.all(quickMetrics.map((metric) => safeSeries(metric.id, "30d"))),
+  ]);
 
   return (
     <>
@@ -83,6 +110,44 @@ export default async function AppleBrowsePage() {
           <span>最近同步</span>
           <strong className="compact">{relativeZh(rawNewest(status)).replace("同步", "")}</strong>
           <small>只读取本地数据</small>
+        </div>
+      </section>
+
+      <section className="apple-panel apple-category-section">
+        <div className="apple-panel-head">
+          <div>
+            <h3>常用指标</h3>
+            <p>站立时间和呼吸频率在这里可以直接进入详情；呼吸频率来自睡眠期间的 Apple Watch 记录。</p>
+          </div>
+        </div>
+        <div className="apple-category-metric-grid apple-quick-metric-grid">
+          {quickMetrics.map((metric, index) => {
+            const series = quickSeriesList[index];
+            const nums = metricSeriesValues(metric, series);
+            const points = orderedSeriesPoints(series);
+            const firstPoint = points[0];
+            const latestPoint = points[points.length - 1];
+            const latest = nums.length ? nums[nums.length - 1] : latestValue(series);
+            const trend = recentTrend(nums);
+            const tone = trendTone(metric, trend.delta);
+            return (
+              <Link className="apple-category-metric-card apple-quick-metric-card" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
+                <div className="apple-card-title">
+                  <span>{metric.label}</span>
+                  <em className={tone}>{trendLabel(trend.pct)}</em>
+                </div>
+                <div className="apple-value">
+                  {formatValue(latest, metric.digits ?? 0)}
+                  <span>{metric.unit}</span>
+                </div>
+                <Sparkline nums={nums} />
+                <div className="apple-card-meta">
+                  {nums.length.toLocaleString("zh-CN")} 个点 · {zhDate(firstPoint?.t)} 到 {zhDate(latestPoint?.t)}
+                </div>
+                <p className="apple-metric-note">{metricHint(metric.id)}</p>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
