@@ -166,6 +166,15 @@ type SummaryFeedItem = {
   stats: SummaryStat[];
 };
 
+type HomeFavoriteItem = {
+  title: string;
+  value: string;
+  helper: string;
+  href?: string;
+  icon: AppleIconName;
+  tone?: "good" | "warn" | "neutral";
+};
+
 function summaryDateHref(summary: AppleDailySummary | null): string {
   return summary?.date ? `/apple/days/${encodeURIComponent(summary.date)}` : "/apple";
 }
@@ -250,6 +259,61 @@ function buildSummaryFeed(summary: AppleDailySummary | null): SummaryFeedItem[] 
         { label: "睡眠", value: sleep?.level ?? "暂无" },
         { label: "建议", value: `${summary?.advice?.length ?? 0} 条` },
       ],
+    },
+  ];
+}
+
+function buildHomeFavorites(
+  summary: AppleDailySummary | null,
+  coreReadyCount: number,
+  observationRows: number,
+): HomeFavoriteItem[] {
+  const activity = summary?.activity ?? null;
+  const sleep = summary?.sleep ?? null;
+  return [
+    {
+      title: "步数",
+      value: formatValue(activity?.steps),
+      helper: activity?.level ?? "等待活动记录",
+      href: "/apple/metrics/steps",
+      icon: "activity",
+      tone: activity?.level === "充足" ? "good" : activity?.level === "偏少" ? "warn" : "neutral",
+    },
+    {
+      title: "睡眠",
+      value: formatHours(sleep?.total_sleep_min),
+      helper: sleep?.level ?? "等待睡眠记录",
+      href: summaryDateHref(summary),
+      icon: "sleep",
+      tone: sleep?.level === "偏少" ? "warn" : sleep ? "good" : "neutral",
+    },
+    {
+      title: "站立时间",
+      value: formatHours(activity?.stand_minutes),
+      helper: "Apple Watch 站立记录",
+      href: "/apple/metrics/stand-time",
+      icon: "activity",
+    },
+    {
+      title: "呼吸次数",
+      value: `${formatValue(sleep?.respiratory_rate, 1)} 次/分`,
+      helper: "睡眠期间记录",
+      href: "/apple/metrics/respiratory-rate",
+      icon: "sleep",
+    },
+    {
+      title: "训练",
+      value: `${summary?.workouts.length ?? 0} 次`,
+      helper: summary?.workouts[0] ? workoutLabel(summary.workouts[0].sport_type) : "昨日未记录训练",
+      href: "/apple/raw/workouts",
+      icon: "cardio",
+    },
+    {
+      title: "健康记录",
+      value: `${coreReadyCount}/${CORE_METRICS.length}`,
+      helper: `${observationRows.toLocaleString("zh-CN")} 条本机记录`,
+      href: "/apple/sources",
+      icon: "data",
     },
   ];
 }
@@ -490,6 +554,7 @@ export default async function AppleHealthPage() {
   const focusInsights = buildFocusInsights(dailySummary, seriesList);
   const sevenDayReview = buildSevenDayReview(activityDetail?.rows ?? [], sleepDetail?.rows ?? []);
   const summaryFeed = buildSummaryFeed(dailySummary);
+  const homeFavorites = buildHomeFavorites(dailySummary, coreReadyCount, observationRows);
 
   return (
     <>
@@ -566,38 +631,38 @@ export default async function AppleHealthPage() {
         </div>
       </section>
 
-      <section className="apple-kpis">
-        <div className="apple-kpi">
-          <span>昨日步数</span>
-          <strong>{formatValue(dailySummary?.activity?.steps)}</strong>
-          <small>{dailySummary?.activity?.level ?? "暂无活动记录"}</small>
+      <section className="apple-home-favorites" aria-label="收藏指标">
+        <div className="apple-section-head">
+          <div>
+            <h3>收藏</h3>
+            <p>把每天最常看的健康指标放在这里。</p>
+          </div>
+          <Link href="/apple/favorites" className="apple-text-link">
+            管理
+          </Link>
         </div>
-        <div className="apple-kpi">
-          <span>昨夜睡眠</span>
-          <strong>{formatHours(dailySummary?.sleep?.total_sleep_min)}</strong>
-          <small>{dailySummary?.sleep?.level ?? "暂无睡眠记录"}</small>
-        </div>
-        <Link className="apple-kpi clickable" href="/apple/metrics/stand-time">
-          <span>站立时间</span>
-          <strong>{formatHours(dailySummary?.activity?.stand_minutes)}</strong>
-          <small>Apple Watch 站立与活动记录</small>
-        </Link>
-        <Link className="apple-kpi clickable" href="/apple/metrics/respiratory-rate">
-          <span>呼吸次数</span>
-          <strong>{formatValue(dailySummary?.sleep?.respiratory_rate, 1)}</strong>
-          <small>次/分 · 睡眠期间每分钟呼吸次数</small>
-        </Link>
-        <div className="apple-kpi">
-          <span>运动记录</span>
-          <strong>{dailySummary?.workouts.length ?? 0}</strong>
-          <small>{dailySummary?.workouts[0] ? workoutLabel(dailySummary.workouts[0].sport_type) : "昨日未记录训练"}</small>
-        </div>
-        <div className="apple-kpi">
-          <span>核心指标</span>
-          <strong>
-            {coreReadyCount}/{CORE_METRICS.length}
-          </strong>
-          <small>{observationRows.toLocaleString("zh-CN")} 条本机健康记录</small>
+        <div className="apple-home-favorites-grid">
+          {homeFavorites.map((item) => {
+            const content = (
+              <>
+                <AppleCategoryIcon name={item.icon} />
+                <div>
+                  <span>{item.title}</span>
+                  <strong>{item.value}</strong>
+                  <small>{item.helper}</small>
+                </div>
+              </>
+            );
+            return item.href ? (
+              <Link className={`apple-home-favorite ${item.tone ?? ""}`} href={item.href} key={item.title}>
+                {content}
+              </Link>
+            ) : (
+              <article className={`apple-home-favorite ${item.tone ?? ""}`} key={item.title}>
+                {content}
+              </article>
+            );
+          })}
         </div>
       </section>
 
