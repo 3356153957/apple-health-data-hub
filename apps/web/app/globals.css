@@ -1473,3 +1473,354 @@ html {
   color: var(--faint);
   margin-top: 4px;
 }
+
+/* ── Apple Health Chinese dashboard ───────────────────────────────── */
+
+.apple-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px 28px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.apple-hero h2 {
+  margin: 8px 0 0;
+  font-size: 26px;
+  line-height: 1.18;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.apple-hero p {
+  max-width: 760px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.apple-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.apple-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raise);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.apple-badge.good {
+  color: var(--signal);
+  border-color: var(--signal-line);
+  background: var(--signal-weak);
+}
+
+.apple-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.apple-kpi,
+.apple-trend-card,
+.apple-ready-row,
+.apple-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.apple-kpi {
+  padding: 17px 18px;
+}
+
+.apple-kpi span,
+.apple-kpi small,
+.apple-card-meta,
+.apple-empty-line,
+.apple-ready-row span,
+.apple-raw-row small {
+  color: var(--muted);
+}
+
+.apple-kpi span {
+  display: block;
+  font-size: 13px;
+}
+
+.apple-kpi strong {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 31px;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-kpi small {
+  display: block;
+  margin-top: 9px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.apple-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 30px 0 10px;
+}
+
+.apple-section-head h3,
+.apple-panel h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.apple-section-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.apple-trend-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.apple-trend-card {
+  padding: 17px 18px 15px;
+  min-height: 176px;
+}
+
+.apple-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.apple-card-title span {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.apple-card-title em {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.apple-card-title em.good {
+  color: var(--up);
+}
+
+.apple-card-title em.warn {
+  color: var(--warn);
+}
+
+.apple-card-title em.neutral {
+  color: var(--faint);
+}
+
+.apple-value {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 30px;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-value span {
+  margin-left: 7px;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.apple-spark {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-top: 17px;
+  color: var(--signal);
+}
+
+.apple-empty-line {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  margin-top: 17px;
+  font-size: 12px;
+}
+
+.apple-card-meta {
+  margin-top: 9px;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+.apple-readiness {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.apple-ready-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  padding: 13px 15px;
+}
+
+.apple-ready-row strong,
+.apple-ready-row span {
+  display: block;
+}
+
+.apple-ready-row strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.apple-ready-row div > span {
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.apple-state {
+  flex: 0 0 auto;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: var(--mono);
+  border: 1px solid var(--line);
+}
+
+.apple-state.ready {
+  color: var(--up);
+  border-color: rgba(56, 217, 150, 0.32);
+  background: rgba(56, 217, 150, 0.1);
+}
+
+.apple-state.waiting {
+  color: var(--warn);
+  border-color: rgba(232, 180, 95, 0.32);
+  background: rgba(232, 180, 95, 0.1);
+}
+
+.apple-state.missing {
+  color: var(--down);
+  border-color: rgba(255, 107, 138, 0.3);
+  background: rgba(255, 107, 138, 0.09);
+}
+
+.apple-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.apple-panel {
+  padding: 20px 22px;
+}
+
+.apple-raw-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.apple-raw-row {
+  display: grid;
+  grid-template-columns: 1fr max-content max-content;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.apple-raw-row:first-child {
+  border-top: 0;
+}
+
+.apple-raw-row span {
+  color: var(--ink);
+}
+
+.apple-raw-row strong {
+  font-family: var(--mono);
+  color: var(--signal);
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-raw-row small {
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.apple-advice {
+  margin: 16px 0 0;
+  padding-left: 19px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.apple-advice li + li {
+  margin-top: 6px;
+}
+
+@media (max-width: 1100px) {
+  .apple-kpis,
+  .apple-trend-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .apple-hero,
+  .apple-section-head,
+  .apple-ready-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .apple-hero-badges {
+    justify-content: flex-start;
+  }
+  .apple-kpis,
+  .apple-trend-grid,
+  .apple-readiness,
+  .apple-two-col {
+    grid-template-columns: 1fr;
+  }
+  .apple-raw-row {
+    grid-template-columns: 1fr max-content;
+  }
+  .apple-raw-row small {
+    grid-column: 1 / -1;
+  }
+}

@@ -34,10 +34,17 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M3 8c0 1.1 2.2 2 5 2s5-.9 5-2" />
     </>
   ),
+  apple: (
+    <>
+      <path d="M8 13.5s-5-3-5-7a3 3 0 0 1 5-2.2A3 3 0 0 1 13 6.5c0 4-5 7-5 7z" />
+      <path d="M4.2 8h2.2l1-2.2 1.5 4.2 1-2h1.9" />
+    </>
+  ),
   privacy: <path d="M8 2.2l4.5 1.8v3.6c0 2.8-1.9 4.7-4.5 5.6-2.6-.9-4.5-2.8-4.5-5.6V4z" />,
 };
 
 const NAV = [
+  { href: "/apple", label: "健康分析", icon: "apple" },
   { href: "/", label: "Today", icon: "overview" },
   { href: "/experiments", label: "Experiments", icon: "experiments" },
   { href: "/evidence", label: "Evidence", icon: "evidence" },

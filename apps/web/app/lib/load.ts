@@ -5,6 +5,7 @@
 import {
   type Candidates,
   type ExperimentList,
+  fetchAppleStatus,
   fetchCandidates,
   fetchExperiments,
   fetchFindings,
@@ -14,6 +15,7 @@ import {
   fetchSeries,
   type Finding,
   type InsightsLatest,
+  type AppleStatus,
   type MetricSeries,
   type Privacy,
   type Readiness,
@@ -42,6 +44,14 @@ export async function safeSeries(id: string, range = "7d"): Promise<MetricSeries
 export async function safeReadiness(): Promise<Readiness | null> {
   try {
     return await fetchReadiness();
+  } catch {
+    return null;
+  }
+}
+
+export async function safeAppleStatus(): Promise<AppleStatus | null> {
+  try {
+    return await fetchAppleStatus();
   } catch {
     return null;
   }

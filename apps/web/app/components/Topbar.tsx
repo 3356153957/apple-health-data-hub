@@ -6,6 +6,7 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const TITLES: Record<string, { title: string; sub: string }> = {
   "/": { title: "Today", sub: "Your body, interpreted — with proof." },
+  "/apple": { title: "健康分析", sub: "Apple Watch 和 iPhone 的同步、完整度与趋势。" },
   "/demo": { title: "Today", sub: "A believable 30-day story — demo data." },
   "/experiments": { title: "Experiments", sub: "Run, measure, and act on what to try next." },
   "/evidence": { title: "Evidence", sub: "What the engine found — computed, not guessed." },

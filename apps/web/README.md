@@ -9,12 +9,17 @@ consume.
 
 ```bash
 cd apps/web
-bun install
-API_BASE=http://localhost:8000 bun run dev   # http://localhost:4173
+npm install
+API_BASE=http://localhost:8000 API_KEY=your-local-api-key npm run dev
 ```
 
 Point `API_BASE` at a running datahub API. Server components fetch it directly;
 the `/api/*` rewrite (next.config.mjs) covers any client-side fetch.
+
+Open `http://127.0.0.1:5173/apple` for the Chinese Apple Health analysis page.
+On Windows, the default dev port is `5173` because some machines reserve the
+old `4173` range. Keep `API_KEY` in your shell or `.env.local`; it is only used
+by the Next server and is not sent to the browser.
 
 ## Status
 
@@ -25,8 +30,9 @@ supported visualization surface.
 
 What's already here, all driven by the v2 read API: a Today/Recovery hero and a
 Baseline Ribbon, Heart Rate and Sleep cards, plus Evidence, Experiments,
-Privacy, Readiness, and Weekly Brief cards — across the home, evidence,
-experiments, privacy, data, and demo pages. Empty/no-data and
+Privacy, Readiness, Weekly Brief, and a Chinese Apple Health analysis page —
+across the home, apple, evidence, experiments, privacy, data, and demo pages.
+Empty/no-data and
 backend-unreachable states are handled. Next: design-system polish, more
 verticals, and wiring the AI narration cards to the local LLM layer.
 

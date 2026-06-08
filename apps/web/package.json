@@ -5,9 +5,9 @@
   "type": "module",
   "description": "HealthSave standalone dashboard — insight-first read UI over the datahub v2 API (replaces Grafana).",
   "scripts": {
-    "dev": "next dev -p 4173",
+    "dev": "next dev -p 5173",
     "build": "next build",
-    "start": "next start -p 4173",
+    "start": "next start -p 5173",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

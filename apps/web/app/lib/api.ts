@@ -113,6 +113,18 @@ export function fetchReadiness(): Promise<Readiness> {
   return getJson<Readiness>("/api/v2/readiness");
 }
 
+export type AppleStatusMetric = {
+  count: number;
+  oldest: string | null;
+  newest: string | null;
+};
+
+export type AppleStatus = Record<string, AppleStatusMetric>;
+
+export function fetchAppleStatus(): Promise<AppleStatus> {
+  return getJson<AppleStatus>("/api/apple/status");
+}
+
 // Insights — Weekly Brief (narratives) + Evidence (findings).
 // Mirrors server/api/v2_insights.py /latest + /findings.
 
