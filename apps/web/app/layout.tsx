@@ -10,15 +10,15 @@ const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "HealthSave · datahub",
-  description: "Your health data, interpreted — a local-first personal health console.",
+  title: "HealthSave · 健康数据",
+  description: "本地优先的 Apple Watch 健康数据分析。",
 };
 
 // The shell fetches the egress posture + freshness for the sidebar/topbar status.
 // Best-effort: defaults keep the chrome sensible when the backend is unreachable.
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const [privacy, readiness] = await Promise.all([safePrivacy(), safeReadiness()]);
-  const provider = privacy?.provider ?? "ollama";
+  const provider = privacy?.provider ?? "本地模型";
   const isLocal = privacy?.is_local ?? true;
   const synced = agoLabel(readiness?.last_ingested_at ?? readiness?.last_observation_at ?? null);
 

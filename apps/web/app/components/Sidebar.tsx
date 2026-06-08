@@ -44,12 +44,12 @@ const ICONS: Record<string, ReactNode> = {
 };
 
 const NAV = [
-  { href: "/apple", label: "健康分析", icon: "apple" },
-  { href: "/", label: "Today", icon: "overview" },
-  { href: "/experiments", label: "Experiments", icon: "experiments" },
-  { href: "/evidence", label: "Evidence", icon: "evidence" },
-  { href: "/data", label: "Data", icon: "data" },
-  { href: "/privacy", label: "Privacy", icon: "privacy" },
+  { href: "/apple", label: "健康概览", icon: "apple" },
+  { href: "/apple/raw/daily_activity", label: "活动明细", icon: "overview" },
+  { href: "/apple/raw/sleep_sessions", label: "睡眠明细", icon: "data" },
+  { href: "/apple/raw/workouts", label: "训练明细", icon: "experiments" },
+  { href: "/apple/metrics/heart-rate", label: "心率趋势", icon: "evidence" },
+  { href: "/privacy", label: "隐私设置", icon: "privacy" },
 ] as const;
 
 function NavIcon({ name }: { name: string }) {
@@ -95,7 +95,7 @@ export function Sidebar({
 
       <nav className="nav">
         {NAV.map((item) => {
-          const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link
               key={item.href}
@@ -113,9 +113,9 @@ export function Sidebar({
       <div className="sidebar-foot">
         <div className="status-line">
           <span className={`status-dot ${isLocal ? "" : "warn"}`} />
-          {isLocal ? "local" : "cloud"} · {provider}
+          {isLocal ? "本地" : "云端"} · {provider}
         </div>
-        <div className="status-sub">synced {synced}</div>
+        <div className="status-sub">同步 {synced}</div>
       </div>
     </aside>
   );

@@ -5,14 +5,20 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 
 const TITLES: Record<string, { title: string; sub: string }> = {
-  "/": { title: "Today", sub: "Your body, interpreted — with proof." },
-  "/apple": { title: "健康分析", sub: "Apple Watch 和 iPhone 的同步、完整度与趋势。" },
-  "/demo": { title: "Today", sub: "A believable 30-day story — demo data." },
-  "/experiments": { title: "Experiments", sub: "Run, measure, and act on what to try next." },
-  "/evidence": { title: "Evidence", sub: "What the engine found — computed, not guessed." },
-  "/data": { title: "Data", sub: "Coverage, freshness, and every metric." },
-  "/privacy": { title: "Privacy", sub: "What leaves this host." },
+  "/": { title: "健康概览", sub: "Apple Watch 与 iPhone 健康数据。" },
+  "/apple": { title: "健康概览", sub: "运动、睡眠、恢复和同步状态。" },
+  "/demo": { title: "演示数据", sub: "示例健康故事。" },
+  "/experiments": { title: "计划", sub: "可尝试的健康习惯。" },
+  "/evidence": { title: "发现", sub: "系统识别到的趋势和异常。" },
+  "/data": { title: "数据", sub: "覆盖范围、更新时间和指标列表。" },
+  "/privacy": { title: "隐私", sub: "哪些数据会离开本机。" },
 };
+
+function titleForPath(pathname: string): { title: string; sub: string } {
+  if (pathname.startsWith("/apple/metrics/")) return { title: "指标详情", sub: "最近趋势、数值范围和数据点。" };
+  if (pathname.startsWith("/apple/raw/")) return { title: "同步明细", sub: "来自本机 Health Data Hub 的原始记录。" };
+  return TITLES[pathname] ?? TITLES["/"];
+}
 
 export function Topbar({
   provider,
@@ -26,10 +32,10 @@ export function Topbar({
   onMenu?: () => void;
 }) {
   const pathname = usePathname();
-  const { title, sub } = TITLES[pathname] ?? TITLES["/"];
+  const { title, sub } = titleForPath(pathname);
   return (
     <header className="topbar">
-      <button type="button" className="menu-btn" onClick={onMenu} aria-label="Open navigation">
+      <button type="button" className="menu-btn" onClick={onMenu} aria-label="打开导航">
         <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
           <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11" />
         </svg>
@@ -40,9 +46,9 @@ export function Topbar({
       </div>
       <div className="topbar-status">
         <span className="pill mono">
-          {provider} · {isLocal ? "local" : "cloud"}
+          {provider} · {isLocal ? "本地" : "云端"}
         </span>
-        <span className="pill mono">synced {synced}</span>
+        <span className="pill mono">同步 {synced}</span>
         <ThemeToggle />
       </div>
     </header>

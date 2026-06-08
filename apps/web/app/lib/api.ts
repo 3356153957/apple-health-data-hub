@@ -125,6 +125,73 @@ export function fetchAppleStatus(): Promise<AppleStatus> {
   return getJson<AppleStatus>("/api/apple/status");
 }
 
+export type AppleDailySummary = {
+  date: string;
+  timezone: string;
+  generated_at: string;
+  headline: string;
+  activity: null | {
+    date: string;
+    steps: number | null;
+    distance_m: number | null;
+    distance_km: number | null;
+    floors_climbed: number | null;
+    active_calories: number | null;
+    total_calories: number | null;
+    active_minutes: number | null;
+    stand_hours: number | null;
+    avg_hr: number | null;
+    max_hr: number | null;
+    level: string;
+    baseline: Record<string, number | null>;
+    delta_pct: Record<string, number | null>;
+  };
+  sleep: null | {
+    start_time: string;
+    end_time: string;
+    total_sleep_min: number | null;
+    in_bed_min: number | null;
+    awake_min: number | null;
+    core_min: number | null;
+    deep_min: number | null;
+    rem_min: number | null;
+    efficiency_pct: number | null;
+    respiratory_rate: number | null;
+    level: string;
+    baseline: Record<string, number | null>;
+  };
+  workouts: Array<{
+    start_time: string;
+    end_time: string;
+    sport_type: string;
+    duration_min: number | null;
+    calories: number | null;
+    distance_m: number | null;
+    distance_km: number | null;
+    avg_hr: number | null;
+    max_hr: number | null;
+  }>;
+  advice: string[];
+};
+
+export function fetchAppleDailySummary(date?: string): Promise<AppleDailySummary> {
+  const query = date ? `?date=${encodeURIComponent(date)}` : "";
+  return getJson<AppleDailySummary>(`/api/apple/daily-summary${query}`);
+}
+
+export type AppleRawDetail = {
+  table: string;
+  label: string;
+  columns: string[];
+  rows: Array<Record<string, string | number | null>>;
+};
+
+export function fetchAppleRawDetail(table: string, limit = 100): Promise<AppleRawDetail> {
+  return getJson<AppleRawDetail>(
+    `/api/apple/raw/${encodeURIComponent(table)}?limit=${encodeURIComponent(String(limit))}`,
+  );
+}
+
 // Insights — Weekly Brief (narratives) + Evidence (findings).
 // Mirrors server/api/v2_insights.py /latest + /findings.
 

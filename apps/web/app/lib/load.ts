@@ -5,6 +5,8 @@
 import {
   type Candidates,
   type ExperimentList,
+  fetchAppleDailySummary,
+  fetchAppleRawDetail,
   fetchAppleStatus,
   fetchCandidates,
   fetchExperiments,
@@ -15,6 +17,8 @@ import {
   fetchSeries,
   type Finding,
   type InsightsLatest,
+  type AppleDailySummary,
+  type AppleRawDetail,
   type AppleStatus,
   type MetricSeries,
   type Privacy,
@@ -52,6 +56,22 @@ export async function safeReadiness(): Promise<Readiness | null> {
 export async function safeAppleStatus(): Promise<AppleStatus | null> {
   try {
     return await fetchAppleStatus();
+  } catch {
+    return null;
+  }
+}
+
+export async function safeAppleDailySummary(date?: string): Promise<AppleDailySummary | null> {
+  try {
+    return await fetchAppleDailySummary(date);
+  } catch {
+    return null;
+  }
+}
+
+export async function safeAppleRawDetail(table: string, limit = 100): Promise<AppleRawDetail | null> {
+  try {
+    return await fetchAppleRawDetail(table, limit);
   } catch {
     return null;
   }
@@ -129,13 +149,13 @@ export async function loadReadinessSparklines(
   return Object.fromEntries(entries);
 }
 
-// "2h ago" style relative label for the shell's sync status. Server-side only.
+// Chinese relative label for the shell's sync status. Server-side only.
 export function agoLabel(iso: string | null | undefined): string {
-  if (!iso) return "never";
+  if (!iso) return "暂无";
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return "刚刚";
+  if (mins < 60) return `${mins} 分钟前`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+  if (hrs < 24) return `${hrs} 小时前`;
+  return `${Math.floor(hrs / 24)} 天前`;
 }

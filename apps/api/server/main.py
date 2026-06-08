@@ -34,6 +34,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from .api import (
+    apple_dashboard,
     health_routes,
     ingest,
     insights,
@@ -158,6 +159,7 @@ async def limit_request_body_size(request: Request, call_next):
 
 
 app.include_router(health_routes.router)
+app.include_router(apple_dashboard.router)
 app.include_router(ingest.router)
 app.include_router(metrics.router)
 app.include_router(status.router)
