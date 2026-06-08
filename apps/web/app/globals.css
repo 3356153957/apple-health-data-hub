@@ -3475,6 +3475,72 @@ a.apple-summary-card:active {
   height: 26px;
 }
 
+.apple-category-guide {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.apple-category-guide-card {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: start;
+  gap: 13px;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-category-guide-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-category-guide-card.good {
+  border-color: rgba(56, 217, 150, 0.24);
+}
+
+.apple-category-guide-card.warn {
+  border-color: rgba(232, 180, 95, 0.26);
+}
+
+.apple-category-guide-card .apple-category-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.apple-category-guide-card span {
+  display: block;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.apple-category-guide-card strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.apple-category-guide-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .apple-kpi strong.compact {
   font-family: var(--sans);
   font-size: 22px;
@@ -5138,6 +5204,7 @@ a.apple-summary-card:active {
   .apple-kpis,
   .apple-daily-action-grid,
   .apple-related-metrics,
+  .apple-category-guide,
   .apple-focus-grid,
   .apple-highlights-grid,
   .apple-checklist-grid,
@@ -5201,6 +5268,7 @@ a.apple-summary-card:active {
   .apple-kpis,
   .apple-daily-action-grid,
   .apple-related-metrics,
+  .apple-category-guide,
   .apple-focus-grid,
   .apple-highlights-grid,
   .apple-checklist-grid,

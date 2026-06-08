@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { safeAppleStatus, safeSeries } from "../../../lib/load";
 import {
   APPLE_METRICS,
+  type AppleIconName,
   AppleCategoryIcon,
   BROWSE_CATEGORIES,
   RAW_TABLES,
@@ -48,6 +49,20 @@ function trendLabel(pct: number | null): string {
   return `${pct > 0 ? "+" : ""}${formatValue(pct, 1)}%`;
 }
 
+function trendPhrase(pct: number | null): string {
+  if (pct === null) return "趋势等待更多记录";
+  return `最近 30 天${pct >= 0 ? "上升" : "下降"} ${formatValue(Math.abs(pct), 1)}%`;
+}
+
+function iconForMetric(metricId: string): AppleIconName {
+  if (metricId.startsWith("activity.")) return "activity";
+  if (metricId === "vital.respiratory_rate") return "sleep";
+  if (metricId === "vital.hrv_sdnn" || metricId === "vital.resting_heart_rate") return "recovery";
+  if (metricId.startsWith("body.")) return "body";
+  if (metricId.startsWith("cardio.")) return "cardio";
+  return "heart";
+}
+
 export default async function AppleCategoryPage({ params }: PageProps) {
   const { category } = await params;
   const decodedCategory = decodeURIComponent(category);
@@ -67,6 +82,26 @@ export default async function AppleCategoryPage({ params }: PageProps) {
   const rawRows = spec.rawTables.map((table) => ({ table, row: status?.[table] ?? null }));
   const rawTotal = rawRows.reduce((sum, item) => sum + (item.row?.count ?? 0), 0);
   const seriesTotal = seriesList.reduce((sum, series) => sum + (series?.points.length ?? 0), 0);
+  const trendItems = categoryMetrics.map((metric, index) => {
+    const series = seriesList[index];
+    const nums = metricSeriesValues(metric, series);
+    const trend = recentTrend(nums);
+    const latest = nums.length ? nums[nums.length - 1] : latestValue(series);
+    return {
+      metric,
+      latest,
+      trend,
+      tone: trendTone(metric, trend.delta),
+      absPct: Math.abs(trend.pct ?? 0),
+    };
+  });
+  const strongestTrend =
+    [...trendItems].filter((item) => item.trend.pct !== null).sort((a, b) => b.absPct - a.absPct)[0] ?? null;
+  const freshestSource =
+    [...rawRows]
+      .filter((item) => item.row?.newest)
+      .sort((a, b) => new Date(b.row?.newest ?? 0).getTime() - new Date(a.row?.newest ?? 0).getTime())[0] ?? null;
+  const largestSource = [...rawRows].sort((a, b) => (b.row?.count ?? 0) - (a.row?.count ?? 0))[0] ?? null;
 
   return (
     <>
@@ -86,6 +121,51 @@ export default async function AppleCategoryPage({ params }: PageProps) {
           <span className="apple-badge">{categoryMetrics.length} 个指标</span>
           <span className="apple-badge good">{relativeZh(rawNewest(status))}</span>
         </div>
+      </section>
+
+      <section className="apple-category-guide">
+        <Link
+          className={`apple-category-guide-card ${strongestTrend?.tone ?? "neutral"}`}
+          href={strongestTrend ? `/apple/metrics/${strongestTrend.metric.slug}` : `/apple/categories/${spec.slug}`}
+        >
+          <AppleCategoryIcon name={strongestTrend ? iconForMetric(strongestTrend.metric.id) : spec.icon} />
+          <div>
+            <span>先看这个</span>
+            <strong>{strongestTrend ? strongestTrend.metric.label : spec.title}</strong>
+            <p>
+              {strongestTrend
+                ? `${trendPhrase(strongestTrend.trend.pct)}，最新 ${formatValue(
+                    strongestTrend.latest,
+                    strongestTrend.metric.digits ?? 0,
+                  )} ${strongestTrend.metric.unit}。`
+                : "继续同步后，这里会自动挑出最值得先看的指标。"}
+            </p>
+          </div>
+        </Link>
+
+        <Link className="apple-category-guide-card good" href="/apple/sources">
+          <AppleCategoryIcon name="data" />
+          <div>
+            <span>数据状态</span>
+            <strong>{rawTotal.toLocaleString("zh-CN")} 条记录</strong>
+            <p>
+              {freshestSource?.row?.newest
+                ? `${RAW_TABLES[freshestSource.table]?.label ?? freshestSource.table} 最近 ${zhTime(freshestSource.row.newest)} 同步。`
+                : "这类数据还没有看到同步记录。"}
+            </p>
+          </div>
+        </Link>
+
+        <Link className="apple-category-guide-card" href={`/apple/raw/${encodeURIComponent(largestSource?.table ?? spec.rawTables[0])}`}>
+          <AppleCategoryIcon name={spec.icon} />
+          <div>
+            <span>查看明细</span>
+            <strong>{RAW_TABLES[largestSource?.table ?? ""]?.label ?? "原始记录"}</strong>
+            <p>
+              {(largestSource?.row?.count ?? 0).toLocaleString("zh-CN")} 条同步记录，适合核对 Apple Watch 和 iPhone 的原始数据。
+            </p>
+          </div>
+        </Link>
       </section>
 
       <section className="apple-kpis">
