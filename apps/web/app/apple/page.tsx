@@ -412,6 +412,16 @@ export default async function AppleHealthPage() {
           <strong>{formatHours(dailySummary?.sleep?.total_sleep_min)}</strong>
           <small>{dailySummary?.sleep?.level ?? "暂无睡眠记录"}</small>
         </div>
+        <Link className="apple-kpi clickable" href="/apple/metrics/stand-time">
+          <span>站立时间</span>
+          <strong>{formatHours(dailySummary?.activity?.stand_minutes)}</strong>
+          <small>Apple Watch 站立与活动记录</small>
+        </Link>
+        <Link className="apple-kpi clickable" href="/apple/metrics/respiratory-rate">
+          <span>呼吸次数</span>
+          <strong>{formatValue(dailySummary?.sleep?.respiratory_rate, 1)}</strong>
+          <small>次/分 · 睡眠期间呼吸频率</small>
+        </Link>
         <div className="apple-kpi">
           <span>运动记录</span>
           <strong>{dailySummary?.workouts.length ?? 0}</strong>

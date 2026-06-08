@@ -115,6 +115,14 @@ type PeriodStats = {
 
 type IconName = "week" | "month" | "trend" | "records";
 
+type MetricInsight = {
+  icon: IconName;
+  title: string;
+  body: string;
+  meta: string;
+  tone: "good" | "warn" | "neutral";
+};
+
 const RANGE_OPTIONS = [
   { key: "24h", label: "日", title: "24 小时" },
   { key: "7d", label: "周", title: "7 天" },
@@ -214,7 +222,7 @@ function changeLabel(value: number | null, label: string): string {
   return `${value > 0 ? "+" : ""}${formatValue(value, 1)}% ${label}`;
 }
 
-function rangeLabel(metric: AppleMetric, stats: PeriodStats): string {
+function rangeLabel(metric: AppleMetric, stats: { min: number | null; max: number | null }): string {
   if (stats.min === null || stats.max === null) return "暂无范围";
   return `${formatValue(stats.min, metric.digits ?? 0)}-${formatValue(stats.max, metric.digits ?? 0)} ${metric.unit}`;
 }
@@ -227,6 +235,91 @@ function metricSummary(metric: AppleMetric, week: PeriodStats, month: PeriodStat
   const monthText =
     monthValue === null ? "本月暂无记录" : `本月${primaryLabel(metric)} ${formatValue(monthValue, metric.digits ?? 0)} ${metric.unit}`;
   return `${weekText}，${monthText}。`;
+}
+
+function metricAmount(metric: AppleMetric, value: number | null): string {
+  if (value === null) return "暂无";
+  return `${formatValue(value, metric.digits ?? 0)} ${metric.unit}`;
+}
+
+function positionTone(metric: AppleMetric, position: number | null): "good" | "warn" | "neutral" {
+  if (position === null || metric.higherIsBetter === undefined) return "neutral";
+  if (position >= 0.8) return metric.higherIsBetter ? "good" : "warn";
+  if (position <= 0.2) return metric.higherIsBetter ? "warn" : "good";
+  return "neutral";
+}
+
+function positionTitle(position: number | null): string {
+  if (position === null) return "等待更多记录";
+  if (position >= 0.8) return "接近近期高位";
+  if (position <= 0.2) return "接近近期低位";
+  return "处在近期中段";
+}
+
+function rangePosition(latest: number | null, range: { min: number | null; max: number | null }): number | null {
+  if (latest === null || range.min === null || range.max === null || range.max === range.min) return null;
+  return Math.max(0, Math.min(1, (latest - range.min) / (range.max - range.min)));
+}
+
+function insightTone(metric: AppleMetric, pct: number | null): "good" | "warn" | "neutral" {
+  if (pct === null || metric.higherIsBetter === undefined || Math.abs(pct) < 0.01) return "neutral";
+  const good = metric.higherIsBetter ? pct > 0 : pct < 0;
+  return good ? "good" : "warn";
+}
+
+function buildMetricInsights({
+  metric,
+  latest,
+  range,
+  trendPct,
+  weekChange,
+  monthChange,
+  windowLabel,
+}: {
+  metric: AppleMetric;
+  latest: number | null;
+  range: { min: number | null; max: number | null };
+  trendPct: number | null;
+  weekChange: number | null;
+  monthChange: number | null;
+  windowLabel: string;
+}): MetricInsight[] {
+  const position = rangePosition(latest, range);
+  const trendDirection = trendPct === null ? null : trendPct >= 0 ? "上升" : "下降";
+  const monthDirection = monthChange === null ? null : monthChange >= 0 ? "高于" : "低于";
+
+  return [
+    {
+      icon: "records",
+      title: positionTitle(position),
+      body:
+        position === null
+          ? `${windowLabel}记录还不足以判断区间位置，后续同步后会更稳定。`
+          : `最新 ${metricAmount(metric, latest)}，${windowLabel}范围是 ${rangeLabel(metric, range)}。`,
+      meta: "当前位置",
+      tone: positionTone(metric, position),
+    },
+    {
+      icon: "trend",
+      title: trendDirection === null ? "趋势还不明显" : `${windowLabel}${trendDirection} ${formatValue(Math.abs(trendPct ?? 0), 1)}%`,
+      body:
+        trendDirection === null
+          ? "最近数据点还不足以形成稳定趋势，先继续观察。"
+          : `最近半段相对前半段${trendDirection}，适合和睡眠、活动量、训练安排一起看。`,
+      meta: "阶段对比",
+      tone: insightTone(metric, trendPct),
+    },
+    {
+      icon: "month",
+      title: monthDirection === null ? "暂无月度对比" : `本月${monthDirection}上月 ${formatValue(Math.abs(monthChange ?? 0), 1)}%`,
+      body:
+        monthDirection === null
+          ? `本周变化${weekChange === null ? "暂时无法比较" : `${weekChange >= 0 ? "上升" : "下降"} ${formatValue(Math.abs(weekChange), 1)}%`}，月度对比还需要更多记录。`
+          : `本周${weekChange === null ? "暂无同期对比" : `${weekChange >= 0 ? "高于" : "低于"}上周 ${formatValue(Math.abs(weekChange), 1)}%`}，本月趋势已经可以和上月做初步比较。`,
+      meta: "周期回顾",
+      tone: insightTone(metric, monthChange ?? weekChange),
+    },
+  ];
 }
 
 function selectedRange(raw: string | string[] | undefined): RangeKey {
@@ -283,6 +376,15 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
   const previousMonthStats = statsFor(pointsBetween(detailPointsAsc, shiftMonths(monthStart, -1), monthStart));
   const weekChange = changePct(primaryValue(metric, weekStats), primaryValue(metric, previousWeekStats));
   const monthChange = changePct(primaryValue(metric, monthStats), primaryValue(metric, previousMonthStats));
+  const metricInsights = buildMetricInsights({
+    metric,
+    latest,
+    range,
+    trendPct: trend.pct,
+    weekChange,
+    monthChange,
+    windowLabel,
+  });
 
   const recentRows = rawPoints.length
     ? rawPoints.slice(0, 120)
@@ -344,6 +446,19 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
           <strong className={tone}>{trend.pct === null ? "暂无" : `${trend.pct > 0 ? "+" : ""}${formatValue(trend.pct, 1)}%`}</strong>
           <small>最近半段对比前半段</small>
         </div>
+      </section>
+
+      <section className="apple-metric-insights">
+        {metricInsights.map((insight) => (
+          <article className={`apple-metric-insight ${insight.tone}`} key={insight.title}>
+            <MetricIcon name={insight.icon} />
+            <div>
+              <span>{insight.meta}</span>
+              <strong>{insight.title}</strong>
+              <p>{insight.body}</p>
+            </div>
+          </article>
+        ))}
       </section>
 
       <section className="apple-panel apple-period-overview">
