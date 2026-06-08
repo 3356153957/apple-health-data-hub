@@ -3825,6 +3825,192 @@ a.apple-summary-card:active {
   line-height: 1.45;
 }
 
+.apple-calendar-panel,
+.apple-calendar-list-panel {
+  margin-top: 18px;
+}
+
+.apple-calendar-weekdays,
+.apple-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.apple-calendar-weekdays {
+  margin-top: 18px;
+}
+
+.apple-calendar-weekdays span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.apple-calendar-grid {
+  margin-top: 8px;
+}
+
+.apple-calendar-day {
+  position: relative;
+  display: grid;
+  align-content: start;
+  min-height: 124px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease,
+    opacity 0.14s ease;
+}
+
+.apple-calendar-day:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-calendar-day:active {
+  opacity: 0.78;
+}
+
+.apple-calendar-day.outside {
+  opacity: 0.48;
+}
+
+.apple-calendar-day.good {
+  border-color: rgba(56, 217, 150, 0.24);
+  background: linear-gradient(180deg, rgba(56, 217, 150, 0.08), var(--raise) 66%);
+}
+
+.apple-calendar-day.warn {
+  border-color: rgba(232, 180, 95, 0.28);
+  background: linear-gradient(180deg, rgba(232, 180, 95, 0.1), var(--raise) 66%);
+}
+
+.apple-calendar-day.empty {
+  color: var(--muted);
+  background: transparent;
+}
+
+.apple-calendar-date {
+  display: block;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.apple-calendar-bars {
+  display: flex;
+  align-items: end;
+  gap: 3px;
+  height: 44px;
+  margin-top: 10px;
+}
+
+.apple-calendar-bars i {
+  display: block;
+  width: 7px;
+  min-height: 4px;
+  border-radius: 999px 999px 2px 2px;
+}
+
+.apple-calendar-bars .move {
+  background: var(--signal);
+}
+
+.apple-calendar-bars .exercise {
+  background: var(--up);
+}
+
+.apple-calendar-bars .sleep {
+  background: var(--accent);
+}
+
+.apple-calendar-day strong {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-calendar-day small,
+.apple-calendar-day p,
+.apple-calendar-day em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.apple-calendar-day p {
+  margin: 6px 0 0;
+  line-height: 1.35;
+}
+
+.apple-calendar-day em {
+  display: block;
+  margin-top: 20px;
+}
+
+.apple-calendar-list {
+  margin-top: 8px;
+}
+
+.apple-calendar-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) max-content;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.apple-calendar-row:hover {
+  background: linear-gradient(90deg, rgba(92, 230, 216, 0.05), transparent 72%);
+}
+
+.apple-calendar-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-calendar-row strong {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 19px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-calendar-row p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.apple-calendar-row em {
+  color: var(--faint);
+  font-size: 12px;
+  font-style: normal;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .apple-period-card em {
   align-self: start;
   padding: 4px 9px;
@@ -4426,6 +4612,45 @@ a.apple-summary-card:active {
   }
   .apple-week-strip {
     grid-template-columns: 1fr;
+  }
+  .apple-calendar-weekdays,
+  .apple-calendar-grid {
+    gap: 4px;
+  }
+  .apple-calendar-day {
+    min-height: 86px;
+    padding: 7px 5px;
+    border-radius: 12px;
+  }
+  .apple-calendar-bars {
+    height: 28px;
+    gap: 2px;
+    margin-top: 7px;
+  }
+  .apple-calendar-bars i {
+    width: 5px;
+  }
+  .apple-calendar-day strong {
+    margin-top: 7px;
+    font-size: 12px;
+  }
+  .apple-calendar-day p,
+  .apple-calendar-day small {
+    display: none;
+  }
+  .apple-calendar-day em {
+    margin-top: 14px;
+    font-size: 10px;
+  }
+  .apple-calendar-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+  }
+  .apple-calendar-row em {
+    grid-column: 2;
+    justify-self: start;
+    text-align: left;
+    white-space: normal;
   }
   .apple-day-nav {
     grid-template-columns: 1fr;

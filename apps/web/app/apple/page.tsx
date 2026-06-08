@@ -617,8 +617,8 @@ export default async function AppleHealthPage() {
               <h3>最近 7 天</h3>
               <p>把每天的活动、站立和睡眠放在一起看。</p>
             </div>
-            <Link href="/apple/raw/daily_activity" className="apple-text-link">
-              查看每日活动
+            <Link href="/apple/calendar" className="apple-text-link">
+              打开日历
             </Link>
           </div>
           <div className="apple-week-strip">
