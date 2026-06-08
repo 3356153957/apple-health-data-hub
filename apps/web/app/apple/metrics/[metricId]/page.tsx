@@ -177,6 +177,12 @@ function MetricIcon({ name }: { name: IconName }) {
   );
 }
 
+function sourceLabel(sourceId: string | null | undefined): string {
+  if (!sourceId) return "本机同步";
+  if (sourceId === "apple-health-healthsave") return "Apple 健康同步";
+  return sourceId;
+}
+
 function pointDate(point: DetailPoint): Date | null {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(point.t) ? new Date(`${point.t}T12:00:00+08:00`) : new Date(point.t);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -562,7 +568,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
           <p>{metric.description}</p>
         </div>
         <div className="apple-hero-badges">
-          <span className="apple-badge">{metric.id}</span>
+          <span className="apple-badge">{metric.note}</span>
           <span className="apple-badge good">本地读取</span>
         </div>
       </section>
@@ -716,7 +722,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
                   {point.value === null ? "暂无" : formatValue(point.value, metric.digits ?? 0)}
                   <small>{point.unit ?? metric.unit}</small>
                 </strong>
-                <p>{point.source_id ?? "本机同步"}</p>
+                <p>{sourceLabel(point.source_id)}</p>
               </div>
             </article>
           ))}
@@ -740,7 +746,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
                   <td>{zhTime(point.t)}</td>
                   <td>{point.value === null ? "暂无" : formatValue(point.value, metric.digits ?? 0)}</td>
                   <td>{point.unit ?? metric.unit}</td>
-                  <td>{point.source_id}</td>
+                  <td>{sourceLabel(point.source_id)}</td>
                 </tr>
               ))}
             </tbody>

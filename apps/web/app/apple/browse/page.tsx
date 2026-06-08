@@ -310,7 +310,7 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
         <div className="apple-kpi">
           <span>同步记录</span>
           <strong>{rawTotal(status).toLocaleString("zh-CN")}</strong>
-          <small>本机 Health Data Hub</small>
+          <small>本机健康数据服务</small>
         </div>
         <div className="apple-kpi">
           <span>最近同步</span>

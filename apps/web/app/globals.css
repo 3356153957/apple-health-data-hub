@@ -3973,6 +3973,51 @@ a.apple-summary-card:active {
   margin-top: 14px;
 }
 
+.apple-source-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.apple-source-metric-card {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) max-content;
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(94, 234, 212, 0.08), transparent 58%),
+    var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-source-metric-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background:
+    linear-gradient(135deg, rgba(94, 234, 212, 0.12), transparent 62%),
+    var(--surface-3);
+}
+
+.apple-source-metric-card:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-source-metric-card .apple-category-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+}
+
 .apple-source-device-card {
   display: grid;
   grid-template-columns: 46px 1fr;
@@ -3992,6 +4037,7 @@ a.apple-summary-card:active {
 }
 
 .apple-source-device-card span,
+.apple-source-metric-card span,
 .apple-source-summary-row span,
 .apple-source-status-row span {
   display: block;
@@ -4000,6 +4046,7 @@ a.apple-summary-card:active {
 }
 
 .apple-source-device-card strong,
+.apple-source-metric-card strong,
 .apple-source-summary-row strong,
 .apple-source-status-row strong {
   display: block;
@@ -4010,12 +4057,41 @@ a.apple-summary-card:active {
 }
 
 .apple-source-device-card p,
+.apple-source-metric-card p,
 .apple-source-summary-row p,
 .apple-source-status-row p {
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.apple-source-metric-value {
+  min-width: 112px;
+  text-align: right;
+}
+
+.apple-source-metric-value b,
+.apple-source-metric-value small {
+  display: block;
+}
+
+.apple-source-metric-value b {
+  color: var(--signal);
+  font-family: var(--mono);
+  font-size: 24px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.apple-source-metric-value small {
+  margin-top: 9px;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
 .apple-source-summary-list,
@@ -5299,6 +5375,7 @@ a.apple-record-card:active {
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
+  .apple-source-metric-grid,
   .apple-source-device-grid,
   .apple-summary-feed-grid,
   .apple-day-detail-grid,
@@ -5365,6 +5442,7 @@ a.apple-record-card:active {
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
+  .apple-source-metric-grid,
   .apple-source-device-grid,
   .apple-summary-feed-grid,
   .apple-day-detail-grid,
@@ -5538,9 +5616,21 @@ a.apple-record-card:active {
     white-space: normal;
   }
   .apple-source-summary-row,
+  .apple-source-metric-card,
   .apple-source-status-row {
     grid-template-columns: 40px 1fr;
   }
+
+  .apple-source-metric-value {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .apple-source-metric-value b,
+  .apple-source-metric-value small {
+    white-space: normal;
+  }
+
   .apple-source-summary-row small,
   .apple-source-status-row em {
     grid-column: 2;

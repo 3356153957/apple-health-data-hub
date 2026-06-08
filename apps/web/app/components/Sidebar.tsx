@@ -165,6 +165,11 @@ function NavIcon({ name }: { name: string }) {
   );
 }
 
+function providerLabel(provider: string): string {
+  if (provider.toLowerCase() === "ollama") return "本地分析";
+  return provider;
+}
+
 export function Sidebar({
   provider,
   isLocal,
@@ -184,7 +189,7 @@ export function Sidebar({
           ◆
         </span>
         <span className="brand-name">HealthSave</span>
-        <span className="brand-sub">datahub</span>
+        <span className="brand-sub">健康数据</span>
       </div>
 
       <nav className="nav">
@@ -211,7 +216,7 @@ export function Sidebar({
       <div className="sidebar-foot">
         <div className="status-line">
           <span className={`status-dot ${isLocal ? "" : "warn"}`} />
-          {isLocal ? "本地" : "云端"} · {provider}
+          {isLocal ? "本地" : "云端"} · {providerLabel(provider)}
         </div>
         <div className="status-sub">同步 {synced}</div>
       </div>

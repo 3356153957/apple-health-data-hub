@@ -29,8 +29,13 @@ function titleForPath(pathname: string): { title: string; sub: string } {
   if (pathname.startsWith("/apple/categories/data")) return { title: "数据来源", sub: "核对 Apple Watch 和 iPhone 同步记录。" };
   if (pathname.startsWith("/apple/categories/")) return { title: "浏览分类", sub: "相关指标、趋势和同步来源。" };
   if (pathname.startsWith("/apple/metrics/")) return { title: "指标详情", sub: "最近趋势、数值范围和数据点。" };
-  if (pathname.startsWith("/apple/raw/")) return { title: "数据来源", sub: "来自本机 Health Data Hub 的原始记录。" };
+  if (pathname.startsWith("/apple/raw/")) return { title: "数据来源", sub: "来自本机健康数据服务的同步记录。" };
   return TITLES[pathname] ?? TITLES["/"];
+}
+
+function providerLabel(provider: string): string {
+  if (provider.toLowerCase() === "ollama") return "本地分析";
+  return provider;
 }
 
 export function Topbar({
@@ -59,7 +64,7 @@ export function Topbar({
       </div>
       <div className="topbar-status">
         <span className="pill mono">
-          {provider} · {isLocal ? "本地" : "云端"}
+          {providerLabel(provider)} · {isLocal ? "本地" : "云端"}
         </span>
         <span className="pill mono">同步 {synced}</span>
         <ThemeToggle />

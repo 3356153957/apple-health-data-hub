@@ -187,7 +187,7 @@ export default async function AppleCategoryPage({ params }: PageProps) {
         <div className="apple-kpi">
           <span>最近同步</span>
           <strong className="compact">{relativeZh(rawNewest(status)).replace("同步", "")}</strong>
-          <small>本机 Health Data Hub</small>
+          <small>本机健康数据服务</small>
         </div>
       </section>
 

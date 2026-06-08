@@ -55,6 +55,12 @@ function privacyTone(privacy: Privacy | null): "good" | "warn" | "neutral" {
   return "good";
 }
 
+function providerLabel(provider: string | null | undefined): string {
+  if (!provider) return "本机";
+  if (provider.toLowerCase() === "ollama") return "本地分析";
+  return provider;
+}
+
 function rowCount(status: AppleStatus | null, table: string): number {
   return status?.[table]?.count ?? 0;
 }
@@ -144,7 +150,7 @@ function healthItems(summary: AppleDailySummary | null, status: AppleStatus | nu
       icon: "body",
       tone: privacyTone(privacy),
       status: privacyLabel(privacy),
-      value: privacy?.provider ?? "本机",
+      value: providerLabel(privacy?.provider),
       action: "隐私设置",
     },
   ];
@@ -198,7 +204,7 @@ export default async function AppleChecklistPage() {
         <div className="apple-kpi">
           <span>来源</span>
           <strong>{readiness?.sources.length ?? 0}</strong>
-          <small>Health Data Hub 可见来源</small>
+          <small>本机可见同步来源</small>
         </div>
       </section>
 
