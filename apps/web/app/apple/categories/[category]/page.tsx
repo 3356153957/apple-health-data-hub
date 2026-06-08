@@ -33,7 +33,7 @@ function findCategory(slug: string) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { category } = await params;
   const spec = findCategory(decodeURIComponent(category));
-  return { title: `${spec?.title ?? "健康分类"} · HealthSave` };
+  return { title: `${spec?.title ?? "健康分类"} · 健康` };
 }
 
 function rawNewest(status: Awaited<ReturnType<typeof safeAppleStatus>>): string | null {

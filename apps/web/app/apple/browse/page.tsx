@@ -21,7 +21,7 @@ import {
   zhTime,
 } from "../appleHealth";
 
-export const metadata: Metadata = { title: "浏览 · HealthSave" };
+export const metadata: Metadata = { title: "浏览 · 健康" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {

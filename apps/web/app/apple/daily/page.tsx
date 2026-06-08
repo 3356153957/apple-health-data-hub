@@ -6,7 +6,7 @@ import type { AppleDailySummary } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleRawDetail } from "../../lib/load";
 import { AppleCategoryIcon, formatHours, formatValue, workoutLabel, zhTime } from "../appleHealth";
 
-export const metadata: Metadata = { title: "每日总结 · HealthSave" };
+export const metadata: Metadata = { title: "每日总结 · 健康" };
 export const dynamic = "force-dynamic";
 
 type Tone = "good" | "warn" | "neutral";

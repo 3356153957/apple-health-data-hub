@@ -55,9 +55,10 @@ function titleForPath(pathname: string): { title: string; sub: string } {
   return TITLES[pathname] ?? TITLES["/"];
 }
 
-function providerLabel(provider: string): string {
-  if (provider.toLowerCase() === "ollama") return "本地分析";
-  return provider;
+function processingLabel(provider: string, isLocal: boolean): string {
+  if (isLocal) return "本机处理";
+  if (provider.toLowerCase() === "ollama") return "本机处理";
+  return "云端摘要";
 }
 
 export function Topbar({
@@ -86,9 +87,9 @@ export function Topbar({
       </div>
       <div className="topbar-status">
         <span className="pill mono">
-          {providerLabel(provider)} · {isLocal ? "本地" : "云端"}
+          {processingLabel(provider, isLocal)}
         </span>
-        <span className="pill mono">同步 {synced}</span>
+        <span className="pill mono">最近同步 {synced}</span>
         <ThemeToggle />
       </div>
     </header>

@@ -32,7 +32,7 @@ import {
   zhTime,
 } from "./appleHealth";
 
-export const metadata: Metadata = { title: "健康概览 · HealthSave" };
+export const metadata: Metadata = { title: "健康概览 · 健康" };
 export const dynamic = "force-dynamic";
 
 function totalRows(status: AppleStatus | null): number {
@@ -565,7 +565,7 @@ export default async function AppleHealthPage() {
           <p>{dailySummary?.headline ?? "同步完成后，这里会展示昨日运动、睡眠与恢复建议。"}</p>
         </div>
         <div className="apple-hero-badges">
-          <span className="apple-badge good">{isLocal ? "本地数据" : "云端模式"}</span>
+          <span className="apple-badge good">{isLocal ? "本机数据" : "云端摘要"}</span>
           <span className="apple-badge">{relativeZh(latestSync(readiness, status))}</span>
         </div>
       </section>

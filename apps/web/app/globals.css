@@ -125,14 +125,27 @@ a {
 
 .brand {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 6px 10px 24px;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 10px 22px;
 }
 
 .brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  border: 1px solid var(--accent-line);
+  border-radius: 9px;
+  background: var(--accent-weak);
   color: var(--accent);
-  font-size: 15px;
+}
+
+.brand-mark .nav-icon {
+  color: currentColor;
+  width: 16px;
+  height: 16px;
 }
 
 .brand-name {

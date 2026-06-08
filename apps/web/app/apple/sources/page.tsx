@@ -14,7 +14,7 @@ import {
   zhTime,
 } from "../appleHealth";
 
-export const metadata: Metadata = { title: "数据来源 · HealthSave" };
+export const metadata: Metadata = { title: "数据来源 · 健康" };
 export const dynamic = "force-dynamic";
 
 type RawRow = Record<string, string | number | null>;
@@ -125,8 +125,8 @@ function privacyHelper(privacy: Privacy | null): string {
 }
 
 function providerLabel(provider: string | null | undefined): string {
-  if (!provider) return "本地分析";
-  if (provider.toLowerCase() === "ollama") return "本地分析";
+  if (!provider) return "本机处理";
+  if (provider.toLowerCase() === "ollama") return "本机处理";
   return provider;
 }
 

@@ -10,7 +10,7 @@ const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "HealthSave · 健康数据",
+  title: "健康 · Apple Watch 数据",
   description: "本地优先的 Apple Watch 健康数据分析。",
 };
 
@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const synced = agoLabel(readiness?.last_ingested_at ?? readiness?.last_observation_at ?? null);
 
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="zh-CN" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         {/* Apply the saved theme before paint so there's no light/dark flash. */}
         <script

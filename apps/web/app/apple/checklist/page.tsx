@@ -5,7 +5,7 @@ import type { AppleDailySummary, AppleStatus, Privacy } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleStatus, safePrivacy, safeReadiness } from "../../lib/load";
 import { AppleCategoryIcon, type AppleIconName, formatHours, formatValue, relativeZh, zhTime } from "../appleHealth";
 
-export const metadata: Metadata = { title: "健康清单 · HealthSave" };
+export const metadata: Metadata = { title: "健康清单 · 健康" };
 export const dynamic = "force-dynamic";
 
 type ChecklistItem = {
@@ -56,8 +56,8 @@ function privacyTone(privacy: Privacy | null): "good" | "warn" | "neutral" {
 }
 
 function providerLabel(provider: string | null | undefined): string {
-  if (!provider) return "本机";
-  if (provider.toLowerCase() === "ollama") return "本地分析";
+  if (!provider) return "本机处理";
+  if (provider.toLowerCase() === "ollama") return "本机处理";
   return provider;
 }
 

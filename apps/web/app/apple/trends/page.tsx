@@ -16,7 +16,7 @@ import {
   zhDate,
 } from "../appleHealth";
 
-export const metadata: Metadata = { title: "趋势 · HealthSave" };
+export const metadata: Metadata = { title: "趋势 · 健康" };
 export const dynamic = "force-dynamic";
 
 type TrendItem = {

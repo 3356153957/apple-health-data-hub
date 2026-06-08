@@ -17,7 +17,7 @@ import {
   zhDate,
 } from "../appleHealth";
 
-export const metadata: Metadata = { title: "收藏 · HealthSave" };
+export const metadata: Metadata = { title: "收藏 · 健康" };
 export const dynamic = "force-dynamic";
 
 type FavoriteItem = {

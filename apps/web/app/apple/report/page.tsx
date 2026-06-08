@@ -6,7 +6,7 @@ import type { AppleRawDetail } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleRawDetail } from "../../lib/load";
 import { AppleCategoryIcon, formatHours, formatValue, workoutLabel } from "../appleHealth";
 
-export const metadata: Metadata = { title: "健康报告 · HealthSave" };
+export const metadata: Metadata = { title: "健康报告 · 健康" };
 export const dynamic = "force-dynamic";
 
 type RawRow = AppleRawDetail["rows"][number];

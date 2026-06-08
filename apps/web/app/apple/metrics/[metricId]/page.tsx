@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { metricId } = await params;
   const key = decodeURIComponent(metricId);
   const metric = APPLE_METRICS.find((item) => item.slug === key || item.id === key);
-  return { title: `${metric?.label ?? "健康指标"} · HealthSave` };
+  return { title: `${metric?.label ?? "健康指标"} · 健康` };
 }
 
 function minMax(nums: number[]): { min: number | null; max: number | null } {

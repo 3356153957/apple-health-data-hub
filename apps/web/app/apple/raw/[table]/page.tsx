@@ -122,7 +122,7 @@ function RawIcon({ name }: { name: IconName }) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { table } = await params;
   const spec = RAW_TABLES[decodeURIComponent(table)];
-  return { title: `${spec?.label ?? "同步明细"} · HealthSave` };
+  return { title: `${spec?.label ?? "同步明细"} · 健康` };
 }
 
 function formatCell(key: string, value: string | number | null): string {

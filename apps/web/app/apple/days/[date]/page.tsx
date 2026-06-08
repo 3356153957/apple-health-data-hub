@@ -122,7 +122,7 @@ function formatMinutes(value: number | null | undefined): string {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { date } = await params;
   const dateKey = decodeURIComponent(date);
-  return { title: `${validDateKey(dateKey) ? displayDate(dateKey) : "每日详情"} · HealthSave` };
+  return { title: `${validDateKey(dateKey) ? displayDate(dateKey) : "每日详情"} · 健康` };
 }
 
 export default async function AppleDayDetailPage({ params }: PageProps) {

@@ -181,9 +181,10 @@ export function NavIcon({ name }: { name: string }) {
   );
 }
 
-function providerLabel(provider: string): string {
-  if (provider.toLowerCase() === "ollama") return "本地分析";
-  return provider;
+function processingLabel(provider: string, isLocal: boolean): string {
+  if (isLocal) return "本机处理";
+  if (provider.toLowerCase() === "ollama") return "本机处理";
+  return "云端摘要";
 }
 
 export function Sidebar({
@@ -202,10 +203,10 @@ export function Sidebar({
     <aside className="sidebar">
       <div className="brand">
         <span className="brand-mark" aria-hidden>
-          ◆
+          <NavIcon name="apple" />
         </span>
-        <span className="brand-name">HealthSave</span>
-        <span className="brand-sub">健康数据</span>
+        <span className="brand-name">健康</span>
+        <span className="brand-sub">Apple Watch</span>
       </div>
 
       <nav className="nav">
@@ -228,9 +229,9 @@ export function Sidebar({
       <div className="sidebar-foot">
         <div className="status-line">
           <span className={`status-dot ${isLocal ? "" : "warn"}`} />
-          {isLocal ? "本地" : "云端"} · {providerLabel(provider)}
+          {processingLabel(provider, isLocal)}
         </div>
-        <div className="status-sub">同步 {synced}</div>
+        <div className="status-sub">最近同步 {synced}</div>
       </div>
     </aside>
   );

@@ -16,7 +16,7 @@ import {
   trendTone,
 } from "../appleHealth";
 
-export const metadata: Metadata = { title: "健康亮点 · HealthSave" };
+export const metadata: Metadata = { title: "健康亮点 · 健康" };
 export const dynamic = "force-dynamic";
 
 type HighlightItem = {
