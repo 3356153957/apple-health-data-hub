@@ -71,7 +71,7 @@ export const APPLE_METRICS: AppleMetric[] = [
     digits: 0,
     higherIsBetter: true,
     note: "日常活动",
-    description: "Apple Watch 记录的站立分钟数，和健身圆环里的站立小时口径不同，适合和久坐、运动分钟一起看。",
+    description: "Apple Watch 记录的站立分钟数，和健身圆环里的站立圆环小时口径不同，适合和久坐、运动分钟一起看。",
   },
   {
     id: "vital.hrv_sdnn",

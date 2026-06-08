@@ -1600,6 +1600,73 @@ html {
   flex: 0 0 auto;
 }
 
+.apple-hero-side {
+  display: grid;
+  justify-items: end;
+  align-content: start;
+  gap: 16px;
+  flex: 0 0 360px;
+  max-width: 100%;
+}
+
+.apple-hero-rings {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 10px;
+  width: 100%;
+}
+
+.apple-hero-ring-item {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  min-height: 126px;
+  padding: 12px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.025);
+  text-align: center;
+}
+
+.apple-hero-ring {
+  display: block;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, var(--surface) 0 55%, transparent 56%),
+    conic-gradient(var(--ring-color) 0 var(--ring-pct), var(--raise) var(--ring-pct) 100%);
+}
+
+.apple-hero-ring-item span,
+.apple-hero-ring-item small {
+  display: block;
+  color: var(--muted);
+}
+
+.apple-hero-ring-item span {
+  margin-top: 9px;
+  font-size: 11px;
+}
+
+.apple-hero-ring-item strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-hero-ring-item small {
+  margin-top: 3px;
+  font-family: var(--sans);
+  font-size: 10px;
+}
+
 .apple-badge {
   display: inline-flex;
   align-items: center;
@@ -5566,9 +5633,27 @@ a.apple-record-card:active {
   .apple-panel-head {
     align-items: stretch;
     flex-direction: column;
+    justify-content: flex-start;
   }
   .apple-hero-badges {
     justify-content: flex-start;
+  }
+  .apple-hero-side {
+    display: block;
+    flex: 0 0 auto;
+    justify-items: stretch;
+    width: 100%;
+  }
+  .apple-hero-rings {
+    margin-top: 16px;
+  }
+  .apple-hero-ring-item {
+    min-height: 112px;
+    padding: 11px 8px;
+  }
+  .apple-hero-ring {
+    width: 40px;
+    height: 40px;
   }
   .apple-context-note {
     grid-template-columns: 38px minmax(0, 1fr);

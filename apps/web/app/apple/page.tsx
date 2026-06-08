@@ -111,6 +111,33 @@ function ActivityRing({
   );
 }
 
+function HeroRing({
+  label,
+  value,
+  goal,
+  unit,
+  color,
+}: {
+  label: string;
+  value: number | null | undefined;
+  goal: number;
+  unit: string;
+  color: string;
+}) {
+  return (
+    <div className="apple-hero-ring-item" style={ringStyle(value, goal, color)}>
+      <i className="apple-hero-ring" aria-hidden />
+      <div>
+        <span>{label}</span>
+        <strong>
+          {formatValue(value)}
+          <small>{unit}</small>
+        </strong>
+      </div>
+    </div>
+  );
+}
+
 function trendHighlights(seriesList: Array<MetricSeries | null>) {
   return APPLE_METRICS.map((metric, index) => {
     const nums = metricSeriesValues(metric, seriesList[index]);
@@ -556,6 +583,7 @@ export default async function AppleHealthPage() {
   const sevenDayReview = buildSevenDayReview(activityDetail?.rows ?? [], sleepDetail?.rows ?? []);
   const summaryFeed = buildSummaryFeed(dailySummary);
   const homeFavorites = buildHomeFavorites(dailySummary, coreReadyCount, observationRows);
+  const activity = dailySummary?.activity ?? null;
 
   return (
     <>
@@ -565,9 +593,16 @@ export default async function AppleHealthPage() {
           <h2>{todayReadiness(dailySummary)}</h2>
           <p>{dailySummary?.headline ?? "同步完成后，这里会展示昨日运动、睡眠与恢复建议。"}</p>
         </div>
-        <div className="apple-hero-badges">
-          <span className="apple-badge good">{isLocal ? "仅自己可见" : "云端摘要"}</span>
-          <span className="apple-badge">{relativeZh(latestSync(readiness, status))}</span>
+        <div className="apple-hero-side">
+          <div className="apple-hero-badges">
+            <span className="apple-badge good">{isLocal ? "仅自己可见" : "云端摘要"}</span>
+            <span className="apple-badge">{relativeZh(latestSync(readiness, status))}</span>
+          </div>
+          <div className="apple-hero-rings" aria-label="活动圆环">
+            <HeroRing label="能量" value={activity?.active_calories} goal={600} unit="kcal" color="var(--down)" />
+            <HeroRing label="分钟" value={activity?.active_minutes} goal={30} unit="分" color="var(--up)" />
+            <HeroRing label="站立" value={activity?.stand_minutes} goal={180} unit="分" color="var(--accent)" />
+          </div>
         </div>
       </section>
 

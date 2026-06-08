@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { safeAppleRawDetail } from "../../../lib/load";
-import { RAW_TABLES, formatHours, formatValue, workoutLabel, zhTime } from "../../appleHealth";
+import { RAW_TABLES, formatHours, formatRespiratoryRate, formatValue, workoutLabel, zhTime } from "../../appleHealth";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ const COLUMN_LABELS: Record<string, string> = {
   active_calories: "活动能量",
   total_calories: "总能量",
   active_minutes: "活动分钟",
-  stand_hours: "站立小时",
+  stand_hours: "站立圆环小时",
   stand_minutes: "站立时间",
   total_sleep_min: "睡眠分钟",
   awake_min: "清醒",
@@ -238,7 +238,7 @@ function unitLabel(value: string | null | undefined): string {
 }
 
 function sourceLabel(value: string | null | undefined): string {
-  if (!value) return "本机同步";
+  if (!value) return "已同步";
   if (value === "apple-health-healthsave") return "Apple 健康同步";
   return value;
 }
@@ -436,7 +436,7 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
         details: [
           `深睡 ${formatMinutes(numeric(row, "deep_min"))}`,
           `REM ${formatMinutes(numeric(row, "rem_min"))}`,
-          `呼吸 ${formatValue(numeric(row, "respiratory_rate"), 1)} 次/分`,
+          `呼吸 ${formatRespiratoryRate(numeric(row, "respiratory_rate"))}`,
         ],
         href: rowDayHref(row),
       };
@@ -496,9 +496,9 @@ function tableNotice(decodedTable: string, rows: RawRow[]): TableNotice | null {
       icon: "activity",
       title: hasStandHours ? "站立数据已同步" : "站立时间按分钟展示",
       body: hasStandHours
-        ? "这里同时保留 Apple 站立小时和 Apple Watch 站立时间。趋势页会优先使用更细的站立分钟。"
+        ? "这里同时保留 Apple 站立圆环小时和 Apple Watch 站立时间。趋势页会优先使用更细的站立分钟。"
         : hasStandMinutes
-          ? "Apple Watch 当前同步到了站立时间分钟数；健身圆环里的站立小时是另一种口径，所以这一项暂时为空。"
+          ? "Apple Watch 当前同步到了站立时间分钟数；健身圆环里的站立圆环小时是另一种口径，所以这一列暂时为空。"
           : "这张表还没有站立分钟记录。保持 Apple Watch 佩戴并手动同步一次后，这里会显示站立时间。",
       href: "/apple/metrics/stand-time",
       action: "查看站立时间",

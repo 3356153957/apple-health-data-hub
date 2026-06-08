@@ -178,7 +178,7 @@ function MetricIcon({ name }: { name: IconName }) {
 }
 
 function sourceLabel(sourceId: string | null | undefined): string {
-  if (!sourceId) return "本机同步";
+  if (!sourceId) return "已同步";
   if (sourceId === "apple-health-healthsave") return "Apple 健康同步";
   return sourceId;
 }
@@ -266,6 +266,14 @@ function primaryValue(metric: AppleMetric, stats: PeriodStats): number | null {
 
 function primaryLabel(metric: AppleMetric): string {
   return TOTAL_METRICS.has(metric.id) ? "累计" : "平均";
+}
+
+function latestKpiLabel(metric: AppleMetric): string {
+  return TOTAL_METRICS.has(metric.id) ? "最新一天" : "最新值";
+}
+
+function latestKpiUnit(metric: AppleMetric): string {
+  return TOTAL_METRICS.has(metric.id) ? `${metric.unit} · 当天累计` : metric.unit;
 }
 
 function changePct(current: number | null, previous: number | null): number | null {
@@ -612,9 +620,9 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
       <section className="apple-kpis">
         <div className="apple-kpi icon">
           <MetricIcon name="records" />
-          <span>最新值</span>
+          <span>{latestKpiLabel(metric)}</span>
           <strong>{formatValue(latest, metric.digits ?? 0)}</strong>
-          <small>{metric.unit}</small>
+          <small>{latestKpiUnit(metric)}</small>
         </div>
         <div className="apple-kpi icon">
           <MetricIcon name="week" />

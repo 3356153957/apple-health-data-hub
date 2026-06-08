@@ -7,7 +7,6 @@ import {
   APPLE_METRICS,
   AppleCategoryIcon,
   RAW_TABLES,
-  formatHours,
   formatValue,
   normalizeMetricValue,
   relativeZh,
@@ -40,7 +39,7 @@ const KEY_METRICS: KeyMetricDefinition[] = [
     href: "/apple/metrics/stand-time",
     icon: "activity",
     source: "活动记录",
-    helper: "Apple Watch 已同步站立分钟数，和健身圆环里的站立小时不是同一个口径。",
+    helper: "Apple Watch 已同步站立分钟数，和健身圆环里的站立圆环小时不是同一个口径。",
   },
   {
     id: "vital.respiratory_rate",
@@ -77,16 +76,16 @@ function validTime(value: string | null): string | null {
 function sourceTitle(sourceId: string): string {
   const normalized = sourceId.toLowerCase();
   if (normalized.includes("apple-health")) return "Apple 健康同步";
-  if (normalized.includes("healthsave")) return "本机同步";
-  if (sourceId === "本机同步") return "本机同步";
+  if (normalized.includes("healthsave")) return "已同步";
+  if (sourceId === "私密记录") return "私密记录";
   return sourceId;
 }
 
 function sourceSubtitle(sourceId: string): string {
-  if (sourceId === "本机同步") return "没有附带来源名称的私密记录";
+  if (sourceId === "私密记录") return "没有附带来源名称的私密记录";
   const normalized = sourceId.toLowerCase();
   if (normalized.includes("apple-health")) return "来自 Apple 健康导入与自动同步";
-  if (normalized.includes("healthsave")) return "来自本机健康记录";
+  if (normalized.includes("healthsave")) return "来自私密健康记录";
   return "私密同步来源";
 }
 
@@ -94,7 +93,7 @@ function sourceSummaries(details: Array<AppleRawDetail | null>): SourceSummary[]
   const map = new Map<string, { count: number; latest: string | null; tables: Set<string> }>();
   details.forEach((detail) => {
     detail?.rows.forEach((row) => {
-      const sourceId = typeof row.source_id === "string" && row.source_id.trim() ? row.source_id.trim() : "本机同步";
+      const sourceId = typeof row.source_id === "string" && row.source_id.trim() ? row.source_id.trim() : "私密记录";
       const current = map.get(sourceId) ?? { count: 0, latest: null, tables: new Set<string>() };
       current.count += 1;
       current.tables.add(detail.table);
@@ -166,7 +165,7 @@ function metricValue(metricId: string, series: MetricSeries | null): number | nu
 }
 
 function metricValueText(metricId: string, value: number | null): string {
-  if (metricId === "activity.stand_minutes") return formatHours(value);
+  if (metricId === "activity.stand_minutes") return `${formatValue(value)} 分钟`;
   const metric = APPLE_METRICS.find((item) => item.id === metricId);
   return `${formatValue(value, metric?.digits ?? 0)} ${metric?.unit ?? ""}`.trim();
 }
