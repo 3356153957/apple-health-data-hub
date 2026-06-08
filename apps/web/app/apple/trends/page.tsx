@@ -29,6 +29,20 @@ type TrendItem = {
   absPct: number;
 };
 
+const RECOVERY_TREND_IDS = new Set([
+  "vital.hrv_sdnn",
+  "vital.resting_heart_rate",
+  "vital.respiratory_rate",
+  "vital.blood_oxygen",
+]);
+
+const ACTIVITY_TREND_IDS = new Set([
+  "activity.steps",
+  "activity.active_energy",
+  "activity.stand_minutes",
+  "cardio.vo2_max",
+]);
+
 function iconForMetric(metricId: string) {
   if (metricId.startsWith("activity.")) return "activity";
   if (metricId === "vital.respiratory_rate") return "sleep";
@@ -86,6 +100,8 @@ export default async function AppleTrendsPage() {
   const upward = comparable.filter((item) => (item.trend.pct ?? 0) > 0.05).length;
   const downward = comparable.filter((item) => (item.trend.pct ?? 0) < -0.05).length;
   const strongest = ranked[0] ?? null;
+  const recoveryFocus = ranked.find((item) => RECOVERY_TREND_IDS.has(item.metric.id)) ?? null;
+  const activityFocus = ranked.find((item) => ACTIVITY_TREND_IDS.has(item.metric.id)) ?? null;
   const totalPoints = items.reduce((sum, item) => sum + item.nums.length, 0);
 
   return (
@@ -103,6 +119,41 @@ export default async function AppleTrendsPage() {
           <span className="apple-badge">{APPLE_METRICS.length} 个指标</span>
           <span className="apple-badge good">30 天窗口</span>
         </div>
+      </section>
+
+      <section className="apple-category-guide">
+        <Link
+          className={`apple-category-guide-card ${recoveryFocus?.tone ?? "neutral"}`}
+          href={recoveryFocus ? `/apple/metrics/${recoveryFocus.metric.slug}` : "/apple/categories/recovery"}
+        >
+          <AppleCategoryIcon name={recoveryFocus ? iconForMetric(recoveryFocus.metric.id) : "recovery"} />
+          <div>
+            <span>恢复信号</span>
+            <strong>{recoveryFocus?.metric.label ?? "恢复指标"}</strong>
+            <p>{recoveryFocus ? changeSentence(recoveryFocus) : "HRV、静息心率和呼吸次数同步后会在这里形成恢复趋势。"}</p>
+          </div>
+        </Link>
+
+        <Link
+          className={`apple-category-guide-card ${activityFocus?.tone ?? "neutral"}`}
+          href={activityFocus ? `/apple/metrics/${activityFocus.metric.slug}` : "/apple/categories/activity"}
+        >
+          <AppleCategoryIcon name={activityFocus ? iconForMetric(activityFocus.metric.id) : "activity"} />
+          <div>
+            <span>活动负荷</span>
+            <strong>{activityFocus?.metric.label ?? "活动指标"}</strong>
+            <p>{activityFocus ? changeSentence(activityFocus) : "步数、活动能量和站立时间同步后会在这里呈现活动变化。"}</p>
+          </div>
+        </Link>
+
+        <Link className="apple-category-guide-card good" href="/apple/report">
+          <AppleCategoryIcon name="data" />
+          <div>
+            <span>整体节奏</span>
+            <strong>{upward} 上升 · {downward} 下降</strong>
+            <p>{comparable.length} 个指标已有 30 天对比，当前趋势来自 {totalPoints.toLocaleString("zh-CN")} 个数据点。</p>
+          </div>
+        </Link>
       </section>
 
       <section className="apple-kpis">
