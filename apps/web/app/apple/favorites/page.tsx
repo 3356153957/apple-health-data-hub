@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
-import type { MetricSeries } from "../../lib/api";
-import { safeSeries } from "../../lib/load";
+import type { AppleDailySummary, MetricSeries } from "../../lib/api";
+import { safeAppleDailySummary, safeSeries } from "../../lib/load";
 import {
   APPLE_METRICS,
   AppleCategoryIcon,
   FAVORITE_METRIC_IDS,
   Sparkline,
+  formatHours,
   formatValue,
   latestValue,
   metricSeriesValues,
@@ -49,6 +50,49 @@ function favoriteStatus(item: FavoriteItem): string {
   return `${formatValue(item.latest, item.metric.digits ?? 0)} ${item.metric.unit}，最近 30 天${item.trend.pct > 0 ? "上升" : "下降"} ${formatValue(Math.abs(item.trend.pct), 1)}%。`;
 }
 
+function dailyFocus(summary: AppleDailySummary | null, changed: FavoriteItem | null): {
+  href: string;
+  icon: ReturnType<typeof iconForMetric>;
+  title: string;
+  body: string;
+  tone: string;
+} {
+  if (summary?.sleep?.level === "偏少") {
+    return {
+      href: "/apple/categories/sleep",
+      icon: "sleep",
+      title: "先看睡眠恢复",
+      body: `昨夜睡眠 ${formatHours(summary.sleep.total_sleep_min)}，适合先看睡眠、呼吸次数和 HRV。`,
+      tone: "warn",
+    };
+  }
+  if (summary?.activity?.level === "偏少") {
+    return {
+      href: "/apple/categories/activity",
+      icon: "activity",
+      title: "先看活动量",
+      body: `昨日 ${formatValue(summary.activity.steps)} 步，活动 ${formatValue(summary.activity.active_minutes)} 分钟，可以先补基础活动。`,
+      tone: "warn",
+    };
+  }
+  if (changed) {
+    return {
+      href: `/apple/metrics/${changed.metric.slug}`,
+      icon: iconForMetric(changed.metric.id),
+      title: `先看${changed.metric.label}`,
+      body: favoriteStatus(changed),
+      tone: changed.tone,
+    };
+  }
+  return {
+    href: "/apple/daily",
+    icon: "activity",
+    title: "先看每日总结",
+    body: "同步完成后，这里会根据昨日运动和睡眠挑出最值得先看的收藏项。",
+    tone: "neutral",
+  };
+}
+
 function buildFavoriteItems(seriesList: Array<MetricSeries | null>): FavoriteItem[] {
   return FAVORITE_METRIC_IDS.map((metricId) => {
     const metricIndex = APPLE_METRICS.findIndex((metric) => metric.id === metricId);
@@ -69,10 +113,14 @@ function buildFavoriteItems(seriesList: Array<MetricSeries | null>): FavoriteIte
 }
 
 export default async function AppleFavoritesPage() {
-  const seriesList = await Promise.all(APPLE_METRICS.map((metric) => safeSeries(metric.id, "30d")));
+  const [seriesList, dailySummary] = await Promise.all([
+    Promise.all(APPLE_METRICS.map((metric) => safeSeries(metric.id, "30d"))),
+    safeAppleDailySummary(),
+  ]);
   const favorites = buildFavoriteItems(seriesList);
   const comparable = favorites.filter((item) => item.trend.pct !== null);
   const changed = [...comparable].sort((a, b) => Math.abs(b.trend.pct ?? 0) - Math.abs(a.trend.pct ?? 0))[0] ?? null;
+  const focus = dailyFocus(dailySummary, changed);
   const totalPoints = favorites.reduce((sum, item) => sum + item.nums.length, 0);
   const latestDates = favorites
     .map((item) => item.series?.end)
@@ -94,6 +142,35 @@ export default async function AppleFavoritesPage() {
           <span className="apple-badge">{favorites.length} 个收藏</span>
           <span className="apple-badge good">最近 {zhDate(latestDates[0])}</span>
         </div>
+      </section>
+
+      <section className="apple-category-guide">
+        <Link className={`apple-category-guide-card ${focus.tone}`} href={focus.href}>
+          <AppleCategoryIcon name={focus.icon} />
+          <div>
+            <span>今日关注</span>
+            <strong>{focus.title}</strong>
+            <p>{focus.body}</p>
+          </div>
+        </Link>
+
+        <Link className={`apple-category-guide-card ${changed?.tone ?? "neutral"}`} href={changed ? `/apple/metrics/${changed.metric.slug}` : "/apple/trends"}>
+          <AppleCategoryIcon name={changed ? iconForMetric(changed.metric.id) : "recovery"} />
+          <div>
+            <span>变化最大</span>
+            <strong>{changed?.metric.label ?? "等待趋势"}</strong>
+            <p>{changed ? favoriteStatus(changed) : "更多连续记录同步后，这里会显示变化最明显的收藏指标。"}</p>
+          </div>
+        </Link>
+
+        <Link className="apple-category-guide-card good" href="/apple/daily">
+          <AppleCategoryIcon name="data" />
+          <div>
+            <span>记录覆盖</span>
+            <strong>{totalPoints.toLocaleString("zh-CN")} 个数据点</strong>
+            <p>{favorites.length} 个收藏指标已接入 30 天趋势，适合每天快速扫一眼。</p>
+          </div>
+        </Link>
       </section>
 
       <section className="apple-kpis">
