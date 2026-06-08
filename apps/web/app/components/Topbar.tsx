@@ -8,6 +8,7 @@ const TITLES: Record<string, { title: string; sub: string }> = {
   "/": { title: "健康概览", sub: "Apple Watch 与 iPhone 健康数据。" },
   "/apple": { title: "健康概览", sub: "运动、睡眠、恢复和同步状态。" },
   "/apple/browse": { title: "浏览", sub: "按健康分类查看指标和记录。" },
+  "/apple/sources": { title: "数据来源", sub: "设备、同步类别和本地隐私状态。" },
   "/demo": { title: "演示数据", sub: "示例健康故事。" },
   "/experiments": { title: "计划", sub: "可尝试的健康习惯。" },
   "/evidence": { title: "发现", sub: "系统识别到的趋势和异常。" },
@@ -17,6 +18,7 @@ const TITLES: Record<string, { title: string; sub: string }> = {
 
 function titleForPath(pathname: string): { title: string; sub: string } {
   if (pathname.startsWith("/apple/days/")) return { title: "每日详情", sub: "当天活动、睡眠、训练和建议。" };
+  if (pathname.startsWith("/apple/sources")) return { title: "数据来源", sub: "设备、同步类别和本地隐私状态。" };
   if (pathname.startsWith("/apple/categories/data")) return { title: "数据来源", sub: "核对 Apple Watch 和 iPhone 同步记录。" };
   if (pathname.startsWith("/apple/categories/")) return { title: "浏览分类", sub: "相关指标、趋势和同步来源。" };
   if (pathname.startsWith("/apple/metrics/")) return { title: "指标详情", sub: "最近趋势、数值范围和数据点。" };

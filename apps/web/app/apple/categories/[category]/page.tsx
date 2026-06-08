@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 import { safeAppleStatus, safeSeries } from "../../../lib/load";
@@ -53,6 +53,7 @@ export default async function AppleCategoryPage({ params }: PageProps) {
   const decodedCategory = decodeURIComponent(category);
   const spec = findCategory(decodedCategory);
   if (!spec) notFound();
+  if (decodedCategory === "data") redirect("/apple/sources");
 
   const categoryMetrics = spec.metricIds
     .map((id) => APPLE_METRICS.find((metric) => metric.id === id))

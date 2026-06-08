@@ -194,6 +194,9 @@ export default async function AppleBrowsePage() {
             <h3>数据来源</h3>
             <p>需要核对同步是否完整时，再进入原始记录。日常查看优先使用上面的分类和指标详情。</p>
           </div>
+          <Link href="/apple/sources" className="apple-text-link">
+            查看设备与同步
+          </Link>
         </div>
         <div className="apple-source-grid">
           {sourceTables.map((table) => {

@@ -661,7 +661,7 @@ export default async function AppleHealthPage() {
       </div>
       <section className="apple-category-grid">
         {BROWSE_CATEGORIES.map((category) => (
-          <Link className="apple-category-card" href={`/apple/categories/${category.slug}`} key={category.title}>
+          <Link className="apple-category-card" href={category.slug === "data" ? "/apple/sources" : `/apple/categories/${category.slug}`} key={category.title}>
             <AppleCategoryIcon name={category.icon} />
             <div>
               <span>{category.title}</span>

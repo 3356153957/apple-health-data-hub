@@ -224,9 +224,9 @@ export const BROWSE_CATEGORIES: AppleBrowseCategory[] = [
   },
   {
     slug: "data",
-    title: "同步数据",
-    subtitle: "查看原始同步分类",
-    description: "按同步表查看最近记录，适合核对 Apple Watch 和 iPhone 是否持续上传。",
+    title: "数据来源",
+    subtitle: "设备、同步、隐私状态",
+    description: "查看 Apple Watch、iPhone 和本机服务的同步状态，需要核对时再进入记录明细。",
     icon: "data",
     metricIds: [],
     rawTables: ["daily_activity", "sleep_sessions", "workouts", "heart_rate", "hrv", "blood_oxygen", "quantity_samples"],

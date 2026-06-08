@@ -57,7 +57,7 @@ const NAV: readonly NavItem[] = [
   { href: "/apple/categories/activity", label: "活动", icon: "overview" },
   { href: "/apple/categories/sleep", label: "睡眠", icon: "data" },
   { href: "/apple/categories/recovery", label: "恢复", icon: "evidence" },
-  { href: "/apple/categories/data", label: "数据来源", icon: "experiments", activePrefixes: ["/apple/raw/"] },
+  { href: "/apple/sources", label: "数据来源", icon: "experiments", activePrefixes: ["/apple/raw/", "/apple/categories/data"] },
   { href: "/privacy", label: "隐私设置", icon: "privacy" },
 ];
 

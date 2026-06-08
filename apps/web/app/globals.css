@@ -2765,6 +2765,130 @@ html {
   line-height: 1.55;
 }
 
+.apple-source-device-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.apple-source-device-card {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.apple-source-device-card .apple-category-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+}
+
+.apple-source-device-card span,
+.apple-source-summary-row span,
+.apple-source-status-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-source-device-card strong,
+.apple-source-summary-row strong,
+.apple-source-status-row strong {
+  display: block;
+  margin-top: 7px;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.apple-source-device-card p,
+.apple-source-summary-row p,
+.apple-source-status-row p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.apple-source-summary-list,
+.apple-source-status-list {
+  display: grid;
+  gap: 0;
+  margin-top: 16px;
+}
+
+.apple-source-summary-row,
+.apple-source-status-row {
+  display: grid;
+  grid-template-columns: 40px 1fr max-content;
+  gap: 13px;
+  align-items: start;
+  min-width: 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-soft);
+  text-decoration: none;
+}
+
+.apple-source-status-row {
+  transition:
+    background 0.14s ease,
+    opacity 0.14s ease;
+}
+
+.apple-source-status-row:hover {
+  background: linear-gradient(90deg, rgba(92, 230, 216, 0.05), transparent 70%);
+}
+
+.apple-source-status-row:active {
+  opacity: 0.82;
+}
+
+.apple-source-summary-row small,
+.apple-source-status-row em {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1.6;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.apple-source-status-row em.good {
+  color: var(--signal);
+}
+
+.apple-source-status-row em.warn {
+  color: var(--warn);
+}
+
+.apple-source-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.apple-source-chip-list em {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 0 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--raise);
+  font-size: 11px;
+  font-style: normal;
+}
+
 .apple-category-icon {
   display: inline-grid;
   place-items: center;
@@ -3391,6 +3515,7 @@ html {
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
+  .apple-source-device-grid,
   .apple-day-detail-grid,
   .apple-period-grid.four,
   .apple-record-grid.raw {
@@ -3431,6 +3556,7 @@ html {
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
+  .apple-source-device-grid,
   .apple-day-detail-grid,
   .apple-period-grid,
   .apple-period-grid.four,
@@ -3486,6 +3612,16 @@ html {
     align-items: start;
   }
   .apple-browse-row small {
+    grid-column: 2;
+    text-align: left;
+    white-space: normal;
+  }
+  .apple-source-summary-row,
+  .apple-source-status-row {
+    grid-template-columns: 40px 1fr;
+  }
+  .apple-source-summary-row small,
+  .apple-source-status-row em {
     grid-column: 2;
     text-align: left;
     white-space: normal;
