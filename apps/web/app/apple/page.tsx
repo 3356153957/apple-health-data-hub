@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 
 import type { AppleDailySummary, AppleStatus, MetricSeries, Readiness } from "../lib/api";
 import {
@@ -29,6 +30,33 @@ import {
 export const metadata: Metadata = { title: "健康概览 · HealthSave" };
 export const dynamic = "force-dynamic";
 
+type AppleIconName = "activity" | "heart" | "sleep" | "recovery" | "body" | "cardio" | "data";
+
+const APPLE_ICON_PATHS: Record<AppleIconName, string[]> = {
+  activity: ["M13 5l3 6h5", "M11 19l-3-6H3", "M16 11l-4 8", "M8 13l4-8"],
+  heart: ["M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8"],
+  sleep: ["M21 12.8A8 8 0 1 1 11.2 3a6 6 0 1 0 9.8 9.8"],
+  recovery: ["M12 3v6l4 2", "M21 12a9 9 0 1 1-3.3-7", "M21 4v6h-6"],
+  body: ["M12 5a3 3 0 1 0 0.01 0", "M5 21v-2a7 7 0 0 1 14 0v2", "M8 14h8"],
+  cardio: ["M4 17l4-4 3 3 7-8", "M14 8h4v4"],
+  data: ["M5 5h14", "M5 12h14", "M5 19h14", "M8 5v14", "M16 5v14"],
+};
+
+const BROWSE_CATEGORIES: Array<{
+  title: string;
+  subtitle: string;
+  href: string;
+  icon: AppleIconName;
+}> = [
+  { title: "活动", subtitle: "步数、能量、站立时间", href: "/apple/raw/daily_activity", icon: "activity" },
+  { title: "心脏", subtitle: "心率、HRV、静息心率", href: "/apple/metrics/heart-rate", icon: "heart" },
+  { title: "睡眠", subtitle: "睡眠阶段、效率、呼吸频率", href: "/apple/raw/sleep_sessions", icon: "sleep" },
+  { title: "恢复", subtitle: "HRV、静息心率、呼吸", href: "/apple/metrics/hrv", icon: "recovery" },
+  { title: "身体", subtitle: "腕温和其他身体指标", href: "/apple/metrics/wrist-temperature", icon: "body" },
+  { title: "心肺", subtitle: "VO2 max 与训练能力", href: "/apple/metrics/vo2-max", icon: "cardio" },
+  { title: "同步数据", subtitle: "查看原始同步分类", href: "/apple/raw/quantity_samples", icon: "data" },
+];
+
 function totalRows(status: AppleStatus | null): number {
   return Object.values(status ?? {}).reduce((sum, row) => sum + (row.count ?? 0), 0);
 }
@@ -55,6 +83,76 @@ function todayReadiness(summary: AppleDailySummary | null): string {
   return "保持稳定节奏";
 }
 
+function pct(value: number | null | undefined, goal: number): number {
+  if (value === null || value === undefined || !Number.isFinite(value) || goal <= 0) return 0;
+  return Math.max(0, Math.min(1, value / goal));
+}
+
+function ringStyle(value: number | null | undefined, goal: number, color: string): CSSProperties {
+  return {
+    "--ring-pct": `${pct(value, goal) * 100}%`,
+    "--ring-color": color,
+  } as CSSProperties;
+}
+
+function AppleIcon({ name }: { name: AppleIconName }) {
+  return (
+    <span className={`apple-category-icon ${name}`} aria-hidden>
+      <svg viewBox="0 0 24 24" focusable="false">
+        {APPLE_ICON_PATHS[name].map((path) => (
+          <path d={path} key={path} />
+        ))}
+      </svg>
+    </span>
+  );
+}
+
+function ActivityRing({
+  label,
+  value,
+  goal,
+  unit,
+  color,
+}: {
+  label: string;
+  value: number | null | undefined;
+  goal: number;
+  unit: string;
+  color: string;
+}) {
+  return (
+    <div className="apple-ring-item">
+      <i className="apple-ring" style={ringStyle(value, goal, color)} />
+      <div>
+        <span>{label}</span>
+        <strong>
+          {formatValue(value)}
+          <small>{unit}</small>
+        </strong>
+        <p>目标 {formatValue(goal)} {unit}</p>
+      </div>
+    </div>
+  );
+}
+
+function trendHighlights(seriesList: Array<MetricSeries | null>) {
+  return APPLE_METRICS.map((metric, index) => {
+    const nums = metricSeriesValues(metric, seriesList[index]);
+    const trend = recentTrend(nums);
+    const latest = nums.length ? nums[nums.length - 1] : latestValue(seriesList[index]);
+    return {
+      metric,
+      latest,
+      trend,
+      tone: trendTone(metric, trend.delta),
+      absPct: Math.abs(trend.pct ?? 0),
+    };
+  })
+    .filter((item) => item.trend.pct !== null)
+    .sort((a, b) => b.absPct - a.absPct)
+    .slice(0, 3);
+}
+
 export default async function AppleHealthPage() {
   const [readiness, status, privacy, dailySummary, seriesList] = await Promise.all([
     safeReadiness(),
@@ -66,6 +164,7 @@ export default async function AppleHealthPage() {
   const observationRows = readiness?.sources.reduce((sum, source) => sum + source.observation_count, 0) ?? totalRows(status);
   const coreReadyCount = readyCount(readiness);
   const isLocal = privacy ? !privacy.cloud_active : true;
+  const highlights = trendHighlights(seriesList);
 
   return (
     <>
@@ -104,6 +203,70 @@ export default async function AppleHealthPage() {
           </strong>
           <small>{observationRows.toLocaleString("zh-CN")} 条本机健康记录</small>
         </div>
+      </section>
+
+      <section className="apple-two-col apple-ios-summary">
+        <article className="apple-panel apple-rings-panel">
+          <div className="apple-panel-head">
+            <div>
+              <h3>活动状态</h3>
+              <p>按常用运动目标快速看昨日完成度。</p>
+            </div>
+            <Link href="/apple/raw/daily_activity" className="apple-text-link">
+              查看活动
+            </Link>
+          </div>
+          <div className="apple-rings-grid">
+            <ActivityRing
+              label="活动能量"
+              value={dailySummary?.activity?.active_calories}
+              goal={600}
+              unit="kcal"
+              color="var(--down)"
+            />
+            <ActivityRing
+              label="活动分钟"
+              value={dailySummary?.activity?.active_minutes}
+              goal={30}
+              unit="分钟"
+              color="var(--up)"
+            />
+            <ActivityRing
+              label="站立时间"
+              value={dailySummary?.activity?.stand_minutes}
+              goal={180}
+              unit="分钟"
+              color="var(--accent)"
+            />
+          </div>
+        </article>
+
+        <article className="apple-panel apple-highlight-panel">
+          <div className="apple-panel-head">
+            <div>
+              <h3>趋势亮点</h3>
+              <p>自动挑出最近变化最明显的指标。</p>
+            </div>
+          </div>
+          <div className="apple-highlight-list">
+            {highlights.map(({ metric, latest, trend, tone }) => (
+              <Link className="apple-highlight-row" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
+                <AppleIcon name={metric.id.startsWith("activity.") ? "activity" : metric.id.startsWith("cardio.") ? "cardio" : "heart"} />
+                <div>
+                  <span>{metric.label}</span>
+                  <strong>
+                    {formatValue(latest, metric.digits ?? 0)}
+                    <small>{metric.unit}</small>
+                  </strong>
+                </div>
+                <em className={tone}>
+                  {trend.pct === null ? "暂无" : `${trend.pct > 0 ? "+" : ""}${formatValue(trend.pct, 1)}%`}
+                </em>
+              </Link>
+            ))}
+            {!highlights.length && <div className="apple-empty-line">暂无可比较的趋势亮点</div>}
+          </div>
+        </article>
       </section>
 
       <section className="apple-two-col apple-brief-grid">
@@ -183,6 +346,22 @@ export default async function AppleHealthPage() {
             </div>
           </div>
         </article>
+      </section>
+
+      <div className="apple-section-head">
+        <h3>浏览</h3>
+        <p>按 Apple 健康式分类快速进入你关心的数据。</p>
+      </div>
+      <section className="apple-category-grid">
+        {BROWSE_CATEGORIES.map((category) => (
+          <Link className="apple-category-card" href={category.href} key={category.title}>
+            <AppleIcon name={category.icon} />
+            <div>
+              <span>{category.title}</span>
+              <small>{category.subtitle}</small>
+            </div>
+          </Link>
+        ))}
       </section>
 
       <div className="apple-section-head">
