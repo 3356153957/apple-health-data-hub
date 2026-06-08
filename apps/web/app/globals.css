@@ -1897,6 +1897,101 @@ html {
   line-height: 1.4;
 }
 
+.apple-day-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.apple-goal-list {
+  display: grid;
+  gap: 0;
+  margin-top: 16px;
+}
+
+.apple-goal-row {
+  display: grid;
+  grid-template-columns: 40px 1fr max-content;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 13px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.apple-goal-row:first-child {
+  border-top: 0;
+}
+
+.apple-goal-row span,
+.apple-goal-row em {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-goal-row strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 19px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-goal-row em {
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.apple-goal-track {
+  height: 8px;
+  overflow: hidden;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: var(--raise);
+}
+
+.apple-goal-track i {
+  display: block;
+  width: var(--goal-pct);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--goal-color);
+}
+
+.apple-sleep-bars.day {
+  margin-top: 18px;
+}
+
+.apple-day-bottom {
+  margin-top: 14px;
+}
+
+.apple-day-advice-list {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.apple-day-advice-list li {
+  padding: 12px 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--raise);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.apple-record-grid.day-workouts {
+  grid-template-columns: 1fr;
+}
+
 .apple-mini-icon {
   display: inline-grid;
   place-items: center;
@@ -3078,6 +3173,7 @@ html {
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
+  .apple-day-detail-grid,
   .apple-period-grid.four,
   .apple-record-grid.raw {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3117,6 +3213,7 @@ html {
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
+  .apple-day-detail-grid,
   .apple-period-grid,
   .apple-period-grid.four,
   .apple-record-grid,
@@ -3152,6 +3249,12 @@ html {
     grid-template-columns: 38px 1fr;
   }
   .apple-period-card em {
+    grid-column: 2;
+  }
+  .apple-goal-row {
+    grid-template-columns: 40px 1fr;
+  }
+  .apple-goal-row em {
     grid-column: 2;
   }
 }

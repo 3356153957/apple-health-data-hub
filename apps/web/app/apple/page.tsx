@@ -464,7 +464,7 @@ export default async function AppleHealthPage() {
           </div>
           <div className="apple-week-strip">
             {sevenDayReview.map((day) => (
-              <Link className={`apple-day-card ${day.tone}`} href="/apple/raw/daily_activity" key={day.date}>
+              <Link className={`apple-day-card ${day.tone}`} href={`/apple/days/${encodeURIComponent(day.date)}`} key={day.date}>
                 <span>{day.label}</span>
                 <strong>{formatValue(day.steps)}</strong>
                 <small>步</small>
