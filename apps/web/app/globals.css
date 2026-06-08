@@ -1775,6 +1775,13 @@ html {
   grid-column: span 2;
 }
 
+.apple-link-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 a.apple-summary-card:hover {
   transform: translateY(-1px);
   border-color: var(--signal-line);
@@ -1869,6 +1876,75 @@ a.apple-summary-card:active {
   margin-top: 5px;
   color: var(--faint);
   font-size: 11px;
+}
+
+.apple-highlights-panel {
+  margin-top: 14px;
+}
+
+.apple-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.apple-highlight-story {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  min-height: 238px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-highlight-story.primary {
+  grid-column: span 2;
+  background:
+    linear-gradient(135deg, rgba(92, 230, 216, 0.09), transparent 48%),
+    var(--surface);
+}
+
+.apple-highlight-story:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-highlight-story:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-highlight-story.warn {
+  border-color: rgba(232, 180, 95, 0.28);
+}
+
+.apple-highlight-story.good {
+  border-color: rgba(56, 217, 150, 0.24);
+}
+
+.apple-highlight-story > strong {
+  display: block;
+  margin-top: 18px;
+  color: var(--ink);
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.apple-highlight-story > p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.58;
 }
 
 .apple-metric-insights {
@@ -4106,6 +4182,7 @@ a.apple-summary-card:active {
 @media (max-width: 1100px) {
   .apple-kpis,
   .apple-focus-grid,
+  .apple-highlights-grid,
   .apple-metric-insights,
   .apple-trend-grid,
   .apple-trend-focus-grid,
@@ -4148,6 +4225,7 @@ a.apple-summary-card:active {
   }
   .apple-kpis,
   .apple-focus-grid,
+  .apple-highlights-grid,
   .apple-metric-insights,
   .apple-trend-grid,
   .apple-trend-focus-grid,
@@ -4171,6 +4249,7 @@ a.apple-summary-card:active {
     grid-template-columns: 1fr;
   }
   .apple-summary-card.primary,
+  .apple-highlight-story.primary,
   .apple-summary-card:last-child {
     grid-column: auto;
   }

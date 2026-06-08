@@ -511,11 +511,16 @@ export default async function AppleHealthPage() {
             <h3>每日摘要</h3>
             <p>{dailySummary ? `${dailySummary.date} · 运动、睡眠和建议` : "同步完成后显示每日摘要"}</p>
           </div>
-          {dailySummary?.date && (
-            <Link href={summaryDateHref(dailySummary)} className="apple-text-link">
-              查看当天详情
+          <div className="apple-link-group">
+            <Link href="/apple/highlights" className="apple-text-link">
+              全部亮点
             </Link>
-          )}
+            {dailySummary?.date && (
+              <Link href={summaryDateHref(dailySummary)} className="apple-text-link">
+                当天详情
+              </Link>
+            )}
+          </div>
         </div>
         <div className="apple-summary-feed-grid">
           {summaryFeed.map((item, index) => {

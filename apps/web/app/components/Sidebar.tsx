@@ -51,6 +51,18 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M8 2.5l1.6 3.3 3.7.5-2.7 2.6.7 3.7L8 10.9l-3.3 1.7.7-3.7-2.7-2.6 3.7-.5z" />
     </>
   ),
+  highlight: (
+    <>
+      <path d="M8 2.5v2" />
+      <path d="M8 11.5v2" />
+      <path d="M2.5 8h2" />
+      <path d="M11.5 8h2" />
+      <path d="M4.4 4.4l1.4 1.4" />
+      <path d="M10.2 10.2l1.4 1.4" />
+      <path d="M11.6 4.4l-1.4 1.4" />
+      <path d="M5.8 10.2l-1.4 1.4" />
+    </>
+  ),
   stand: (
     <>
       <path d="M8 2.5v11" />
@@ -80,6 +92,7 @@ type NavItem = {
 
 const NAV: readonly NavItem[] = [
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
+  { href: "/apple/highlights", label: "亮点", icon: "highlight" },
   { href: "/apple/favorites", label: "收藏", icon: "favorite" },
   { href: "/apple/browse", label: "浏览", icon: "overview" },
   { href: "/apple/trends", label: "趋势", icon: "trend" },
