@@ -31,6 +31,14 @@ def verify_api_key(x_api_key: str = Header(default="")):
         raise HTTPException(status_code=401, detail="Invalid API key")
 
 
+def verify_configured_api_key(x_api_key: str = Header(default="")):
+    """Require API_KEY to be configured and the caller's key to match it."""
+    if not API_KEY:
+        raise HTTPException(status_code=503, detail="API key is not configured")
+    if not hmac.compare_digest(x_api_key or "", API_KEY):
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+
 def warn_if_auth_disabled() -> None:
     """Emit a loud startup signal when the PHI surface is unauthenticated.
 
@@ -62,5 +70,6 @@ __all__ = [
     "API_KEY",
     "get_session",
     "verify_api_key",
+    "verify_configured_api_key",
     "warn_if_auth_disabled",
 ]

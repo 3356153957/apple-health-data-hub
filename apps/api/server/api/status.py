@@ -25,12 +25,23 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..ingestion.owner import OWNER_HEADER, resolve_owner_id
-from .deps import get_session, verify_api_key
+from .deps import get_session, verify_api_key, verify_configured_api_key
 from .metrics import STATUS_QUERY_FAILURES
 
 log = logging.getLogger("healthsave")
 
 router = APIRouter()
+
+
+@router.get("/api/apple/discovery", dependencies=[Depends(verify_configured_api_key)])
+async def apple_discovery():
+    """Return a strict discovery marker only when API key auth is configured."""
+    return {
+        "status": "ok",
+        "service": "health-data-hub",
+        "auth": "api-key",
+        "scope": "apple-health-sync",
+    }
 
 
 @router.get("/api/apple/status", dependencies=[Depends(verify_api_key)])
