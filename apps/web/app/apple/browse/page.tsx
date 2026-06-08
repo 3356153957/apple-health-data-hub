@@ -299,7 +299,7 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
         <div className="apple-panel-head">
           <div>
             <h3>常用指标</h3>
-            <p>站立时间和呼吸次数在这里可以直接进入详情；呼吸次数按“呼吸频率”记录，来自睡眠期间的 Apple Watch 数据。</p>
+            <p>站立时间和呼吸次数在这里可以直接进入详情；呼吸次数来自睡眠期间的 Apple Watch 数据。</p>
           </div>
         </div>
         <div className="apple-category-metric-grid apple-quick-metric-grid">

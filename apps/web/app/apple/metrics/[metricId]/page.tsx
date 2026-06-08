@@ -42,11 +42,10 @@ const RAW_METRIC_MAP: Record<string, { table: string; time: string; value: strin
   "activity.steps": { table: "daily_activity", time: "date", value: "steps", unit: "步" },
   "activity.active_energy": { table: "daily_activity", time: "date", value: "active_calories", unit: "kcal" },
   "activity.stand_minutes": {
-    table: "quantity_samples",
-    time: "time",
-    value: "value",
+    table: "daily_activity",
+    time: "date",
+    value: "stand_minutes",
     unit: "分钟",
-    metricName: "apple_stand_time",
   },
   "vital.resting_heart_rate": {
     table: "quantity_samples",

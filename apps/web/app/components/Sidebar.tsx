@@ -40,6 +40,22 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M4.2 8h2.2l1-2.2 1.5 4.2 1-2h1.9" />
     </>
   ),
+  stand: (
+    <>
+      <path d="M8 2.5v11" />
+      <path d="M5.5 5.5h5" />
+      <path d="M4.5 13.5h7" />
+      <path d="M6.5 8.5l-2.5 2" />
+      <path d="M9.5 8.5l2.5 2" />
+    </>
+  ),
+  breath: (
+    <>
+      <path d="M4 6.5c1.2-2.2 4.5-2.2 5.7-.1 1.4 2.5-.8 5.1-5.1 5.1" />
+      <path d="M12 9.5h.9c2.6 0 3.8 2.9 2 4.7-1.2 1.2-3.1 1.2-4.3 0" />
+      <path d="M3 14h5" />
+    </>
+  ),
   privacy: <path d="M8 2.2l4.5 1.8v3.6c0 2.8-1.9 4.7-4.5 5.6-2.6-.9-4.5-2.8-4.5-5.6V4z" />,
 };
 
@@ -54,6 +70,8 @@ type NavItem = {
 const NAV: readonly NavItem[] = [
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
   { href: "/apple/browse", label: "浏览", icon: "overview" },
+  { href: "/apple/metrics/stand-time", label: "站立时间", icon: "stand", activePrefixes: ["/apple/metrics/activity.stand_minutes"] },
+  { href: "/apple/metrics/respiratory-rate", label: "呼吸次数", icon: "breath", activePrefixes: ["/apple/metrics/vital.respiratory_rate"] },
   { href: "/apple/categories/activity", label: "活动", icon: "overview" },
   { href: "/apple/categories/sleep", label: "睡眠", icon: "data" },
   { href: "/apple/categories/recovery", label: "恢复", icon: "evidence" },

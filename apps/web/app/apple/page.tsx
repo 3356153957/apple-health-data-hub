@@ -356,7 +356,7 @@ function buildFocusInsights(
   } else if (respiration) {
     insights.push({
       title: "夜间呼吸有记录",
-      body: `最近呼吸频率 ${formatValue(respiration.latest, respiration.metric.digits ?? 0)} ${respiration.metric.unit}，适合和睡眠质量一起看。`,
+      body: `最近呼吸次数 ${formatValue(respiration.latest, respiration.metric.digits ?? 0)} ${respiration.metric.unit}，适合和睡眠质量一起看。`,
       meta: "睡眠呼吸",
       href: `/apple/metrics/${respiration.metric.slug}`,
       icon: "sleep",
@@ -366,7 +366,7 @@ function buildFocusInsights(
 
   if (respiration && hrv && insights.length < 3) {
     insights.push({
-      title: "夜间呼吸频率",
+      title: "夜间呼吸次数",
       body: `昨夜平均 ${formatValue(sleep?.respiratory_rate ?? respiration.latest, respiration.metric.digits ?? 0)} ${respiration.metric.unit}，目前已同步到睡眠记录。`,
       meta: "睡眠期间采集",
       href: `/apple/metrics/${respiration.metric.slug}`,
@@ -574,7 +574,7 @@ export default async function AppleHealthPage() {
         <Link className="apple-kpi clickable" href="/apple/metrics/respiratory-rate">
           <span>呼吸次数</span>
           <strong>{formatValue(dailySummary?.sleep?.respiratory_rate, 1)}</strong>
-          <small>次/分 · 睡眠期间呼吸频率</small>
+          <small>次/分 · 睡眠期间每分钟呼吸次数</small>
         </Link>
         <div className="apple-kpi">
           <span>运动记录</span>

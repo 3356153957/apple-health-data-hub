@@ -101,7 +101,7 @@ function tableHealth(row: AppleStatus[string] | null | undefined): "good" | "war
 
 function tableHelper(table: string, row: AppleStatus[string] | null | undefined): string {
   if (!row?.newest) return "还没有看到这类同步记录";
-  if (table === "quantity_samples") return "包含呼吸频率、腕温、VO2 max 等睡眠和身体指标";
+  if (table === "quantity_samples") return "包含呼吸次数、腕温、VO2 max 等睡眠和身体指标";
   if (table === "daily_activity") return "包含步数、活动分钟、能量和站立时间";
   if (table === "sleep_sessions") return "包含睡眠时段、阶段和睡眠呼吸";
   return RAW_TABLES[table]?.description ?? "同步记录明细";
