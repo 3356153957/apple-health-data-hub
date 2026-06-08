@@ -22,6 +22,7 @@ export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ metricId: string }>;
+  searchParams?: Promise<{ range?: string | string[] }>;
 };
 
 type DetailPoint = {
@@ -113,6 +114,16 @@ type PeriodStats = {
 };
 
 type IconName = "week" | "month" | "trend" | "records";
+
+const RANGE_OPTIONS = [
+  { key: "24h", label: "日", title: "24 小时" },
+  { key: "7d", label: "周", title: "7 天" },
+  { key: "30d", label: "月", title: "30 天" },
+  { key: "90d", label: "三月", title: "90 天" },
+  { key: "1y", label: "年", title: "1 年" },
+] as const;
+
+type RangeKey = (typeof RANGE_OPTIONS)[number]["key"];
 
 const ICON_PATHS: Record<IconName, string[]> = {
   week: ["M7 2v4", "M17 2v4", "M3 9h18", "M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"],
@@ -218,35 +229,51 @@ function metricSummary(metric: AppleMetric, week: PeriodStats, month: PeriodStat
   return `${weekText}，${monthText}。`;
 }
 
-export default async function AppleMetricDetailPage({ params }: PageProps) {
+function selectedRange(raw: string | string[] | undefined): RangeKey {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return RANGE_OPTIONS.some((option) => option.key === value) ? (value as RangeKey) : "30d";
+}
+
+function rangeTitle(key: RangeKey): string {
+  return RANGE_OPTIONS.find((option) => option.key === key)?.title ?? "30 天";
+}
+
+export default async function AppleMetricDetailPage({ params, searchParams }: PageProps) {
   const { metricId } = await params;
+  const query = searchParams ? await searchParams : {};
   const decodedId = decodeURIComponent(metricId);
   const metric = APPLE_METRICS.find((item) => item.slug === decodedId || item.id === decodedId);
   if (!metric) notFound();
 
+  const activeRange = selectedRange(query.range);
   const rawConfig = RAW_METRIC_MAP[metric.id];
-  const [series30, series90, rawDetail] = await Promise.all([
-    safeSeries(metric.id, "30d"),
+  const [selectedSeries, series90, rawDetail] = await Promise.all([
+    safeSeries(metric.id, activeRange),
     safeSeries(metric.id, "90d"),
     rawConfig ? safeAppleRawDetail(rawConfig.table, 500) : Promise.resolve(null),
   ]);
   const rawPoints = rawDetailPoints(metric, rawDetail?.rows ?? []);
-  const rawNumsAsc = [...rawPoints].reverse().map((point) => point.value).filter((value): value is number => value !== null);
   const seriesPoints = orderedSeriesPoints(series90).map((point) => ({
     t: point.t,
     value: normalizeMetricValue(metric, point.value),
     unit: point.unit ?? metric.unit,
     source_id: point.source_id,
   }));
-  const detailPointsAsc = rawPoints.length ? [...rawPoints].reverse() : seriesPoints;
-  const nums = rawNumsAsc.length ? rawNumsAsc : metricSeriesValues(metric, series30);
+  const selectedPointsDesc = orderedSeriesPoints(selectedSeries, "desc").map((point) => ({
+    t: point.t,
+    value: normalizeMetricValue(metric, point.value),
+    unit: point.unit ?? metric.unit,
+    source_id: point.source_id,
+  }));
+  const detailPointsAsc = seriesPoints.length ? seriesPoints : [...rawPoints].reverse();
+  const nums = metricSeriesValues(metric, selectedSeries);
   const longNums = metricSeriesValues(metric, series90);
-  const latest = rawPoints[0]?.value ?? (nums.length ? nums[nums.length - 1] : latestValue(series30));
+  const latest = rawPoints[0]?.value ?? (nums.length ? nums[nums.length - 1] : latestValue(selectedSeries));
   const avg = average(nums);
   const range = minMax(nums);
   const trend = recentTrend(nums);
   const tone = trendTone(metric, trend.delta);
-  const windowLabel = rawPoints.length ? "最近" : "30 天";
+  const windowLabel = rangeTitle(activeRange);
   const now = new Date();
   const weekStart = startOfWeek(now);
   const monthStart = startOfMonth(now);
@@ -259,12 +286,7 @@ export default async function AppleMetricDetailPage({ params }: PageProps) {
 
   const recentRows = rawPoints.length
     ? rawPoints.slice(0, 120)
-    : orderedSeriesPoints(series30, "desc").slice(0, 80).map((point) => ({
-        t: point.t,
-        value: normalizeMetricValue(metric, point.value),
-        unit: point.unit ?? metric.unit,
-        source_id: point.source_id,
-      }));
+    : selectedPointsDesc.slice(0, 80);
 
   return (
     <>
@@ -282,6 +304,18 @@ export default async function AppleMetricDetailPage({ params }: PageProps) {
           <span className="apple-badge good">本地读取</span>
         </div>
       </section>
+
+      <nav className="apple-range-tabs" aria-label="时间范围">
+        {RANGE_OPTIONS.map((option) => (
+          <Link
+            className={option.key === activeRange ? "active" : undefined}
+            href={`/apple/metrics/${encodeURIComponent(metric.slug)}?range=${option.key}`}
+            key={option.key}
+          >
+            {option.label}
+          </Link>
+        ))}
+      </nav>
 
       <section className="apple-kpis">
         <div className="apple-kpi icon">
@@ -360,7 +394,7 @@ export default async function AppleMetricDetailPage({ params }: PageProps) {
             <p>{nums.length.toLocaleString("zh-CN")} 个数据点</p>
           </div>
           <span className="apple-badge">
-            {rawPoints.length ? "最近同步记录" : `90 天总计 ${longNums.length.toLocaleString("zh-CN")} 点`}
+            {`90 天总计 ${longNums.length.toLocaleString("zh-CN")} 点`}
           </span>
         </div>
         <Sparkline nums={nums} tall />

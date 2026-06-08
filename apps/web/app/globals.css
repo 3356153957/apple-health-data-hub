@@ -1555,6 +1555,49 @@ html {
   margin-top: 14px;
 }
 
+.apple-range-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  width: min(100%, 420px);
+  margin-top: 14px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raise);
+}
+
+.apple-range-tabs a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 650;
+  transition:
+    color 0.14s ease,
+    background 0.14s ease,
+    transform 0.14s ease;
+}
+
+.apple-range-tabs a:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.apple-range-tabs a:active {
+  transform: scale(0.98);
+}
+
+.apple-range-tabs a.active {
+  color: var(--surface-2);
+  background: var(--signal);
+}
+
 .apple-kpi,
 .apple-trend-card,
 .apple-ready-row,
