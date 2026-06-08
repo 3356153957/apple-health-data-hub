@@ -29,6 +29,43 @@ function displayDate(dateKey: string): string {
   }).format(new Date(`${dateKey}T12:00:00+08:00`));
 }
 
+function shortDate(dateKey: string): string {
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+    timeZone: "Asia/Shanghai",
+  }).format(new Date(`${dateKey}T12:00:00+08:00`));
+}
+
+function shiftDateKey(dateKey: string, days: number): string {
+  const date = new Date(`${dateKey}T12:00:00+08:00`);
+  date.setDate(date.getDate() + days);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Shanghai",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  return year && month && day ? `${year}-${month}-${day}` : dateKey;
+}
+
+function todayDateKey(): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Shanghai",
+  }).formatToParts(new Date());
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  return year && month && day ? `${year}-${month}-${day}` : "";
+}
+
 function activityTone(level: string | undefined): Tone {
   if (level === "充足") return "good";
   if (level === "偏少") return "warn";
@@ -99,6 +136,10 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
   const workouts = summary?.workouts ?? [];
   const activityState = activityTone(activity?.level);
   const sleepState = sleepTone(sleep?.level);
+  const previousDate = shiftDateKey(dateKey, -1);
+  const nextDate = shiftDateKey(dateKey, 1);
+  const today = todayDateKey();
+  const canOpenNextDate = !today || nextDate <= today;
 
   return (
     <>
@@ -121,6 +162,28 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
           </span>
         </div>
       </section>
+
+      <nav className="apple-day-nav" aria-label="每日记录切换">
+        <Link href={`/apple/days/${encodeURIComponent(previousDate)}`}>
+          <span>前一天</span>
+          <strong>{shortDate(previousDate)}</strong>
+        </Link>
+        <div>
+          <span>当前日期</span>
+          <strong>{shortDate(dateKey)}</strong>
+        </div>
+        {canOpenNextDate ? (
+          <Link href={`/apple/days/${encodeURIComponent(nextDate)}`}>
+            <span>后一天</span>
+            <strong>{shortDate(nextDate)}</strong>
+          </Link>
+        ) : (
+          <div className="disabled">
+            <span>后一天</span>
+            <strong>等待同步</strong>
+          </div>
+        )}
+      </nav>
 
       <section className="apple-kpis">
         <div className="apple-kpi">

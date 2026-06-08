@@ -1904,6 +1904,70 @@ html {
   margin-top: 14px;
 }
 
+.apple-day-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.apple-day-nav a,
+.apple-day-nav div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    color 0.14s ease,
+    background 0.14s ease,
+    transform 0.14s ease;
+}
+
+.apple-day-nav a:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+  transform: translateY(-1px);
+}
+
+.apple-day-nav a:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-day-nav span,
+.apple-day-nav strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apple-day-nav span {
+  color: var(--faint);
+  font-size: 11px;
+}
+
+.apple-day-nav strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.apple-day-nav .disabled {
+  opacity: 0.58;
+}
+
 .apple-goal-list {
   display: grid;
   gap: 0;
@@ -3727,6 +3791,15 @@ html {
   }
   .apple-week-strip {
     grid-template-columns: 1fr;
+  }
+  .apple-day-nav {
+    grid-template-columns: 1fr;
+    border-radius: var(--radius);
+  }
+  .apple-day-nav a,
+  .apple-day-nav div {
+    justify-content: space-between;
+    border-radius: var(--radius-sm);
   }
   .apple-category-hero {
     align-items: stretch;
