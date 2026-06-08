@@ -729,7 +729,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
           {!recentRows.length && <div className="apple-empty-chart compact">暂无最近记录</div>}
         </div>
         <details className="apple-disclosure">
-          <summary>查看表格明细</summary>
+          <summary>查看完整字段</summary>
         <div className="apple-table-wrap">
           <table className="apple-table">
             <thead>

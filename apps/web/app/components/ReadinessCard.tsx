@@ -94,7 +94,7 @@ export function ReadinessCard({
     return (
       <article className="card readiness">
         <h2>数据状态</h2>
-        <p className="empty">暂时无法连接健康服务，恢复后会显示同步状态。</p>
+        <p className="empty">暂时无法连接健康记录，恢复后会显示同步状态。</p>
       </article>
     );
   }

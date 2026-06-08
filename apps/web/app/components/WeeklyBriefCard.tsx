@@ -10,7 +10,7 @@ export function WeeklyBriefCard({ latest }: { latest: InsightsLatest | null }) {
     return (
       <article className="card brief">
         <h2>每周简报</h2>
-        <p className="empty">暂时无法连接健康服务，恢复后会显示简报。</p>
+        <p className="empty">暂时无法连接健康记录，恢复后会显示简报。</p>
       </article>
     );
   }

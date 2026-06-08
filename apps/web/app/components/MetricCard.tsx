@@ -29,7 +29,7 @@ export function MetricCard({
     return (
       <article className="card">
         <h2>{fallbackTitle}</h2>
-        <p className="empty">暂时无法连接健康服务，恢复后会自动显示。</p>
+        <p className="empty">暂时无法连接健康记录，恢复后会自动显示。</p>
       </article>
     );
   }

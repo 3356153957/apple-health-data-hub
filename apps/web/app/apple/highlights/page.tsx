@@ -172,8 +172,8 @@ function buildHighlights({
     },
     {
       title: "同步状态",
-      body: syncNewest ? `最近同步 ${relativeZh(syncNewest)}，健康数据仍保存在本机服务中。` : "还没有看到 Apple 健康同步记录。",
-      meta: "数据来源",
+      body: syncNewest ? `最近同步 ${relativeZh(syncNewest)}，健康明细仍只保留在你的私密记录里。` : "还没有看到 Apple 健康同步记录。",
+      meta: "设备与同步",
       href: "/apple/sources",
       icon: "data",
       tone: syncNewest ? "good" : "neutral",

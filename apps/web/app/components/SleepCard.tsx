@@ -19,7 +19,7 @@ export function SleepCard({ series }: { series: MetricSeries | null }) {
     return (
       <article className="card">
         <h2>睡眠</h2>
-        <p className="empty">暂时无法连接健康服务，恢复后会显示睡眠记录。</p>
+        <p className="empty">暂时无法连接健康记录，恢复后会显示睡眠记录。</p>
       </article>
     );
   }

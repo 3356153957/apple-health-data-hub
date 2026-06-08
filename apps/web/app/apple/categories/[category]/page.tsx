@@ -159,10 +159,10 @@ export default async function AppleCategoryPage({ params }: PageProps) {
         <Link className="apple-category-guide-card" href={`/apple/raw/${encodeURIComponent(largestSource?.table ?? spec.rawTables[0])}`}>
           <AppleCategoryIcon name={spec.icon} />
           <div>
-            <span>查看明细</span>
-            <strong>{RAW_TABLES[largestSource?.table ?? ""]?.label ?? "原始记录"}</strong>
+            <span>记录详情</span>
+            <strong>{RAW_TABLES[largestSource?.table ?? ""]?.label ?? "详细记录"}</strong>
             <p>
-              {(largestSource?.row?.count ?? 0).toLocaleString("zh-CN")} 条同步记录，适合核对 Apple Watch 和 iPhone 的原始数据。
+              {(largestSource?.row?.count ?? 0).toLocaleString("zh-CN")} 条同步记录，适合确认 Apple Watch 和 iPhone 是否同步完整。
             </p>
           </div>
         </Link>
@@ -180,7 +180,7 @@ export default async function AppleCategoryPage({ params }: PageProps) {
           <small>用于趋势判断</small>
         </div>
         <div className="apple-kpi">
-          <span>同步记录</span>
+          <span>记录数量</span>
           <strong>{rawTotal.toLocaleString("zh-CN")}</strong>
           <small>{spec.rawTables.length} 类来源</small>
         </div>
@@ -230,8 +230,8 @@ export default async function AppleCategoryPage({ params }: PageProps) {
       <section className="apple-panel apple-category-section">
         <div className="apple-panel-head">
           <div>
-            <h3>数据来源</h3>
-            <p>分类背后的同步表，点进去可以看最近明细。</p>
+            <h3>设备与记录</h3>
+            <p>按健康类别整理最近记录，需要核对时可以继续查看详情。</p>
           </div>
         </div>
         <div className="apple-source-grid">
@@ -240,7 +240,7 @@ export default async function AppleCategoryPage({ params }: PageProps) {
               <span>{RAW_TABLES[table]?.label ?? table}</span>
               <strong>{(row?.count ?? 0).toLocaleString("zh-CN")}</strong>
               <small>{row?.newest ? `最近：${zhTime(row.newest)}` : "暂无同步记录"}</small>
-              <p>{RAW_TABLES[table]?.description ?? "同步数据明细。"}</p>
+              <p>{RAW_TABLES[table]?.description ?? "健康记录详情。"}</p>
             </Link>
           ))}
         </div>

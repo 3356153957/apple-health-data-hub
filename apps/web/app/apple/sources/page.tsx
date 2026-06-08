@@ -14,7 +14,7 @@ import {
   zhTime,
 } from "../appleHealth";
 
-export const metadata: Metadata = { title: "数据来源 · 健康" };
+export const metadata: Metadata = { title: "设备与同步 · 健康" };
 export const dynamic = "force-dynamic";
 
 type RawRow = Record<string, string | number | null>;
@@ -83,11 +83,11 @@ function sourceTitle(sourceId: string): string {
 }
 
 function sourceSubtitle(sourceId: string): string {
-  if (sourceId === "本机同步") return "没有附带来源名称的本机记录";
+  if (sourceId === "本机同步") return "没有附带来源名称的私密记录";
   const normalized = sourceId.toLowerCase();
   if (normalized.includes("apple-health")) return "来自 Apple 健康导入与自动同步";
   if (normalized.includes("healthsave")) return "来自本机健康记录";
-  return "本机同步来源";
+  return "私密同步来源";
 }
 
 function sourceSummaries(details: Array<AppleRawDetail | null>): SourceSummary[] {
@@ -114,14 +114,14 @@ function sourceSummaries(details: Array<AppleRawDetail | null>): SourceSummary[]
 
 function privacyLabel(privacy: Privacy | null): string {
   if (!privacy) return "本地优先";
-  if (privacy.raw_observations_leave_host) return "有原始数据外发";
+  if (privacy.raw_observations_leave_host) return "健康明细外发";
   return privacy.is_local ? "仅自己可见" : "云端摘要";
 }
 
 function privacyHelper(privacy: Privacy | null): string {
   if (!privacy) return "暂时无法读取隐私状态，但页面不会主动上传健康明细。";
   if (privacy.raw_observations_leave_host) return "建议到隐私设置里核对外发范围。";
-  return privacy.cloud_active ? "当前启用了云端摘要，但原始健康记录不会直接离开本机。" : "健康明细只保留在你的设备和本地服务里。";
+  return privacy.cloud_active ? "当前启用了云端摘要，但健康明细不会直接离开本机。" : "健康明细只保留在你的设备和私密记录里。";
 }
 
 function providerLabel(provider: string | null | undefined): string {
@@ -147,7 +147,7 @@ function tableHelper(table: string, row: AppleStatus[string] | null | undefined)
   if (table === "quantity_samples") return "包含呼吸次数、腕温、VO2 max 等睡眠和身体指标";
   if (table === "daily_activity") return "包含步数、活动分钟、能量和站立时间";
   if (table === "sleep_sessions") return "包含睡眠时段、阶段和睡眠呼吸";
-  return RAW_TABLES[table]?.description ?? "同步记录明细";
+  return RAW_TABLES[table]?.description ?? "健康记录详情";
 }
 
 function latestPoint(series: MetricSeries | null): SeriesPoint | null {
@@ -191,9 +191,9 @@ export default async function AppleSourcesPage() {
           <Link href="/apple" className="apple-back-link">
             返回健康概览
           </Link>
-          <div className="hero-eyebrow">数据来源</div>
+          <div className="hero-eyebrow">设备与同步</div>
           <h2>设备与同步</h2>
-          <p>查看 Apple Watch、iPhone 和本机服务最近同步了哪些健康记录；需要核对明细时，再进入单个类别。</p>
+          <p>查看 Apple Watch、iPhone 最近同步了哪些健康记录；需要核对详情时，再进入单个类别。</p>
         </div>
         <div className="apple-hero-badges">
           <span className="apple-badge good">{privacyLabel(privacy)}</span>
@@ -203,7 +203,7 @@ export default async function AppleSourcesPage() {
 
       <section className="apple-kpis">
         <div className="apple-kpi">
-          <span>同步记录</span>
+          <span>记录数量</span>
           <strong>{totalRows(status).toLocaleString("zh-CN")}</strong>
           <small>来自 Apple 健康导入与自动同步</small>
         </div>
@@ -213,7 +213,7 @@ export default async function AppleSourcesPage() {
           <small>{latest ? zhTime(latest) : "暂无同步时间"}</small>
         </div>
         <div className="apple-kpi">
-          <span>可见来源</span>
+          <span>记录来源</span>
           <strong>{sources.length || readinessSources(readiness)}</strong>
           <small>{sampledRows.toLocaleString("zh-CN")} 条最近记录用于核对</small>
         </div>
@@ -229,7 +229,7 @@ export default async function AppleSourcesPage() {
           <AppleCategoryIcon name="heart" />
           <div>
             <span>Apple Watch 与 iPhone</span>
-            <strong>健康数据来源</strong>
+            <strong>健康记录来源</strong>
             <p>心率、活动、睡眠、训练和身体指标会按类别汇总到本机健康记录。</p>
           </div>
         </article>
@@ -277,8 +277,8 @@ export default async function AppleSourcesPage() {
       <section className="apple-panel apple-category-section">
         <div className="apple-panel-head">
           <div>
-            <h3>来源明细</h3>
-            <p>按同步来源汇总最近记录，方便确认数据是不是来自你自己的本机服务。</p>
+            <h3>来源概览</h3>
+            <p>按设备和同步来源汇总最近记录，方便确认数据是否来自你的 Apple Watch 和 iPhone。</p>
           </div>
         </div>
         <div className="apple-source-summary-list">
@@ -298,7 +298,7 @@ export default async function AppleSourcesPage() {
               <small>{source.latest ? `最近 ${zhTime(source.latest)}` : "暂无时间"}</small>
             </article>
           ))}
-          {!sources.length && <div className="apple-empty-chart compact">暂无可展示的数据来源</div>}
+          {!sources.length && <div className="apple-empty-chart compact">暂无可展示的同步来源</div>}
         </div>
       </section>
 

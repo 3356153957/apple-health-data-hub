@@ -70,7 +70,7 @@ const SUGGESTED_SEARCHES: Array<{ query: string; label: string; icon: AppleIconN
   { query: "呼吸次数", label: "呼吸次数", icon: "sleep" },
   { query: "心率", label: "心率", icon: "heart" },
   { query: "训练", label: "训练", icon: "cardio" },
-  { query: "数据来源", label: "数据来源", icon: "data" },
+  { query: "设备与同步", label: "设备与同步", icon: "data" },
 ];
 
 const SEARCH_ALIASES: Record<string, string[]> = {
@@ -315,7 +315,7 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
         <div className="apple-kpi">
           <span>最近同步</span>
           <strong className="compact">{relativeZh(rawNewest(status)).replace("同步", "")}</strong>
-          <small>只读取本地数据</small>
+          <small>仅自己可见</small>
         </div>
       </section>
 
@@ -397,8 +397,8 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
       <section className="apple-panel apple-category-section">
         <div className="apple-panel-head">
           <div>
-            <h3>数据来源</h3>
-            <p>需要核对同步是否完整时，再进入原始记录。日常查看优先使用上面的分类和单个指标。</p>
+            <h3>设备与同步</h3>
+            <p>需要核对同步是否完整时，再进入详细记录。日常查看优先使用上面的分类和单个指标。</p>
           </div>
           <Link href="/apple/sources" className="apple-text-link">
             查看设备与同步
@@ -412,7 +412,7 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
                 <span>{RAW_TABLES[table]?.label ?? table}</span>
                 <strong>{(row?.count ?? 0).toLocaleString("zh-CN")}</strong>
                 <small>{row?.newest ? `最近：${zhTime(row.newest)}` : "暂无同步记录"}</small>
-                <p>{RAW_TABLES[table]?.description ?? "同步数据明细。"}</p>
+                <p>{RAW_TABLES[table]?.description ?? "健康记录详情。"}</p>
               </Link>
             );
           })}

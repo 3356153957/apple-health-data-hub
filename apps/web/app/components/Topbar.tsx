@@ -36,7 +36,7 @@ function lastPathSegment(pathname: string): string {
 function titleForPath(pathname: string): { title: string; sub: string } {
   if (pathname.startsWith("/apple/days/")) return { title: "每日详情", sub: "按这一天查看活动、睡眠和训练。" };
   if (pathname.startsWith("/apple/sources")) return TITLES["/apple/sources"];
-  if (pathname.startsWith("/apple/categories/data")) return { title: "数据来源", sub: "核对 Apple Watch 和 iPhone 同步记录。" };
+  if (pathname.startsWith("/apple/categories/data")) return { title: "设备与同步", sub: "查看 Apple Watch、iPhone 和同步状态。" };
   if (pathname.startsWith("/apple/categories/")) {
     const slug = lastPathSegment(pathname);
     const category = BROWSE_CATEGORIES.find((item) => item.slug === slug);
@@ -50,7 +50,7 @@ function titleForPath(pathname: string): { title: string; sub: string } {
   if (pathname.startsWith("/apple/raw/")) {
     const table = lastPathSegment(pathname);
     const raw = RAW_TABLES[table];
-    return raw ? { title: raw.label, sub: raw.description } : { title: "同步明细", sub: "最近记录和来源。" };
+    return raw ? { title: raw.label, sub: raw.description } : { title: "记录详情", sub: "最近记录和来源。" };
   }
   return TITLES[pathname] ?? TITLES["/"];
 }

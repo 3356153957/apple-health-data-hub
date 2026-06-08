@@ -142,10 +142,10 @@ function healthItems(summary: AppleDailySummary | null, status: AppleStatus | nu
     {
       title: "隐私状态",
       body: privacy?.raw_observations_leave_host
-        ? "检测到原始健康记录可能离开本机，建议进入隐私设置核对。"
+        ? "检测到健康明细可能离开本机，建议进入隐私设置核对。"
         : privacy?.cloud_active
-          ? "当前可能使用云端摘要能力，但原始健康记录不会直接离开本机。"
-          : "当前读取和分析在本机完成，健康明细保留在你的设备服务里。",
+          ? "当前可能使用云端摘要能力，但健康明细不会直接离开本机。"
+          : "当前读取和分析在本机完成，健康明细保留在你的私密记录里。",
       href: "/privacy",
       icon: "body",
       tone: privacyTone(privacy),
@@ -177,7 +177,7 @@ export default async function AppleChecklistPage() {
           </Link>
           <div className="hero-eyebrow">健康清单</div>
           <h2>关键项目检查</h2>
-          <p>确认 Apple Watch、iPhone 和本机服务的活动、睡眠、恢复、同步和隐私状态是否准备好。</p>
+          <p>确认 Apple Watch、iPhone、活动、睡眠、恢复、同步和隐私状态是否准备好。</p>
         </div>
         <div className="apple-hero-badges">
           <span className="apple-badge">{items.length} 项检查</span>

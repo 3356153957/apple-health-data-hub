@@ -122,7 +122,7 @@ function RawIcon({ name }: { name: IconName }) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { table } = await params;
   const spec = RAW_TABLES[decodeURIComponent(table)];
-  return { title: `${spec?.label ?? "同步明细"} · 健康` };
+  return { title: `${spec?.label ?? "记录详情"} · 健康` };
 }
 
 function formatCell(key: string, value: string | number | null): string {
@@ -498,7 +498,7 @@ function tableNotice(decodedTable: string, rows: RawRow[]): TableNotice | null {
       body: hasStandHours
         ? "这里同时保留 Apple 站立小时和 Apple Watch 站立时间。趋势页会优先使用更细的站立分钟。"
         : hasStandMinutes
-          ? "Apple Watch 当前同步到了站立时间分钟数；表格里的站立小时是另一种健身圆环口径，所以这一列暂时为空。"
+          ? "Apple Watch 当前同步到了站立时间分钟数；健身圆环里的站立小时是另一种口径，所以这一项暂时为空。"
           : "这张表还没有站立分钟记录。保持 Apple Watch 佩戴并手动同步一次后，这里会显示站立时间。",
       href: "/apple/metrics/stand-time",
       action: "查看站立时间",
@@ -544,12 +544,12 @@ export default async function AppleRawTablePage({ params }: PageProps) {
           <Link href="/apple" className="apple-back-link">
             返回健康概览
           </Link>
-          <div className="hero-eyebrow">同步明细</div>
+          <div className="hero-eyebrow">记录详情</div>
           <h2>{spec.label}</h2>
           <p>{spec.description}</p>
         </div>
         <div className="apple-hero-badges">
-          <span className="apple-badge">本地明细</span>
+          <span className="apple-badge">私密记录</span>
           <span className="apple-badge good">{rows.length.toLocaleString("zh-CN")} 条</span>
         </div>
       </section>
@@ -569,7 +569,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
         <div className="apple-panel-head">
           <div>
             <h3>总体情况</h3>
-            <p>按本周和本月汇总，先看结论，再看明细。</p>
+            <p>按本周和本月汇总，先看结论，再看详情。</p>
           </div>
         </div>
         <div className="apple-period-grid four">
@@ -593,7 +593,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
         <div className="apple-panel-head">
           <div>
             <h3>最近记录</h3>
-            <p>最近 12 条以卡片展示；需要核对字段时可以展开表格。</p>
+            <p>最近 12 条以卡片展示；需要核对更多字段时可以展开详情。</p>
           </div>
         </div>
         <div className="apple-record-grid raw">
@@ -638,7 +638,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
         </div>
 
         <details className="apple-disclosure">
-          <summary>查看表格明细</summary>
+          <summary>查看完整字段</summary>
         <div className="apple-table-wrap">
           <table className="apple-table">
             <thead>
@@ -658,7 +658,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={Math.max(1, columns.length)}>暂无明细数据。</td>
+                  <td colSpan={Math.max(1, columns.length)}>暂无详细记录。</td>
                 </tr>
               )}
             </tbody>

@@ -200,7 +200,7 @@ export function ExperimentsCard({
     return (
       <article className="card experiments">
         <h2>接下来可以尝试</h2>
-        <p className="empty">暂时无法连接健康服务，恢复后会显示建议。</p>
+        <p className="empty">暂时无法连接健康记录，恢复后会显示建议。</p>
       </article>
     );
   }

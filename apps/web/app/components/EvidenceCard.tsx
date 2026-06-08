@@ -109,7 +109,7 @@ export function EvidenceCard({ findings }: { findings: Finding[] | null }) {
     return (
       <article className="card evidence">
         <h2>健康发现</h2>
-        <p className="empty">暂时无法连接健康服务，恢复后会显示发现。</p>
+        <p className="empty">暂时无法连接健康记录，恢复后会显示发现。</p>
       </article>
     );
   }

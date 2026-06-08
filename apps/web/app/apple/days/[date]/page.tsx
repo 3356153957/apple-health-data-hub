@@ -216,7 +216,7 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
               <p>按常用目标看这一天的运动量、站立和能量消耗。</p>
             </div>
             <Link href="/apple/raw/daily_activity" className="apple-text-link">
-              活动原始记录
+              活动详情
             </Link>
           </div>
           <div className="apple-goal-list">
@@ -263,7 +263,7 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
               <p>{sleep ? `${zhTime(sleep.start_time)} 到 ${zhTime(sleep.end_time)}` : "暂无睡眠记录"}</p>
             </div>
             <Link href="/apple/raw/sleep_sessions" className="apple-text-link">
-              睡眠原始记录
+              睡眠详情
             </Link>
           </div>
           <div className="apple-sleep-bars day">
@@ -320,7 +320,7 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
               <p>这一天由 Apple Watch 记录的体能训练。</p>
             </div>
             <Link href="/apple/raw/workouts" className="apple-text-link">
-              训练原始记录
+              训练详情
             </Link>
           </div>
           <div className="apple-record-grid day-workouts">
