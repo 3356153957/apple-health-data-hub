@@ -2574,6 +2574,88 @@ a.apple-summary-card:active {
   line-height: 1.5;
 }
 
+.apple-favorite-grid-full {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.apple-favorite-list {
+  display: grid;
+  gap: 0;
+  margin-top: 12px;
+}
+
+.apple-favorite-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--line-soft);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-favorite-row:first-child {
+  border-top: 0;
+}
+
+.apple-favorite-row:hover {
+  transform: translateY(-1px);
+  background: var(--surface-3);
+}
+
+.apple-favorite-row:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-favorite-row span,
+.apple-favorite-row p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-favorite-row strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.apple-favorite-row p {
+  margin: 6px 0 0;
+  font-family: var(--mono);
+}
+
+.apple-favorite-row em {
+  justify-self: end;
+  max-width: 180px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--raise);
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apple-favorite-row em.good {
+  color: var(--up);
+  background: rgba(56, 217, 150, 0.1);
+}
+
+.apple-favorite-row em.warn {
+  color: var(--warn);
+  background: rgba(232, 180, 95, 0.1);
+}
+
 .apple-rings-panel,
 .apple-highlight-panel {
   min-height: 254px;
@@ -4031,6 +4113,7 @@ a.apple-summary-card:active {
   .apple-brief-metrics,
   .apple-sleep-extra,
   .apple-favorite-grid,
+  .apple-favorite-grid-full,
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
@@ -4074,6 +4157,7 @@ a.apple-summary-card:active {
   .apple-brief-metrics,
   .apple-sleep-extra,
   .apple-favorite-grid,
+  .apple-favorite-grid-full,
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
@@ -4112,6 +4196,15 @@ a.apple-summary-card:active {
   .apple-trend-row-value {
     grid-column: 2;
     text-align: left;
+  }
+  .apple-favorite-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+  }
+  .apple-favorite-row em {
+    grid-column: 2;
+    justify-self: start;
+    max-width: 100%;
   }
   .apple-category-hero {
     align-items: stretch;

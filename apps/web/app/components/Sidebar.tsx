@@ -46,6 +46,11 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M4.2 8h2.2l1-2.2 1.5 4.2 1-2h1.9" />
     </>
   ),
+  favorite: (
+    <>
+      <path d="M8 2.5l1.6 3.3 3.7.5-2.7 2.6.7 3.7L8 10.9l-3.3 1.7.7-3.7-2.7-2.6 3.7-.5z" />
+    </>
+  ),
   stand: (
     <>
       <path d="M8 2.5v11" />
@@ -75,6 +80,7 @@ type NavItem = {
 
 const NAV: readonly NavItem[] = [
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
+  { href: "/apple/favorites", label: "收藏", icon: "favorite" },
   { href: "/apple/browse", label: "浏览", icon: "overview" },
   { href: "/apple/trends", label: "趋势", icon: "trend" },
   { href: "/apple/metrics/stand-time", label: "站立时间", icon: "stand", activePrefixes: ["/apple/metrics/activity.stand_minutes"] },

@@ -645,7 +645,9 @@ export default async function AppleHealthPage() {
             <h3>常看指标</h3>
             <p>活动、心率、恢复和睡眠的关键状态。</p>
           </div>
-          <span className="apple-badge">30 天趋势</span>
+          <Link href="/apple/favorites" className="apple-text-link">
+            查看全部
+          </Link>
         </div>
         <div className="apple-favorite-grid">
           {favorites.map(({ metric, nums, latest, trend, tone }) => (
