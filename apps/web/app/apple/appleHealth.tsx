@@ -161,7 +161,7 @@ export const RAW_TABLES: Record<string, { label: string; description: string }> 
   heart_rate: { label: "心率", description: "Apple Watch 记录的连续心率读数。" },
   hrv: { label: "HRV", description: "心率变异性读数，单位为毫秒。" },
   blood_oxygen: { label: "血氧", description: "血氧饱和度读数。" },
-  daily_activity: { label: "每日活动", description: "按天汇总的步数、距离、能量和活动分钟。" },
+  daily_activity: { label: "每日活动", description: "按天汇总的步数、距离、能量、活动分钟和站立时间。" },
   quantity_samples: { label: "其他连续指标", description: "呼吸次数、静息心率、腕温、VO2 max 等其他样本。" },
   sleep_sessions: { label: "睡眠记录", description: "睡眠时段和各睡眠阶段时长。" },
   workouts: { label: "体能训练", description: "Apple Watch 体能训练记录。" },

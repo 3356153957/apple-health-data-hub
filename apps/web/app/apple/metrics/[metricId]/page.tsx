@@ -135,6 +135,29 @@ const RANGE_OPTIONS = [
 
 type RangeKey = (typeof RANGE_OPTIONS)[number]["key"];
 
+const RELATED_METRICS: Array<{
+  id: string;
+  href: string;
+  icon: IconName;
+  kicker: string;
+  description: string;
+}> = [
+  {
+    id: "activity.stand_minutes",
+    href: "/apple/metrics/stand-time",
+    icon: "records",
+    kicker: "活动",
+    description: "按天汇总 Apple Watch 站立分钟数，不会混在心率曲线里。",
+  },
+  {
+    id: "vital.respiratory_rate",
+    href: "/apple/metrics/respiratory-rate",
+    icon: "trend",
+    kicker: "睡眠",
+    description: "通常在睡眠期间产生读数，适合和睡眠质量、疲劳状态一起看。",
+  },
+];
+
 const ICON_PATHS: Record<IconName, string[]> = {
   week: ["M7 2v4", "M17 2v4", "M3 9h18", "M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"],
   month: ["M4 19V5", "M4 19h16", "M8 16v-5", "M12 16V8", "M16 16v-8"],
@@ -486,6 +509,18 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
   const recentRows = rawPoints.length
     ? rawPoints.slice(0, 120)
     : selectedPointsDesc.slice(0, 80);
+  const relatedSeries = await Promise.all(RELATED_METRICS.map((item) => safeSeries(item.id, "30d")));
+  const relatedCards = RELATED_METRICS.map((item, index) => {
+    const relatedMetric = APPLE_METRICS.find((candidate) => candidate.id === item.id);
+    if (!relatedMetric) return null;
+    const relatedLatest = normalizeMetricValue(relatedMetric, latestValue(relatedSeries[index]));
+    return {
+      ...item,
+      active: item.id === metric.id,
+      metric: relatedMetric,
+      latest: relatedLatest,
+    };
+  }).filter((item): item is NonNullable<typeof item> => item !== null);
 
   return (
     <>
@@ -502,6 +537,30 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
           <span className="apple-badge">{metric.id}</span>
           <span className="apple-badge good">本地读取</span>
         </div>
+      </section>
+
+      <section className="apple-related-metrics" aria-label="相关指标">
+        <div className="apple-related-copy">
+          <span>相关指标</span>
+          <strong>站立和呼吸有单独页面</strong>
+          <p>
+            Apple Health 会把这些项目分开记录。当前页只看{metric.label}，站立时间在活动里，呼吸次数在睡眠和恢复里。
+          </p>
+        </div>
+        {relatedCards.map((item) => (
+          <Link className={`apple-related-card ${item.active ? "active" : ""}`} href={item.href} key={item.id}>
+            <MetricIcon name={item.icon} />
+            <div>
+              <span>{item.active ? "当前指标" : item.kicker}</span>
+              <strong>{item.metric.label}</strong>
+              <p>{item.description}</p>
+              <em>
+                最近 {item.latest === null ? "暂无" : formatValue(item.latest, item.metric.digits ?? 0)}
+                {item.latest === null ? "" : ` ${item.metric.unit}`}
+              </em>
+            </div>
+          </Link>
+        ))}
       </section>
 
       <nav className="apple-range-tabs" aria-label="时间范围">

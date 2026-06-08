@@ -515,6 +515,9 @@ export default async function AppleHealthPage() {
             <Link href="/apple/highlights" className="apple-text-link">
               全部亮点
             </Link>
+            <Link href="/apple/report" className="apple-text-link">
+              健康报告
+            </Link>
             {dailySummary?.date && (
               <Link href={summaryDateHref(dailySummary)} className="apple-text-link">
                 当天详情
