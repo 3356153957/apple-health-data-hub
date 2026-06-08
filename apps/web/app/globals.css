@@ -1947,6 +1947,120 @@ a.apple-summary-card:active {
   line-height: 1.58;
 }
 
+.apple-checklist-panel {
+  margin-top: 14px;
+}
+
+.apple-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.apple-checklist-card {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  min-height: 232px;
+  padding: 17px 19px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-checklist-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-checklist-card:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-checklist-card.good {
+  border-color: rgba(56, 217, 150, 0.24);
+}
+
+.apple-checklist-card.warn {
+  border-color: rgba(232, 180, 95, 0.28);
+}
+
+.apple-checklist-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.apple-checklist-top .apple-category-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+}
+
+.apple-checklist-top em {
+  max-width: 68%;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apple-checklist-card.good .apple-checklist-top em {
+  color: var(--up);
+  background: rgba(56, 217, 150, 0.1);
+}
+
+.apple-checklist-card.warn .apple-checklist-top em {
+  color: var(--warn);
+  background: rgba(232, 180, 95, 0.1);
+}
+
+.apple-checklist-card > span {
+  display: block;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-checklist-card > strong {
+  display: block;
+  margin-top: 7px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-checklist-card > p {
+  margin: 11px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.apple-checklist-card > small {
+  margin-top: 15px;
+  color: var(--signal);
+  font-size: 12px;
+}
+
 .apple-metric-insights {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4183,6 +4297,7 @@ a.apple-summary-card:active {
   .apple-kpis,
   .apple-focus-grid,
   .apple-highlights-grid,
+  .apple-checklist-grid,
   .apple-metric-insights,
   .apple-trend-grid,
   .apple-trend-focus-grid,
@@ -4226,6 +4341,7 @@ a.apple-summary-card:active {
   .apple-kpis,
   .apple-focus-grid,
   .apple-highlights-grid,
+  .apple-checklist-grid,
   .apple-metric-insights,
   .apple-trend-grid,
   .apple-trend-focus-grid,
