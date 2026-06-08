@@ -1718,6 +1718,121 @@ html {
   line-height: 1.55;
 }
 
+.apple-week-review {
+  margin-top: 26px;
+}
+
+.apple-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.apple-day-card {
+  display: grid;
+  min-width: 0;
+  min-height: 214px;
+  padding: 14px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-day-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-day-card:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-day-card.good {
+  border-color: rgba(56, 217, 150, 0.24);
+}
+
+.apple-day-card.warn {
+  border-color: rgba(232, 180, 95, 0.24);
+}
+
+.apple-day-card span,
+.apple-day-card small,
+.apple-day-card em {
+  display: block;
+  color: var(--muted);
+}
+
+.apple-day-card span {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.apple-day-card strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 22px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-day-card small {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.apple-day-bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 4px;
+  height: 54px;
+  margin-top: 14px;
+  padding: 6px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.apple-day-bars i {
+  display: block;
+  min-height: 8px;
+  border-radius: 999px 999px 3px 3px;
+  background: var(--signal);
+}
+
+.apple-day-bars i:nth-child(2) {
+  background: var(--up);
+}
+
+.apple-day-bars i:nth-child(3) {
+  background: var(--accent);
+}
+
+.apple-day-card p {
+  min-height: 34px;
+  margin: 11px 0 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.apple-day-card em {
+  margin-top: 8px;
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1.4;
+}
+
 .apple-mini-icon {
   display: inline-grid;
   place-items: center;
@@ -2902,6 +3017,10 @@ html {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .apple-week-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .apple-record-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2935,6 +3054,9 @@ html {
   .apple-period-grid.four,
   .apple-record-grid,
   .apple-record-grid.raw {
+    grid-template-columns: 1fr;
+  }
+  .apple-week-strip {
     grid-template-columns: 1fr;
   }
   .apple-category-hero {

@@ -6,6 +6,7 @@ import type { AppleDailySummary, AppleStatus, MetricSeries, Readiness } from "..
 import type { AppleIconName, AppleMetric } from "./appleHealth";
 import {
   safeAppleDailySummary,
+  safeAppleRawDetail,
   safeAppleStatus,
   safePrivacy,
   safeReadiness,
@@ -136,6 +137,20 @@ type FocusInsight = {
   tone: "good" | "warn" | "neutral";
 };
 
+type AppleRawRow = Record<string, string | number | null>;
+
+type DayReview = {
+  date: string;
+  label: string;
+  steps: number | null;
+  activeMinutes: number | null;
+  standMinutes: number | null;
+  sleepMinutes: number | null;
+  activityText: string;
+  sleepText: string;
+  tone: "good" | "warn" | "neutral";
+};
+
 function favoriteMetricCards(seriesList: Array<MetricSeries | null>) {
   return FAVORITE_METRIC_IDS.map((metricId) => {
     const metricIndex = APPLE_METRICS.findIndex((item) => item.id === metricId);
@@ -260,13 +275,109 @@ function buildFocusInsights(
   return insights.slice(0, 3);
 }
 
+function rawNumber(row: AppleRawRow | undefined, key: string): number | null {
+  const value = row?.[key];
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function localDateKey(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Shanghai",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  return year && month && day ? `${year}-${month}-${day}` : null;
+}
+
+function dayLabel(dateKey: string): string {
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+    timeZone: "Asia/Shanghai",
+  }).format(new Date(`${dateKey}T12:00:00+08:00`));
+}
+
+function activityText(steps: number | null, activeMinutes: number | null): { text: string; tone: "good" | "warn" | "neutral" } {
+  if (steps === null && activeMinutes === null) return { text: "暂无活动", tone: "neutral" };
+  if ((steps ?? 0) >= 8000 || (activeMinutes ?? 0) >= 30) return { text: "活动充足", tone: "good" };
+  if ((steps ?? 0) >= 5000 || (activeMinutes ?? 0) >= 15) return { text: "保持中", tone: "neutral" };
+  return { text: "活动偏少", tone: "warn" };
+}
+
+function sleepText(sleepMinutes: number | null): { text: string; tone: "good" | "warn" | "neutral" } {
+  if (sleepMinutes === null) return { text: "暂无睡眠", tone: "neutral" };
+  if (sleepMinutes >= 420) return { text: "睡眠充足", tone: "good" };
+  if (sleepMinutes >= 355) return { text: "睡眠尚可", tone: "neutral" };
+  return { text: "睡眠偏少", tone: "warn" };
+}
+
+function combinedTone(a: "good" | "warn" | "neutral", b: "good" | "warn" | "neutral"): "good" | "warn" | "neutral" {
+  if (a === "warn" || b === "warn") return "warn";
+  if (a === "good" && b === "good") return "good";
+  return "neutral";
+}
+
+function buildSevenDayReview(activityRows: AppleRawRow[], sleepRows: AppleRawRow[]): DayReview[] {
+  const sleepByDate = new Map<string, AppleRawRow>();
+  sleepRows.forEach((row) => {
+    const dateKey = localDateKey(String(row.end_time ?? row.start_time ?? ""));
+    if (!dateKey) return;
+    const current = sleepByDate.get(dateKey);
+    const currentSleep = rawNumber(current, "total_sleep_min") ?? 0;
+    const nextSleep = rawNumber(row, "total_sleep_min") ?? 0;
+    if (!current || nextSleep > currentSleep) sleepByDate.set(dateKey, row);
+  });
+
+  const activityByDate = new Map(
+    activityRows
+      .map((row) => [String(row.date ?? ""), row] as const)
+      .filter(([date]) => /^\d{4}-\d{2}-\d{2}$/.test(date)),
+  );
+  const dates = Array.from(new Set([...activityByDate.keys(), ...sleepByDate.keys()]))
+    .sort((a, b) => b.localeCompare(a))
+    .slice(0, 7);
+
+  return dates.map((date) => {
+    const activity = activityByDate.get(date);
+    const sleep = sleepByDate.get(date);
+    const steps = rawNumber(activity, "steps");
+    const activeMinutes = rawNumber(activity, "active_minutes");
+    const standMinutes = rawNumber(activity, "stand_minutes");
+    const sleepMinutes = rawNumber(sleep, "total_sleep_min");
+    const activityState = activityText(steps, activeMinutes);
+    const sleepState = sleepText(sleepMinutes);
+    return {
+      date,
+      label: dayLabel(date),
+      steps,
+      activeMinutes,
+      standMinutes,
+      sleepMinutes,
+      activityText: activityState.text,
+      sleepText: sleepState.text,
+      tone: combinedTone(activityState.tone, sleepState.tone),
+    };
+  });
+}
+
 export default async function AppleHealthPage() {
-  const [readiness, status, privacy, dailySummary, seriesList] = await Promise.all([
+  const [readiness, status, privacy, dailySummary, seriesList, activityDetail, sleepDetail] = await Promise.all([
     safeReadiness(),
     safeAppleStatus(),
     safePrivacy(),
     safeAppleDailySummary(),
     Promise.all(APPLE_METRICS.map((metric) => safeSeries(metric.id, "30d"))),
+    safeAppleRawDetail("daily_activity", 14),
+    safeAppleRawDetail("sleep_sessions", 20),
   ]);
   const observationRows = readiness?.sources.reduce((sum, source) => sum + source.observation_count, 0) ?? totalRows(status);
   const coreReadyCount = readyCount(readiness);
@@ -274,6 +385,7 @@ export default async function AppleHealthPage() {
   const highlights = trendHighlights(seriesList);
   const favorites = favoriteMetricCards(seriesList);
   const focusInsights = buildFocusInsights(dailySummary, seriesList);
+  const sevenDayReview = buildSevenDayReview(activityDetail?.rows ?? [], sleepDetail?.rows ?? []);
 
   return (
     <>
@@ -326,6 +438,40 @@ export default async function AppleHealthPage() {
               </div>
             </Link>
           ))}
+        </section>
+      )}
+
+      {!!sevenDayReview.length && (
+        <section className="apple-panel apple-week-review">
+          <div className="apple-panel-head">
+            <div>
+              <h3>最近 7 天</h3>
+              <p>把每天的活动、站立和睡眠放在一起看。</p>
+            </div>
+            <Link href="/apple/raw/daily_activity" className="apple-text-link">
+              查看每日活动
+            </Link>
+          </div>
+          <div className="apple-week-strip">
+            {sevenDayReview.map((day) => (
+              <Link className={`apple-day-card ${day.tone}`} href="/apple/raw/daily_activity" key={day.date}>
+                <span>{day.label}</span>
+                <strong>{formatValue(day.steps)}</strong>
+                <small>步</small>
+                <div className="apple-day-bars" aria-hidden>
+                  <i style={{ height: `${Math.max(8, Math.min(100, ((day.steps ?? 0) / 10000) * 100))}%` }} />
+                  <i style={{ height: `${Math.max(8, Math.min(100, ((day.activeMinutes ?? 0) / 60) * 100))}%` }} />
+                  <i style={{ height: `${Math.max(8, Math.min(100, ((day.sleepMinutes ?? 0) / 480) * 100))}%` }} />
+                </div>
+                <p>
+                  {day.activityText} · {day.sleepText}
+                </p>
+                <em>
+                  {formatHours(day.sleepMinutes)} 睡眠 · {formatHours(day.standMinutes)} 站立
+                </em>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 
