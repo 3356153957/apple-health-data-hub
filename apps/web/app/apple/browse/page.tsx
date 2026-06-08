@@ -64,6 +64,15 @@ function metricLabels(metricIds: string[]): string[] {
 
 const QUICK_METRIC_IDS = ["activity.stand_minutes", "vital.respiratory_rate", "activity.steps", "vital.heart_rate"];
 
+const SUGGESTED_SEARCHES: Array<{ query: string; label: string; icon: AppleIconName }> = [
+  { query: "睡眠", label: "睡眠", icon: "sleep" },
+  { query: "站立时间", label: "站立时间", icon: "activity" },
+  { query: "呼吸次数", label: "呼吸次数", icon: "sleep" },
+  { query: "心率", label: "心率", icon: "heart" },
+  { query: "训练", label: "训练", icon: "cardio" },
+  { query: "数据来源", label: "数据来源", icon: "data" },
+];
+
 const SEARCH_ALIASES: Record<string, string[]> = {
   "activity.stand_minutes": ["站立", "站立时间", "站立小时", "久坐", "stand"],
   "vital.respiratory_rate": ["呼吸", "呼吸频率", "呼吸次数", "睡眠呼吸", "respiratory"],
@@ -241,6 +250,21 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
             </Link>
           )}
         </form>
+        <div className="apple-search-suggestions" aria-label="推荐搜索">
+          <span>推荐搜索</span>
+          <div>
+            {SUGGESTED_SEARCHES.map((item) => (
+              <Link
+                className={query === item.query ? "active" : undefined}
+                href={`/apple/browse?q=${encodeURIComponent(item.query)}`}
+                key={item.query}
+              >
+                <AppleCategoryIcon name={item.icon} />
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
         {query && (
           <div className="apple-search-results">
             <div className="apple-panel-head">
