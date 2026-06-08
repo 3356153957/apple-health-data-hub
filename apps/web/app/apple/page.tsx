@@ -127,6 +127,15 @@ function trendHighlights(seriesList: Array<MetricSeries | null>) {
     .slice(0, 3);
 }
 
+type FocusInsight = {
+  title: string;
+  body: string;
+  meta: string;
+  href: string;
+  icon: AppleIconName;
+  tone: "good" | "warn" | "neutral";
+};
+
 function favoriteMetricCards(seriesList: Array<MetricSeries | null>) {
   return FAVORITE_METRIC_IDS.map((metricId) => {
     const metricIndex = APPLE_METRICS.findIndex((item) => item.id === metricId);
@@ -158,6 +167,99 @@ function favoriteTrendLabel(metric: AppleMetric, pctValue: number | null): strin
   return `30 天${direction} ${formatValue(Math.abs(pctValue), 1)}%`;
 }
 
+function metricSnapshot(seriesList: Array<MetricSeries | null>, metricId: string) {
+  const index = APPLE_METRICS.findIndex((item) => item.id === metricId);
+  const metric = APPLE_METRICS[index];
+  if (!metric) return null;
+  const nums = metricSeriesValues(metric, seriesList[index]);
+  const trend = recentTrend(nums);
+  return {
+    metric,
+    latest: nums.length ? nums[nums.length - 1] : latestValue(seriesList[index]),
+    trend,
+    tone: trendTone(metric, trend.delta),
+  };
+}
+
+function buildFocusInsights(
+  summary: AppleDailySummary | null,
+  seriesList: Array<MetricSeries | null>,
+): FocusInsight[] {
+  const insights: FocusInsight[] = [];
+  const activity = summary?.activity;
+  const sleep = summary?.sleep;
+  const stepsDelta = activity?.delta_pct?.steps ?? null;
+  const activeMinutes = activity?.active_minutes ?? null;
+  const hrv = metricSnapshot(seriesList, "vital.hrv_sdnn");
+  const respiration = metricSnapshot(seriesList, "vital.respiratory_rate");
+
+  if (activity) {
+    const isActiveDay = activity.level === "充足" || (stepsDelta !== null && stepsDelta >= 10) || (activeMinutes !== null && activeMinutes >= 30);
+    insights.push({
+      title: isActiveDay ? "活动量保持得不错" : "今天可以补一点活动量",
+      body: isActiveDay
+        ? `昨日 ${formatValue(activity.steps)} 步，活动 ${formatValue(activeMinutes)} 分钟，日常活动已经有基础。`
+        : `昨日 ${formatValue(activity.steps)} 步，活动 ${formatValue(activeMinutes)} 分钟，今天安排几段轻活动会更稳。`,
+      meta: stepsDelta === null ? "昨日活动" : `较近 7 日 ${stepsDelta > 0 ? "高" : "低"} ${formatValue(Math.abs(stepsDelta), 1)}%`,
+      href: "/apple/categories/activity",
+      icon: "activity",
+      tone: isActiveDay ? "good" : "warn",
+    });
+  }
+
+  if (sleep) {
+    const sleepHours = sleep.total_sleep_min === null ? null : sleep.total_sleep_min / 60;
+    const lowSleep = sleep.level === "偏少" || (sleep.total_sleep_min !== null && sleep.total_sleep_min < 360);
+    insights.push({
+      title: lowSleep ? "恢复优先级更高" : "睡眠恢复较稳定",
+      body: lowSleep
+        ? `昨夜睡眠 ${formatHours(sleep.total_sleep_min)}，今天训练和学习节奏建议留出缓冲。`
+        : `昨夜睡眠 ${formatHours(sleep.total_sleep_min)}，睡眠效率 ${formatValue(sleep.efficiency_pct, 1)}%。`,
+      meta: sleepHours === null ? "昨夜睡眠" : `${formatValue(sleepHours, 1)} 小时 · ${sleep.level}`,
+      href: "/apple/raw/sleep_sessions",
+      icon: "sleep",
+      tone: lowSleep ? "warn" : "good",
+    });
+  }
+
+  if (hrv) {
+    const hrvPct = hrv.trend.pct;
+    insights.push({
+      title: hrvPct !== null && hrvPct < -5 ? "恢复指标有下降" : "恢复趋势可继续观察",
+      body:
+        hrvPct === null
+          ? `最近 HRV 最新值 ${formatValue(hrv.latest, hrv.metric.digits ?? 0)} ${hrv.metric.unit}，继续积累记录。`
+          : `HRV 最近 30 天${hrvPct >= 0 ? "上升" : "下降"} ${formatValue(Math.abs(hrvPct), 1)}%，适合结合睡眠和训练负荷一起看。`,
+      meta: `最新 ${formatValue(hrv.latest, hrv.metric.digits ?? 0)} ${hrv.metric.unit}`,
+      href: `/apple/metrics/${hrv.metric.slug}`,
+      icon: "recovery",
+      tone: hrvPct !== null && hrvPct < -5 ? "warn" : hrv.tone === "good" ? "good" : "neutral",
+    });
+  } else if (respiration) {
+    insights.push({
+      title: "夜间呼吸有记录",
+      body: `最近呼吸频率 ${formatValue(respiration.latest, respiration.metric.digits ?? 0)} ${respiration.metric.unit}，适合和睡眠质量一起看。`,
+      meta: "睡眠呼吸",
+      href: `/apple/metrics/${respiration.metric.slug}`,
+      icon: "sleep",
+      tone: "neutral",
+    });
+  }
+
+  if (respiration && hrv && insights.length < 3) {
+    insights.push({
+      title: "夜间呼吸频率",
+      body: `昨夜平均 ${formatValue(sleep?.respiratory_rate ?? respiration.latest, respiration.metric.digits ?? 0)} ${respiration.metric.unit}，目前已同步到睡眠记录。`,
+      meta: "睡眠期间采集",
+      href: `/apple/metrics/${respiration.metric.slug}`,
+      icon: "sleep",
+      tone: "neutral",
+    });
+  }
+
+  return insights.slice(0, 3);
+}
+
 export default async function AppleHealthPage() {
   const [readiness, status, privacy, dailySummary, seriesList] = await Promise.all([
     safeReadiness(),
@@ -171,6 +273,7 @@ export default async function AppleHealthPage() {
   const isLocal = privacy ? !privacy.cloud_active : true;
   const highlights = trendHighlights(seriesList);
   const favorites = favoriteMetricCards(seriesList);
+  const focusInsights = buildFocusInsights(dailySummary, seriesList);
 
   return (
     <>
@@ -210,6 +313,21 @@ export default async function AppleHealthPage() {
           <small>{observationRows.toLocaleString("zh-CN")} 条本机健康记录</small>
         </div>
       </section>
+
+      {!!focusInsights.length && (
+        <section className="apple-focus-grid">
+          {focusInsights.map((insight) => (
+            <Link className={`apple-focus-card ${insight.tone}`} href={insight.href} key={insight.title}>
+              <AppleCategoryIcon name={insight.icon} />
+              <div>
+                <span>{insight.meta}</span>
+                <strong>{insight.title}</strong>
+                <p>{insight.body}</p>
+              </div>
+            </Link>
+          ))}
+        </section>
+      )}
 
       <section className="apple-panel apple-favorites-panel">
         <div className="apple-panel-head">
