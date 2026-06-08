@@ -151,6 +151,109 @@ type DayReview = {
   tone: "good" | "warn" | "neutral";
 };
 
+type SummaryStat = {
+  label: string;
+  value: string;
+};
+
+type SummaryFeedItem = {
+  title: string;
+  body: string;
+  meta: string;
+  href?: string;
+  icon: AppleIconName;
+  tone: "good" | "warn" | "neutral";
+  stats: SummaryStat[];
+};
+
+function summaryDateHref(summary: AppleDailySummary | null): string {
+  return summary?.date ? `/apple/days/${encodeURIComponent(summary.date)}` : "/apple";
+}
+
+function deltaText(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "暂无 7 日对比";
+  return `较近 7 日${value >= 0 ? "高" : "低"} ${formatValue(Math.abs(value), 1)}%`;
+}
+
+function activitySummaryTitle(activity: AppleDailySummary["activity"]): string {
+  if (!activity) return "等待活动同步";
+  if (activity.level === "充足") return "昨日活动达标";
+  if (activity.level === "偏少") return "昨日活动偏少";
+  return "昨日活动平稳";
+}
+
+function sleepSummaryTitle(sleep: AppleDailySummary["sleep"]): string {
+  if (!sleep) return "等待睡眠同步";
+  if (sleep.level === "偏少") return "昨夜睡眠偏少";
+  if (sleep.level === "恢复较好") return "昨夜恢复不错";
+  return "昨夜睡眠基本够用";
+}
+
+function buildSummaryFeed(summary: AppleDailySummary | null): SummaryFeedItem[] {
+  const activity = summary?.activity ?? null;
+  const sleep = summary?.sleep ?? null;
+  const dayHref = summaryDateHref(summary);
+  const advice = summary?.advice?.[0] ?? "同步完成后，这里会显示结合运动和睡眠的每日建议。";
+
+  return [
+    {
+      title: todayReadiness(summary),
+      body: summary?.headline ?? "同步完成后，这里会展示昨日运动、睡眠与恢复建议。",
+      meta: summary ? `${summary.date} · 每日重点` : "每日重点",
+      href: dayHref,
+      icon: sleep?.level === "偏少" ? "sleep" : "activity",
+      tone: sleep?.level === "偏少" ? "warn" : activity?.level === "充足" ? "good" : "neutral",
+      stats: [
+        { label: "步数", value: formatValue(activity?.steps) },
+        { label: "睡眠", value: formatHours(sleep?.total_sleep_min) },
+        { label: "训练", value: `${summary?.workouts.length ?? 0} 次` },
+      ],
+    },
+    {
+      title: activitySummaryTitle(activity),
+      body: activity
+        ? `活动 ${formatValue(activity.active_minutes)} 分钟，消耗 ${formatValue(activity.active_calories)} kcal，站立 ${formatHours(activity.stand_minutes)}。`
+        : "还没有同步到这一天的活动、站立和能量数据。",
+      meta: deltaText(activity?.delta_pct?.steps),
+      href: dayHref,
+      icon: "activity",
+      tone: activity?.level === "充足" ? "good" : activity?.level === "偏少" ? "warn" : "neutral",
+      stats: [
+        { label: "距离", value: `${formatValue(activity?.distance_km, 2)} km` },
+        { label: "活动分钟", value: `${formatValue(activity?.active_minutes)} 分钟` },
+        { label: "站立", value: formatHours(activity?.stand_minutes) },
+      ],
+    },
+    {
+      title: sleepSummaryTitle(sleep),
+      body: sleep
+        ? `睡眠效率 ${formatValue(sleep.efficiency_pct, 1)}%，呼吸次数 ${formatValue(sleep.respiratory_rate, 1)} 次/分。`
+        : "还没有同步到这一天的睡眠阶段和呼吸数据。",
+      meta: sleep ? `${formatHours(sleep.total_sleep_min)} · ${sleep.level}` : "睡眠摘要",
+      href: dayHref,
+      icon: "sleep",
+      tone: sleep?.level === "偏少" ? "warn" : sleep ? "good" : "neutral",
+      stats: [
+        { label: "深睡", value: `${formatValue(sleep?.deep_min)} 分钟` },
+        { label: "REM", value: `${formatValue(sleep?.rem_min)} 分钟` },
+        { label: "清醒", value: `${formatValue(sleep?.awake_min)} 分钟` },
+      ],
+    },
+    {
+      title: "接下来建议",
+      body: advice,
+      meta: "根据活动和睡眠生成",
+      icon: "recovery",
+      tone: sleep?.level === "偏少" ? "warn" : "neutral",
+      stats: [
+        { label: "活动", value: activity?.level ?? "暂无" },
+        { label: "睡眠", value: sleep?.level ?? "暂无" },
+        { label: "建议", value: `${summary?.advice?.length ?? 0} 条` },
+      ],
+    },
+  ];
+}
+
 function favoriteMetricCards(seriesList: Array<MetricSeries | null>) {
   return FAVORITE_METRIC_IDS.map((metricId) => {
     const metricIndex = APPLE_METRICS.findIndex((item) => item.id === metricId);
@@ -386,6 +489,7 @@ export default async function AppleHealthPage() {
   const favorites = favoriteMetricCards(seriesList);
   const focusInsights = buildFocusInsights(dailySummary, seriesList);
   const sevenDayReview = buildSevenDayReview(activityDetail?.rows ?? [], sleepDetail?.rows ?? []);
+  const summaryFeed = buildSummaryFeed(dailySummary);
 
   return (
     <>
@@ -398,6 +502,56 @@ export default async function AppleHealthPage() {
         <div className="apple-hero-badges">
           <span className="apple-badge good">{isLocal ? "本地数据" : "云端模式"}</span>
           <span className="apple-badge">{relativeZh(latestSync(readiness, status))}</span>
+        </div>
+      </section>
+
+      <section className="apple-summary-feed" aria-label="每日摘要">
+        <div className="apple-section-head apple-summary-head">
+          <div>
+            <h3>每日摘要</h3>
+            <p>{dailySummary ? `${dailySummary.date} · 运动、睡眠和建议` : "同步完成后显示每日摘要"}</p>
+          </div>
+          {dailySummary?.date && (
+            <Link href={summaryDateHref(dailySummary)} className="apple-text-link">
+              查看当天详情
+            </Link>
+          )}
+        </div>
+        <div className="apple-summary-feed-grid">
+          {summaryFeed.map((item, index) => {
+            const content = (
+              <>
+                <div className="apple-summary-card-top">
+                  <AppleCategoryIcon name={item.icon} />
+                  <span>{item.meta}</span>
+                </div>
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
+                <div className="apple-summary-stats">
+                  {item.stats.map((stat) => (
+                    <span key={`${item.title}-${stat.label}`}>
+                      <b>{stat.value}</b>
+                      <small>{stat.label}</small>
+                    </span>
+                  ))}
+                </div>
+              </>
+            );
+
+            return item.href ? (
+              <Link
+                className={`apple-summary-card ${item.tone} ${index === 0 ? "primary" : ""}`}
+                href={item.href}
+                key={item.title}
+              >
+                {content}
+              </Link>
+            ) : (
+              <article className={`apple-summary-card ${item.tone}`} key={item.title}>
+                {content}
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -572,85 +726,6 @@ export default async function AppleHealthPage() {
               </Link>
             ))}
             {!highlights.length && <div className="apple-empty-line">暂无可比较的趋势亮点</div>}
-          </div>
-        </article>
-      </section>
-
-      <section className="apple-two-col apple-brief-grid">
-        <article className="apple-panel apple-daily-card">
-          <div className="apple-panel-head">
-            <div>
-              <h3>昨日健康简报</h3>
-              <p>{dailySummary ? `${dailySummary.date} · ${dailySummary.timezone}` : "暂无昨日简报"}</p>
-            </div>
-            <Link href="/apple/raw/daily_activity" className="apple-text-link">
-              查看活动明细
-            </Link>
-          </div>
-          <div className="apple-brief-metrics">
-            <div>
-              <span>距离</span>
-              <strong>{formatValue(dailySummary?.activity?.distance_km, 2)} km</strong>
-            </div>
-            <div>
-              <span>活动分钟</span>
-              <strong>{formatValue(dailySummary?.activity?.active_minutes)} 分钟</strong>
-            </div>
-            <div>
-              <span>站立时间</span>
-              <strong>{formatHours(dailySummary?.activity?.stand_minutes)}</strong>
-            </div>
-            <div>
-              <span>活动能量</span>
-              <strong>{formatValue(dailySummary?.activity?.active_calories)} kcal</strong>
-            </div>
-          </div>
-          <ul className="apple-advice">
-            {(dailySummary?.advice ?? ["暂无足够数据生成建议。"]).map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="apple-panel apple-daily-card">
-          <div className="apple-panel-head">
-            <div>
-              <h3>睡眠结构</h3>
-              <p>按 Apple Watch 睡眠阶段汇总</p>
-            </div>
-            <Link href="/apple/raw/sleep_sessions" className="apple-text-link">
-              查看睡眠明细
-            </Link>
-          </div>
-          <div className="apple-sleep-bars">
-            {[
-              ["深睡", dailySummary?.sleep?.deep_min, "deep"],
-              ["核心", dailySummary?.sleep?.core_min, "core"],
-              ["REM", dailySummary?.sleep?.rem_min, "rem"],
-              ["清醒", dailySummary?.sleep?.awake_min, "awake"],
-            ].map(([label, raw, tone]) => {
-              const value = typeof raw === "number" ? raw : 0;
-              const total = dailySummary?.sleep?.in_bed_min || 1;
-              return (
-                <div className="apple-sleep-row" key={label}>
-                  <span>{label}</span>
-                  <div className="apple-sleep-track">
-                    <i className={`apple-sleep-fill ${tone}`} style={{ width: `${Math.min(100, (value / total) * 100)}%` }} />
-                  </div>
-                  <strong>{formatValue(value)} 分钟</strong>
-                </div>
-              );
-            })}
-          </div>
-          <div className="apple-sleep-extra">
-            <div>
-              <span>睡眠效率</span>
-              <strong>{formatValue(dailySummary?.sleep?.efficiency_pct, 1)}%</strong>
-            </div>
-            <div>
-              <span>呼吸频率</span>
-              <strong>{formatValue(dailySummary?.sleep?.respiratory_rate, 1)} 次/分</strong>
-            </div>
           </div>
         </article>
       </section>

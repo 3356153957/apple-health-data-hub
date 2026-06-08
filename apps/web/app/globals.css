@@ -1733,6 +1733,144 @@ html {
   line-height: 1.55;
 }
 
+.apple-summary-feed {
+  margin-top: 26px;
+}
+
+.apple-summary-head {
+  margin-top: 0;
+}
+
+.apple-summary-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.apple-summary-card {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  min-height: 236px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-summary-card.primary {
+  grid-column: span 2;
+  background:
+    linear-gradient(135deg, rgba(92, 230, 216, 0.09), transparent 48%),
+    var(--surface);
+}
+
+.apple-summary-card:last-child {
+  grid-column: span 2;
+}
+
+a.apple-summary-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+a.apple-summary-card:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-summary-card.warn {
+  border-color: rgba(232, 180, 95, 0.28);
+}
+
+.apple-summary-card.good {
+  border-color: rgba(56, 217, 150, 0.24);
+}
+
+.apple-summary-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.apple-summary-card-top .apple-category-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+}
+
+.apple-summary-card-top span {
+  min-width: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apple-summary-card > strong {
+  display: block;
+  margin-top: 18px;
+  color: var(--ink);
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.apple-summary-card > p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.58;
+}
+
+.apple-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.apple-summary-card:not(.primary):not(:last-child) .apple-summary-stats {
+  grid-template-columns: 1fr;
+}
+
+.apple-summary-stats span {
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  background: var(--raise);
+}
+
+.apple-summary-stats b,
+.apple-summary-stats small {
+  display: block;
+}
+
+.apple-summary-stats b {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-summary-stats small {
+  margin-top: 5px;
+  color: var(--faint);
+  font-size: 11px;
+}
+
 .apple-metric-insights {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3741,6 +3879,7 @@ html {
   .apple-category-metric-grid,
   .apple-source-grid,
   .apple-source-device-grid,
+  .apple-summary-feed-grid,
   .apple-day-detail-grid,
   .apple-period-grid.four,
   .apple-record-grid.raw {
@@ -3782,11 +3921,19 @@ html {
   .apple-category-metric-grid,
   .apple-source-grid,
   .apple-source-device-grid,
+  .apple-summary-feed-grid,
   .apple-day-detail-grid,
   .apple-period-grid,
   .apple-period-grid.four,
   .apple-record-grid,
   .apple-record-grid.raw {
+    grid-template-columns: 1fr;
+  }
+  .apple-summary-card.primary,
+  .apple-summary-card:last-child {
+    grid-column: auto;
+  }
+  .apple-summary-stats {
     grid-template-columns: 1fr;
   }
   .apple-week-strip {
