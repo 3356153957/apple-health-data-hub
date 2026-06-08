@@ -63,6 +63,7 @@ type RecordCard = {
   unit?: string;
   meta: string;
   details: string[];
+  href?: string;
 };
 
 type TableNotice = {
@@ -82,6 +83,28 @@ const ICON_PATHS: Record<IconName, string[]> = {
   heart: ["M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8"],
   records: ["M8 6h13", "M8 12h13", "M8 18h13", "M3.5 6h.01", "M3.5 12h.01", "M3.5 18h.01"],
   energy: ["M13 2L4 14h7l-1 8 10-13h-7l1-7z"],
+};
+
+const METRIC_LABELS: Record<string, string> = {
+  apple_stand_time: "站立时间",
+  respiratory_rate: "呼吸次数",
+  resting_heart_rate: "静息心率",
+  walking_heart_rate_average: "步行心率",
+  wrist_temperature: "腕温",
+  vo2_max: "VO2 max",
+};
+
+const UNIT_LABELS: Record<string, string> = {
+  "breaths/min": "次/分",
+  count: "次",
+  kcal: "kcal",
+  m: "m",
+  min: "分钟",
+  ms: "ms",
+  bpm: "bpm",
+  "%": "%",
+  "ml/kg/min": "ml/kg/min",
+  "degC": "°C",
 };
 
 function RawIcon({ name }: { name: IconName }) {
@@ -107,6 +130,9 @@ function formatCell(key: string, value: string | number | null): string {
   if (key.includes("time")) return zhTime(String(value));
   if (key === "date") return String(value);
   if (key === "sport_type") return workoutLabel(String(value));
+  if (key === "metric_name") return metricLabel(String(value));
+  if (key === "unit") return unitLabel(String(value));
+  if (key === "source_id") return sourceLabel(String(value));
   if (typeof value === "number") {
     const digits = Number.isInteger(value) ? 0 : 1;
     return formatValue(value, digits);
@@ -152,6 +178,25 @@ function rowDate(row: RawRow): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function localDateKeyFromDate(date: Date | null): string | null {
+  if (!date) return null;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Shanghai",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  return year && month && day ? `${year}-${month}-${day}` : null;
+}
+
+function rowDayHref(row: RawRow): string | undefined {
+  const dateKey = localDateKeyFromDate(rowDate(row));
+  return dateKey ? `/apple/days/${encodeURIComponent(dateKey)}` : undefined;
+}
+
 function startOfWeek(now: Date): Date {
   const date = new Date(now);
   date.setHours(0, 0, 0, 0);
@@ -180,6 +225,29 @@ function formatMinutes(value: number | null): string {
 
 function formatKm(value: number | null): string {
   return value === null ? "暂无" : `${formatValue(value / 1000, 2)} km`;
+}
+
+function metricLabel(value: string | null | undefined): string {
+  if (!value) return "健康指标";
+  return METRIC_LABELS[value] ?? value.replaceAll("_", " ");
+}
+
+function unitLabel(value: string | null | undefined): string {
+  if (!value) return "";
+  return UNIT_LABELS[value] ?? value;
+}
+
+function sourceLabel(value: string | null | undefined): string {
+  if (!value) return "本机同步";
+  if (value === "apple-health-healthsave") return "Apple 健康同步";
+  return value;
+}
+
+function valueDigits(unit: string | null | undefined): number {
+  const normalized = unitLabel(unit);
+  if (normalized === "°C" || normalized === "ml/kg/min") return 1;
+  if (normalized === "次/分") return 1;
+  return 0;
 }
 
 function summaryCards(decodedTable: string, rows: RawRow[], weekRows: RawRow[], monthRows: RawRow[]): SummaryCard[] {
@@ -306,12 +374,21 @@ function summaryCards(decodedTable: string, rows: RawRow[], weekRows: RawRow[], 
     ];
   }
 
-  const metricNames = new Set(rows.map((row) => String(row.metric_name ?? "")).filter(Boolean));
+  const metricNames = new Set(rows.map((row) => metricLabel(String(row.metric_name ?? ""))).filter((value) => value !== "健康指标"));
+  const latestRow = rows[0];
+  const latestUnit = latestRow ? unitLabel(String(latestRow.unit ?? "")) : "";
+  const latestMetric = latestRow ? metricLabel(String(latestRow.metric_name ?? "")) : "健康指标";
   return [
-    { icon: "records", label: "本周记录", value: formatValue(weekRows.length), unit: "条", helper: "最近 7 天所在自然周" },
+    { icon: "records", label: "本周记录", value: formatValue(weekRows.length), unit: "条", helper: "当前自然周" },
     { icon: "records", label: "本月记录", value: formatValue(monthRows.length), unit: "条", helper: "当前自然月" },
     { icon: "activity", label: "指标种类", value: formatValue(metricNames.size), unit: "类", helper: Array.from(metricNames).slice(0, 3).join("、") || "暂无分类" },
-    { icon: "heart", label: "本月平均值", value: formatValue(avg(monthRows, "value"), 1), helper: "不同指标仅作快速浏览" },
+    {
+      icon: "heart",
+      label: "最近记录",
+      value: formatValue(numeric(latestRow ?? {}, "value"), valueDigits(latestUnit)),
+      unit: latestUnit,
+      helper: latestMetric,
+    },
   ];
 }
 
@@ -329,6 +406,7 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
           `${formatValue(numeric(row, "calories"), 1)} kcal`,
           maxHr === null ? "最高心率暂无" : `最高 ${formatValue(maxHr)} bpm`,
         ],
+        href: rowDayHref(row),
       };
     }
 
@@ -344,13 +422,15 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
           `${formatHours(numeric(row, "stand_minutes"))} 站立`,
           `${formatValue(numeric(row, "active_calories"))} kcal`,
         ],
+        href: rowDayHref(row),
       };
     }
 
     if (decodedTable === "sleep_sessions") {
+      const dateKey = localDateKeyFromDate(rowDate(row));
       return {
         icon: "sleep",
-        title: "睡眠记录",
+        title: dateKey ?? "睡眠记录",
         value: formatHours(numeric(row, "total_sleep_min")),
         meta: `${zhTime(String(row.start_time ?? ""))} - ${zhTime(String(row.end_time ?? ""))}`,
         details: [
@@ -358,6 +438,7 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
           `REM ${formatMinutes(numeric(row, "rem_min"))}`,
           `呼吸 ${formatValue(numeric(row, "respiratory_rate"), 1)} 次/分`,
         ],
+        href: rowDayHref(row),
       };
     }
 
@@ -368,7 +449,7 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
         value: formatValue(numeric(row, "bpm")),
         unit: "bpm",
         meta: String(row.context ?? "心率记录"),
-        details: [String(row.source_id ?? "本机同步")],
+        details: [sourceLabel(String(row.source_id ?? ""))],
       };
     }
 
@@ -379,7 +460,7 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
         value: formatValue(numeric(row, "value_ms"), 1),
         unit: "ms",
         meta: String(row.context ?? "HRV 记录"),
-        details: [String(row.source_id ?? "本机同步")],
+        details: [sourceLabel(String(row.source_id ?? ""))],
       };
     }
 
@@ -390,17 +471,18 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
         value: formatValue(numeric(row, "spo2_pct"), 1),
         unit: "%",
         meta: String(row.context ?? "血氧记录"),
-        details: [String(row.source_id ?? "本机同步")],
+        details: [sourceLabel(String(row.source_id ?? ""))],
       };
     }
 
+    const rawUnit = String(row.unit ?? "");
     return {
       icon: "records",
-      title: String(row.metric_name ?? row.date ?? row.time ?? "同步记录"),
-      value: formatValue(numeric(row, "value"), 1),
-      unit: String(row.unit ?? ""),
+      title: metricLabel(String(row.metric_name ?? "")),
+      value: formatValue(numeric(row, "value"), valueDigits(rawUnit)),
+      unit: unitLabel(rawUnit),
       meta: zhTime(String(row.time ?? row.date ?? "")),
-      details: [String(row.source_id ?? "本机同步")],
+      details: [sourceLabel(String(row.source_id ?? ""))],
     };
   });
 }
@@ -467,7 +549,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
           <p>{spec.description}</p>
         </div>
         <div className="apple-hero-badges">
-          <span className="apple-badge">{decodedTable}</span>
+          <span className="apple-badge">本地明细</span>
           <span className="apple-badge good">{rows.length.toLocaleString("zh-CN")} 条</span>
         </div>
       </section>
@@ -516,22 +598,41 @@ export default async function AppleRawTablePage({ params }: PageProps) {
         </div>
         <div className="apple-record-grid raw">
           {records.map((record, index) => (
-            <article className="apple-record-card" key={`${record.title}-${index}`}>
-              <RawIcon name={record.icon} />
-              <div>
-                <span>{record.title}</span>
-                <strong>
-                  {record.value}
-                  {record.unit && <small>{record.unit}</small>}
-                </strong>
-                <p>{record.meta}</p>
-                <div className="apple-record-tags">
-                  {record.details.map((detailText) => (
-                    <em key={detailText}>{detailText}</em>
-                  ))}
+            record.href ? (
+              <Link className="apple-record-card clickable" href={record.href} key={`${record.title}-${index}`}>
+                <RawIcon name={record.icon} />
+                <div>
+                  <span>{record.title}</span>
+                  <strong>
+                    {record.value}
+                    {record.unit && <small>{record.unit}</small>}
+                  </strong>
+                  <p>{record.meta}</p>
+                  <div className="apple-record-tags">
+                    {record.details.map((detailText) => (
+                      <em key={detailText}>{detailText}</em>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </article>
+              </Link>
+            ) : (
+              <article className="apple-record-card" key={`${record.title}-${index}`}>
+                <RawIcon name={record.icon} />
+                <div>
+                  <span>{record.title}</span>
+                  <strong>
+                    {record.value}
+                    {record.unit && <small>{record.unit}</small>}
+                  </strong>
+                  <p>{record.meta}</p>
+                  <div className="apple-record-tags">
+                    {record.details.map((detailText) => (
+                      <em key={detailText}>{detailText}</em>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            )
           ))}
           {!records.length && <div className="apple-empty-chart compact">暂无最近记录</div>}
         </div>
