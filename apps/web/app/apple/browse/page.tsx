@@ -5,6 +5,7 @@ import type { AppleStatus } from "../../lib/api";
 import { safeAppleStatus, safeSeries } from "../../lib/load";
 import {
   APPLE_METRICS,
+  type AppleIconName,
   AppleCategoryIcon,
   BROWSE_CATEGORIES,
   RAW_TABLES,
@@ -22,6 +23,19 @@ import {
 
 export const metadata: Metadata = { title: "浏览 · HealthSave" };
 export const dynamic = "force-dynamic";
+
+type PageProps = {
+  searchParams?: Promise<{ q?: string | string[] }>;
+};
+
+type SearchResult = {
+  icon: AppleIconName;
+  kind: string;
+  title: string;
+  body: string;
+  href: string;
+  meta: string;
+};
 
 function rawNewest(status: AppleStatus | null, tables?: string[]): string | null {
   const rows = tables?.length
@@ -50,6 +64,23 @@ function metricLabels(metricIds: string[]): string[] {
 
 const QUICK_METRIC_IDS = ["activity.stand_minutes", "vital.respiratory_rate", "activity.steps", "vital.heart_rate"];
 
+const SEARCH_ALIASES: Record<string, string[]> = {
+  "activity.stand_minutes": ["站立", "站立时间", "站立小时", "久坐", "stand"],
+  "vital.respiratory_rate": ["呼吸", "呼吸频率", "呼吸次数", "睡眠呼吸", "respiratory"],
+  "activity.steps": ["步数", "走路", "步行", "steps"],
+  "activity.active_energy": ["能量", "卡路里", "消耗", "kcal"],
+  "vital.heart_rate": ["心率", "心跳", "bpm"],
+  "vital.resting_heart_rate": ["静息心率", "休息心率"],
+  "vital.hrv_sdnn": ["hrv", "心率变异", "恢复"],
+  "vital.blood_oxygen": ["血氧", "氧饱和"],
+  "body.wrist_temperature": ["腕温", "体温", "温度"],
+  "cardio.vo2_max": ["vo2", "心肺", "有氧"],
+  sleep_sessions: ["睡眠", "睡觉", "深睡", "rem", "呼吸"],
+  daily_activity: ["活动", "步数", "站立", "能量"],
+  workouts: ["训练", "运动", "体能"],
+  quantity_samples: ["呼吸", "腕温", "vo2", "静息心率", "其他"],
+};
+
 function trendLabel(pct: number | null): string {
   if (pct === null) return "暂无趋势";
   return `${pct > 0 ? "+" : ""}${formatValue(pct, 1)}%`;
@@ -61,7 +92,108 @@ function metricHint(metricId: string): string {
   return "点进去查看本周、本月和最近记录。";
 }
 
-export default async function AppleBrowsePage() {
+function searchText(raw: string | string[] | undefined): string {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return (value ?? "").trim().slice(0, 32);
+}
+
+function haystack(parts: Array<string | number | null | undefined>): string {
+  return parts.filter((part) => part !== null && part !== undefined).join(" ").toLowerCase();
+}
+
+function matchesSearch(query: string, parts: Array<string | number | null | undefined>): boolean {
+  if (!query) return false;
+  const normalized = query.toLowerCase();
+  return haystack(parts).includes(normalized);
+}
+
+function categoryHref(slug: string): string {
+  return slug === "data" ? "/apple/sources" : `/apple/categories/${slug}`;
+}
+
+function iconForMetric(metricId: string): AppleIconName {
+  if (metricId.startsWith("activity.")) return "activity";
+  if (metricId === "vital.respiratory_rate") return "sleep";
+  if (metricId === "vital.hrv_sdnn" || metricId === "vital.resting_heart_rate") return "recovery";
+  if (metricId.startsWith("body.")) return "body";
+  if (metricId.startsWith("cardio.")) return "cardio";
+  return "heart";
+}
+
+function metricGroup(metricId: string): string {
+  return BROWSE_CATEGORIES.find((category) => category.metricIds.includes(metricId))?.title ?? "健康指标";
+}
+
+function buildSearchResults(query: string, status: AppleStatus | null): SearchResult[] {
+  if (!query) return [];
+  const results: SearchResult[] = [];
+
+  APPLE_METRICS.forEach((metric) => {
+    if (
+      matchesSearch(query, [
+        metric.id,
+        metric.slug,
+        metric.label,
+        metric.note,
+        metric.description,
+        metric.unit,
+        ...(SEARCH_ALIASES[metric.id] ?? []),
+      ])
+    ) {
+      results.push({
+        icon: iconForMetric(metric.id),
+        kind: "指标",
+        title: metric.label,
+        body: metric.description,
+        href: `/apple/metrics/${metric.slug}`,
+        meta: `${metricGroup(metric.id)} · ${metric.note}`,
+      });
+    }
+  });
+
+  BROWSE_CATEGORIES.forEach((category) => {
+    const labels = metricLabels(category.metricIds).join(" ");
+    const metricAliases = category.metricIds.flatMap((metricId) => SEARCH_ALIASES[metricId] ?? []);
+    if (
+      matchesSearch(query, [
+        category.slug,
+        category.title,
+        category.subtitle,
+        category.description,
+        labels,
+        ...metricAliases,
+      ])
+    ) {
+      results.push({
+        icon: category.icon,
+        kind: "分类",
+        title: category.title,
+        body: category.description,
+        href: categoryHref(category.slug),
+        meta: `${category.metricIds.length || category.rawTables.length} 个入口`,
+      });
+    }
+  });
+
+  Object.entries(RAW_TABLES).forEach(([table, spec]) => {
+    const row = status?.[table] ?? null;
+    if (matchesSearch(query, [table, spec.label, spec.description, ...(SEARCH_ALIASES[table] ?? [])])) {
+      results.push({
+        icon: table === "sleep_sessions" ? "sleep" : table === "daily_activity" || table === "workouts" ? "activity" : "data",
+        kind: "同步类别",
+        title: spec.label,
+        body: spec.description,
+        href: `/apple/raw/${encodeURIComponent(table)}`,
+        meta: `${(row?.count ?? 0).toLocaleString("zh-CN")} 条 · ${row?.newest ? relativeZh(row.newest) : "暂无同步"}`,
+      });
+    }
+  });
+
+  return results.slice(0, 12);
+}
+
+export default async function AppleBrowsePage({ searchParams }: PageProps) {
+  const query = searchText((await searchParams)?.q);
   const userCategories = BROWSE_CATEGORIES.filter((category) => category.slug !== "data");
   const metricCount = new Set(userCategories.flatMap((category) => category.metricIds)).size;
   const sourceTables = Object.keys(RAW_TABLES);
@@ -72,6 +204,7 @@ export default async function AppleBrowsePage() {
     safeAppleStatus(),
     Promise.all(quickMetrics.map((metric) => safeSeries(metric.id, "30d"))),
   ]);
+  const searchResults = buildSearchResults(query, status);
 
   return (
     <>
@@ -88,6 +221,55 @@ export default async function AppleBrowsePage() {
           <span className="apple-badge">{userCategories.length} 个分类</span>
           <span className="apple-badge good">{relativeZh(rawNewest(status))}</span>
         </div>
+      </section>
+
+      <section className="apple-search-panel" aria-label="搜索健康数据">
+        <form className="apple-search-form" action="/apple/browse">
+          <label className="apple-search-field">
+            <span aria-hidden>
+              <svg viewBox="0 0 24 24" focusable="false">
+                <circle cx="11" cy="11" r="6" />
+                <path d="M16 16l4 4" />
+              </svg>
+            </span>
+            <input name="q" defaultValue={query} placeholder="搜索步数、站立时间、呼吸次数" />
+          </label>
+          <button type="submit">搜索</button>
+          {query && (
+            <Link href="/apple/browse" className="apple-search-clear">
+              清除
+            </Link>
+          )}
+        </form>
+        {query && (
+          <div className="apple-search-results">
+            <div className="apple-panel-head">
+              <div>
+                <h3>搜索结果</h3>
+                <p>
+                  “{query}” 找到 {searchResults.length} 个结果
+                </p>
+              </div>
+            </div>
+            {searchResults.length ? (
+              <div className="apple-search-result-list">
+                {searchResults.map((result) => (
+                  <Link className="apple-search-result-row" href={result.href} key={`${result.kind}-${result.href}`}>
+                    <AppleCategoryIcon name={result.icon} />
+                    <div>
+                      <span>{result.kind}</span>
+                      <strong>{result.title}</strong>
+                      <p>{result.body}</p>
+                    </div>
+                    <small>{result.meta}</small>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="apple-empty-chart compact">没有找到相关健康数据</div>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="apple-kpis">
@@ -117,7 +299,7 @@ export default async function AppleBrowsePage() {
         <div className="apple-panel-head">
           <div>
             <h3>常用指标</h3>
-            <p>站立时间和呼吸频率在这里可以直接进入详情；呼吸频率来自睡眠期间的 Apple Watch 记录。</p>
+            <p>站立时间和呼吸次数在这里可以直接进入详情；呼吸次数按“呼吸频率”记录，来自睡眠期间的 Apple Watch 数据。</p>
           </div>
         </div>
         <div className="apple-category-metric-grid apple-quick-metric-grid">
