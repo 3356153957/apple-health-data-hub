@@ -148,6 +148,15 @@ export const CORE_METRICS = [
   { id: "cardio.vo2_max", label: "VO2 max", group: "心肺" },
 ];
 
+export const FAVORITE_METRIC_IDS = [
+  "activity.steps",
+  "vital.heart_rate",
+  "activity.stand_minutes",
+  "vital.hrv_sdnn",
+  "vital.respiratory_rate",
+  "vital.blood_oxygen",
+];
+
 export const RAW_TABLES: Record<string, { label: string; description: string }> = {
   heart_rate: { label: "心率", description: "Apple Watch 记录的连续心率读数。" },
   hrv: { label: "HRV", description: "心率变异性读数，单位为毫秒。" },

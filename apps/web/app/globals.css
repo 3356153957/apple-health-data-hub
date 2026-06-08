@@ -1913,6 +1913,120 @@ html {
   line-height: 1.45;
 }
 
+.apple-favorites-panel {
+  margin-top: 26px;
+}
+
+.apple-favorite-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.apple-favorite-card {
+  display: block;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-favorite-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-favorite-card:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-favorite-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.apple-favorite-top .apple-category-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+}
+
+.apple-favorite-top em {
+  min-width: 0;
+  max-width: 72%;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: var(--faint);
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apple-favorite-top em.good {
+  color: var(--up);
+  background: rgba(56, 217, 150, 0.1);
+}
+
+.apple-favorite-top em.warn {
+  color: var(--warn);
+  background: rgba(232, 180, 95, 0.1);
+}
+
+.apple-favorite-card > span {
+  display: block;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-favorite-card strong {
+  display: block;
+  margin-top: 7px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-favorite-card strong small {
+  margin-left: 7px;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 12px;
+}
+
+.apple-favorite-card .apple-spark {
+  margin-top: 14px;
+}
+
+.apple-favorite-card p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: 36px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .apple-rings-panel,
 .apple-highlight-panel {
   min-height: 254px;
@@ -2708,6 +2822,7 @@ html {
   .apple-raw-grid,
   .apple-brief-metrics,
   .apple-sleep-extra,
+  .apple-favorite-grid,
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,
@@ -2740,6 +2855,7 @@ html {
   .apple-raw-grid,
   .apple-brief-metrics,
   .apple-sleep-extra,
+  .apple-favorite-grid,
   .apple-category-grid,
   .apple-category-metric-grid,
   .apple-source-grid,

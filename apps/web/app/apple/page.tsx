@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 
 import type { AppleDailySummary, AppleStatus, MetricSeries, Readiness } from "../lib/api";
+import type { AppleIconName, AppleMetric } from "./appleHealth";
 import {
   safeAppleDailySummary,
   safeAppleStatus,
@@ -15,6 +16,7 @@ import {
   AppleCategoryIcon,
   BROWSE_CATEGORIES,
   CORE_METRICS,
+  FAVORITE_METRIC_IDS,
   RAW_TABLES,
   Sparkline,
   formatHours,
@@ -56,6 +58,15 @@ function todayReadiness(summary: AppleDailySummary | null): string {
   if (sleep === "偏少") return "建议降低强度";
   if (activity === "偏少") return "建议补足活动量";
   return "保持稳定节奏";
+}
+
+function iconForMetric(metricId: string): AppleIconName {
+  if (metricId.startsWith("activity.")) return "activity";
+  if (metricId.startsWith("cardio.")) return "cardio";
+  if (metricId.startsWith("body.")) return "body";
+  if (metricId === "vital.respiratory_rate") return "sleep";
+  if (metricId === "vital.hrv_sdnn" || metricId === "vital.resting_heart_rate") return "recovery";
+  return "heart";
 }
 
 function pct(value: number | null | undefined, goal: number): number {
@@ -116,6 +127,37 @@ function trendHighlights(seriesList: Array<MetricSeries | null>) {
     .slice(0, 3);
 }
 
+function favoriteMetricCards(seriesList: Array<MetricSeries | null>) {
+  return FAVORITE_METRIC_IDS.map((metricId) => {
+    const metricIndex = APPLE_METRICS.findIndex((item) => item.id === metricId);
+    const metric = APPLE_METRICS[metricIndex];
+    if (!metric) return null;
+    const series = seriesList[metricIndex];
+    const nums = metricSeriesValues(metric, series);
+    const latest = nums.length ? nums[nums.length - 1] : latestValue(series);
+    const trend = recentTrend(nums);
+    return {
+      metric,
+      nums,
+      latest,
+      trend,
+      tone: trendTone(metric, trend.delta),
+    };
+  }).filter((item): item is {
+    metric: AppleMetric;
+    nums: number[];
+    latest: number | null;
+    trend: { delta: number | null; pct: number | null };
+    tone: string;
+  } => Boolean(item));
+}
+
+function favoriteTrendLabel(metric: AppleMetric, pctValue: number | null): string {
+  if (pctValue === null) return metric.note;
+  const direction = pctValue > 0 ? "上升" : "下降";
+  return `30 天${direction} ${formatValue(Math.abs(pctValue), 1)}%`;
+}
+
 export default async function AppleHealthPage() {
   const [readiness, status, privacy, dailySummary, seriesList] = await Promise.all([
     safeReadiness(),
@@ -128,6 +170,7 @@ export default async function AppleHealthPage() {
   const coreReadyCount = readyCount(readiness);
   const isLocal = privacy ? !privacy.cloud_active : true;
   const highlights = trendHighlights(seriesList);
+  const favorites = favoriteMetricCards(seriesList);
 
   return (
     <>
@@ -165,6 +208,33 @@ export default async function AppleHealthPage() {
             {coreReadyCount}/{CORE_METRICS.length}
           </strong>
           <small>{observationRows.toLocaleString("zh-CN")} 条本机健康记录</small>
+        </div>
+      </section>
+
+      <section className="apple-panel apple-favorites-panel">
+        <div className="apple-panel-head">
+          <div>
+            <h3>常看指标</h3>
+            <p>活动、心率、恢复和睡眠的关键状态。</p>
+          </div>
+          <span className="apple-badge">30 天趋势</span>
+        </div>
+        <div className="apple-favorite-grid">
+          {favorites.map(({ metric, nums, latest, trend, tone }) => (
+            <Link className="apple-favorite-card" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
+              <div className="apple-favorite-top">
+                <AppleCategoryIcon name={iconForMetric(metric.id)} />
+                <em className={tone}>{favoriteTrendLabel(metric, trend.pct)}</em>
+              </div>
+              <span>{metric.label}</span>
+              <strong>
+                {formatValue(latest, metric.digits ?? 0)}
+                <small>{metric.unit}</small>
+              </strong>
+              <Sparkline nums={nums} />
+              <p>{metric.description}</p>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -214,7 +284,7 @@ export default async function AppleHealthPage() {
           <div className="apple-highlight-list">
             {highlights.map(({ metric, latest, trend, tone }) => (
               <Link className="apple-highlight-row" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
-                <AppleCategoryIcon name={metric.id.startsWith("activity.") ? "activity" : metric.id.startsWith("cardio.") ? "cardio" : "heart"} />
+                <AppleCategoryIcon name={iconForMetric(metric.id)} />
                 <div>
                   <span>{metric.label}</span>
                   <strong>
