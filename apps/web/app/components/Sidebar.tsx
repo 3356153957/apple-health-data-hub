@@ -27,6 +27,12 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M3 12h7" />
     </>
   ),
+  trend: (
+    <>
+      <path d="M3 12.5l4-4 3 3 4-6" />
+      <path d="M10.5 5.5H14v3.5" />
+    </>
+  ),
   data: (
     <>
       <ellipse cx="8" cy="4" rx="5" ry="2" />
@@ -70,6 +76,7 @@ type NavItem = {
 const NAV: readonly NavItem[] = [
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
   { href: "/apple/browse", label: "浏览", icon: "overview" },
+  { href: "/apple/trends", label: "趋势", icon: "trend" },
   { href: "/apple/metrics/stand-time", label: "站立时间", icon: "stand", activePrefixes: ["/apple/metrics/activity.stand_minutes"] },
   { href: "/apple/metrics/respiratory-rate", label: "呼吸次数", icon: "breath", activePrefixes: ["/apple/metrics/vital.respiratory_rate"] },
   { href: "/apple/categories/activity", label: "活动", icon: "overview" },

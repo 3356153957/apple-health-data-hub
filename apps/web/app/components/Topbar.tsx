@@ -8,6 +8,7 @@ const TITLES: Record<string, { title: string; sub: string }> = {
   "/": { title: "健康概览", sub: "Apple Watch 与 iPhone 健康数据。" },
   "/apple": { title: "健康概览", sub: "运动、睡眠、恢复和同步状态。" },
   "/apple/browse": { title: "浏览", sub: "按健康分类查看指标和记录。" },
+  "/apple/trends": { title: "趋势", sub: "最近 30 天变化更明显的健康指标。" },
   "/apple/sources": { title: "数据来源", sub: "设备、同步类别和本地隐私状态。" },
   "/demo": { title: "演示数据", sub: "示例健康故事。" },
   "/experiments": { title: "计划", sub: "可尝试的健康习惯。" },

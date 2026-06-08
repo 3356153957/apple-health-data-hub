@@ -708,6 +708,9 @@ export default async function AppleHealthPage() {
               <h3>趋势亮点</h3>
               <p>自动挑出最近变化最明显的指标。</p>
             </div>
+            <Link href="/apple/trends" className="apple-text-link">
+              查看全部
+            </Link>
           </div>
           <div className="apple-highlight-list">
             {highlights.map(({ metric, latest, trend, tone }) => (
