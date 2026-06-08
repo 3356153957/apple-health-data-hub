@@ -200,7 +200,7 @@ function buildSummaryFeed(summary: AppleDailySummary | null): SummaryFeedItem[] 
       title: todayReadiness(summary),
       body: summary?.headline ?? "同步完成后，这里会展示昨日运动、睡眠与恢复建议。",
       meta: summary ? `${summary.date} · 每日重点` : "每日重点",
-      href: dayHref,
+      href: "/apple/daily",
       icon: sleep?.level === "偏少" ? "sleep" : "activity",
       tone: sleep?.level === "偏少" ? "warn" : activity?.level === "充足" ? "good" : "neutral",
       stats: [
@@ -512,6 +512,9 @@ export default async function AppleHealthPage() {
             <p>{dailySummary ? `${dailySummary.date} · 运动、睡眠和建议` : "同步完成后显示每日摘要"}</p>
           </div>
           <div className="apple-link-group">
+            <Link href="/apple/daily" className="apple-text-link">
+              每日总结
+            </Link>
             <Link href="/apple/highlights" className="apple-text-link">
               全部亮点
             </Link>

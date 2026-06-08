@@ -46,6 +46,13 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M4.2 8h2.2l1-2.2 1.5 4.2 1-2h1.9" />
     </>
   ),
+  daily: (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M8 4.8v3.4l2.4 1.4" />
+      <path d="M5.2 12.5h5.6" />
+    </>
+  ),
   favorite: (
     <>
       <path d="M8 2.5l1.6 3.3 3.7.5-2.7 2.6.7 3.7L8 10.9l-3.3 1.7.7-3.7-2.7-2.6 3.7-.5z" />
@@ -122,6 +129,7 @@ type NavItem = {
 
 const NAV: readonly NavItem[] = [
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
+  { href: "/apple/daily", label: "每日总结", icon: "daily" },
   { href: "/apple/highlights", label: "亮点", icon: "highlight" },
   { href: "/apple/checklist", label: "健康清单", icon: "checklist" },
   { href: "/apple/calendar", label: "日历", icon: "calendar", activePrefixes: ["/apple/days/"] },
