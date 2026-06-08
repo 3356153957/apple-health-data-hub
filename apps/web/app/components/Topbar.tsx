@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
+import { APPLE_METRICS, BROWSE_CATEGORIES, RAW_TABLES } from "../apple/appleHealth";
 import { ThemeToggle } from "./ThemeToggle";
 
 const TITLES: Record<string, { title: string; sub: string }> = {
@@ -13,9 +14,9 @@ const TITLES: Record<string, { title: string; sub: string }> = {
   "/apple/calendar": { title: "健康日历", sub: "按日期回看运动、站立、睡眠和训练。" },
   "/apple/report": { title: "健康报告", sub: "本周运动、睡眠、恢复和建议。" },
   "/apple/favorites": { title: "收藏", sub: "每天优先查看的健康指标。" },
-  "/apple/browse": { title: "浏览", sub: "按健康分类查看指标和记录。" },
+  "/apple/browse": { title: "浏览", sub: "按活动、睡眠、心脏和恢复查看。" },
   "/apple/trends": { title: "趋势", sub: "最近 30 天变化更明显的健康指标。" },
-  "/apple/sources": { title: "数据来源", sub: "设备、同步类别和本地隐私状态。" },
+  "/apple/sources": { title: "设备与同步", sub: "查看 Apple Watch、iPhone 和同步状态。" },
   "/demo": { title: "演示数据", sub: "示例健康故事。" },
   "/experiments": { title: "计划", sub: "可尝试的健康习惯。" },
   "/evidence": { title: "发现", sub: "系统识别到的趋势和异常。" },
@@ -23,13 +24,34 @@ const TITLES: Record<string, { title: string; sub: string }> = {
   "/privacy": { title: "隐私", sub: "哪些数据会离开本机。" },
 };
 
+function lastPathSegment(pathname: string): string {
+  const segment = pathname.split("/").filter(Boolean).at(-1) ?? "";
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
 function titleForPath(pathname: string): { title: string; sub: string } {
-  if (pathname.startsWith("/apple/days/")) return { title: "每日详情", sub: "当天活动、睡眠、训练和建议。" };
-  if (pathname.startsWith("/apple/sources")) return { title: "数据来源", sub: "设备、同步类别和本地隐私状态。" };
+  if (pathname.startsWith("/apple/days/")) return { title: "每日详情", sub: "按这一天查看活动、睡眠和训练。" };
+  if (pathname.startsWith("/apple/sources")) return TITLES["/apple/sources"];
   if (pathname.startsWith("/apple/categories/data")) return { title: "数据来源", sub: "核对 Apple Watch 和 iPhone 同步记录。" };
-  if (pathname.startsWith("/apple/categories/")) return { title: "浏览分类", sub: "相关指标、趋势和同步来源。" };
-  if (pathname.startsWith("/apple/metrics/")) return { title: "指标详情", sub: "最近趋势、数值范围和数据点。" };
-  if (pathname.startsWith("/apple/raw/")) return { title: "数据来源", sub: "来自本机健康数据服务的同步记录。" };
+  if (pathname.startsWith("/apple/categories/")) {
+    const slug = lastPathSegment(pathname);
+    const category = BROWSE_CATEGORIES.find((item) => item.slug === slug);
+    return category ? { title: category.title, sub: category.subtitle } : { title: "健康分类", sub: "相关指标、趋势和记录。" };
+  }
+  if (pathname.startsWith("/apple/metrics/")) {
+    const key = lastPathSegment(pathname);
+    const metric = APPLE_METRICS.find((item) => item.slug === key || item.id === key);
+    return metric ? { title: metric.label, sub: metric.note } : { title: "健康指标", sub: "最近趋势、范围和记录。" };
+  }
+  if (pathname.startsWith("/apple/raw/")) {
+    const table = lastPathSegment(pathname);
+    const raw = RAW_TABLES[table];
+    return raw ? { title: raw.label, sub: raw.description } : { title: "同步明细", sub: "最近记录和来源。" };
+  }
   return TITLES[pathname] ?? TITLES["/"];
 }
 

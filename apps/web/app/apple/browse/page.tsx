@@ -189,7 +189,7 @@ function buildSearchResults(query: string, status: AppleStatus | null): SearchRe
     if (matchesSearch(query, [table, spec.label, spec.description, ...(SEARCH_ALIASES[table] ?? [])])) {
       results.push({
         icon: table === "sleep_sessions" ? "sleep" : table === "daily_activity" || table === "workouts" ? "activity" : "data",
-        kind: "同步类别",
+        kind: "记录类别",
         title: spec.label,
         body: spec.description,
         href: `/apple/raw/${encodeURIComponent(table)}`,
@@ -310,7 +310,7 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
         <div className="apple-kpi">
           <span>同步记录</span>
           <strong>{rawTotal(status).toLocaleString("zh-CN")}</strong>
-          <small>本机健康数据服务</small>
+          <small>本机健康记录</small>
         </div>
         <div className="apple-kpi">
           <span>最近同步</span>
@@ -398,7 +398,7 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
         <div className="apple-panel-head">
           <div>
             <h3>数据来源</h3>
-            <p>需要核对同步是否完整时，再进入原始记录。日常查看优先使用上面的分类和指标详情。</p>
+            <p>需要核对同步是否完整时，再进入原始记录。日常查看优先使用上面的分类和单个指标。</p>
           </div>
           <Link href="/apple/sources" className="apple-text-link">
             查看设备与同步

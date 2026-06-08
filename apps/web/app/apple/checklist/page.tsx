@@ -197,7 +197,7 @@ export default async function AppleChecklistPage() {
           <small>建议优先核对</small>
         </div>
         <div className="apple-kpi">
-          <span>同步类别</span>
+          <span>记录类别</span>
           <strong>{Object.keys(status ?? {}).length}</strong>
           <small>{totalRows(status).toLocaleString("zh-CN")} 条同步记录</small>
         </div>

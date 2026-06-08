@@ -77,7 +77,7 @@ function validTime(value: string | null): string | null {
 function sourceTitle(sourceId: string): string {
   const normalized = sourceId.toLowerCase();
   if (normalized.includes("apple-health")) return "Apple 健康同步";
-  if (normalized.includes("healthsave")) return "HealthSave 本机同步";
+  if (normalized.includes("healthsave")) return "本机同步";
   if (sourceId === "本机同步") return "本机同步";
   return sourceId;
 }
@@ -86,7 +86,7 @@ function sourceSubtitle(sourceId: string): string {
   if (sourceId === "本机同步") return "没有附带来源名称的本机记录";
   const normalized = sourceId.toLowerCase();
   if (normalized.includes("apple-health")) return "来自 Apple 健康导入与自动同步";
-  if (normalized.includes("healthsave")) return "来自本机健康数据服务";
+  if (normalized.includes("healthsave")) return "来自本机健康记录";
   return "本机同步来源";
 }
 
@@ -230,13 +230,13 @@ export default async function AppleSourcesPage() {
           <div>
             <span>Apple Watch 与 iPhone</span>
             <strong>健康数据来源</strong>
-            <p>心率、活动、睡眠、训练和身体指标会按类别汇总到本机健康数据服务。</p>
+            <p>心率、活动、睡眠、训练和身体指标会按类别汇总到本机健康记录。</p>
           </div>
         </article>
         <article className="apple-source-device-card">
           <AppleCategoryIcon name="data" />
           <div>
-            <span>HealthSave 本机服务</span>
+            <span>本机健康记录</span>
             <strong>{providerLabel(privacy?.provider)}</strong>
             <p>{privacyHelper(privacy)}</p>
           </div>
@@ -305,7 +305,7 @@ export default async function AppleSourcesPage() {
       <section className="apple-panel apple-category-section">
         <div className="apple-panel-head">
           <div>
-            <h3>同步类别</h3>
+            <h3>记录类别</h3>
             <p>这些类别对应 Apple 健康里的活动、睡眠、心脏和身体数据；点进去可以看最近记录。</p>
           </div>
           <Link href="/privacy" className="apple-text-link">

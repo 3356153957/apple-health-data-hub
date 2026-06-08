@@ -112,7 +112,7 @@ export default async function AppleCategoryPage({ params }: PageProps) {
             <Link href="/apple" className="apple-back-link">
               返回健康概览
             </Link>
-            <div className="hero-eyebrow">浏览分类</div>
+            <div className="hero-eyebrow">健康分类</div>
             <h2>{spec.title}</h2>
             <p>{spec.description}</p>
           </div>
@@ -187,7 +187,7 @@ export default async function AppleCategoryPage({ params }: PageProps) {
         <div className="apple-kpi">
           <span>最近同步</span>
           <strong className="compact">{relativeZh(rawNewest(status)).replace("同步", "")}</strong>
-          <small>本机健康数据服务</small>
+          <small>本机健康记录</small>
         </div>
       </section>
 

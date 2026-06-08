@@ -177,7 +177,7 @@ function buildHighlights({
       icon: "data",
       tone: syncNewest ? "good" : "neutral",
       stats: [
-        { label: "同步类别", value: `${Object.keys(status ?? {}).length} 类` },
+        { label: "记录类别", value: `${Object.keys(status ?? {}).length} 类` },
         { label: "最近", value: relativeZh(syncNewest) },
         { label: "位置", value: "本机" },
       ],
@@ -231,7 +231,7 @@ export default async function AppleHighlightsPage() {
         <div className="apple-kpi">
           <span>最近同步</span>
           <strong className="compact">{relativeZh(rawNewest(status)).replace("同步", "")}</strong>
-          <small>本机健康数据服务</small>
+          <small>本机健康记录</small>
         </div>
       </section>
 

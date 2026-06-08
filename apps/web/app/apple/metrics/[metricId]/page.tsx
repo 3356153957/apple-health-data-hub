@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { metricId } = await params;
   const key = decodeURIComponent(metricId);
   const metric = APPLE_METRICS.find((item) => item.slug === key || item.id === key);
-  return { title: `${metric?.label ?? "指标详情"} · HealthSave` };
+  return { title: `${metric?.label ?? "健康指标"} · HealthSave` };
 }
 
 function minMax(nums: number[]): { min: number | null; max: number | null } {
@@ -563,7 +563,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
           <Link href="/apple" className="apple-back-link">
             返回健康概览
           </Link>
-          <div className="hero-eyebrow">指标详情</div>
+          <div className="hero-eyebrow">健康指标</div>
           <h2>{metric.label}</h2>
           <p>{metric.description}</p>
         </div>
