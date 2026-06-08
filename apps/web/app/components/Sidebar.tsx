@@ -43,14 +43,23 @@ const ICONS: Record<string, ReactNode> = {
   privacy: <path d="M8 2.2l4.5 1.8v3.6c0 2.8-1.9 4.7-4.5 5.6-2.6-.9-4.5-2.8-4.5-5.6V4z" />,
 };
 
-const NAV = [
-  { href: "/apple", label: "健康概览", icon: "apple" },
-  { href: "/apple/raw/daily_activity", label: "活动明细", icon: "overview" },
-  { href: "/apple/raw/sleep_sessions", label: "睡眠明细", icon: "data" },
-  { href: "/apple/raw/workouts", label: "训练明细", icon: "experiments" },
-  { href: "/apple/metrics/heart-rate", label: "心率趋势", icon: "evidence" },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: string;
+  exact?: boolean;
+  activePrefixes?: readonly string[];
+};
+
+const NAV: readonly NavItem[] = [
+  { href: "/apple", label: "健康概览", icon: "apple", exact: true },
+  { href: "/apple/browse", label: "浏览", icon: "overview" },
+  { href: "/apple/categories/activity", label: "活动", icon: "overview" },
+  { href: "/apple/categories/sleep", label: "睡眠", icon: "data" },
+  { href: "/apple/categories/recovery", label: "恢复", icon: "evidence" },
+  { href: "/apple/categories/data", label: "数据来源", icon: "experiments", activePrefixes: ["/apple/raw/"] },
   { href: "/privacy", label: "隐私设置", icon: "privacy" },
-] as const;
+];
 
 function NavIcon({ name }: { name: string }) {
   return (
@@ -95,7 +104,11 @@ export function Sidebar({
 
       <nav className="nav">
         {NAV.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const active = item.exact
+            ? pathname === item.href
+            : pathname === item.href ||
+              pathname.startsWith(`${item.href}/`) ||
+              Boolean(item.activePrefixes?.some((prefix) => pathname.startsWith(prefix)));
           return (
             <Link
               key={item.href}
