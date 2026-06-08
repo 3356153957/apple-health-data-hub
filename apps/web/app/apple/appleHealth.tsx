@@ -42,6 +42,16 @@ export const APPLE_METRICS: AppleMetric[] = [
     description: "Apple Watch 估算的主动消耗，可以帮助判断昨日运动负荷。",
   },
   {
+    id: "activity.stand_minutes",
+    slug: "stand-time",
+    label: "站立时间",
+    unit: "分钟",
+    digits: 0,
+    higherIsBetter: true,
+    note: "日常活动",
+    description: "Apple Watch 记录的站立和活动时间，适合和久坐、运动分钟一起看。",
+  },
+  {
     id: "vital.hrv_sdnn",
     slug: "hrv",
     label: "HRV",
@@ -111,6 +121,7 @@ export const CORE_METRICS = [
   { id: "workout.session", label: "体能训练", group: "训练" },
   { id: "activity.steps", label: "步数", group: "活动" },
   { id: "activity.active_energy", label: "活动能量", group: "活动" },
+  { id: "activity.stand_minutes", label: "站立时间", group: "活动" },
   { id: "body.wrist_temperature", label: "腕温", group: "身体" },
   { id: "cardio.vo2_max", label: "VO2 max", group: "心肺" },
 ];

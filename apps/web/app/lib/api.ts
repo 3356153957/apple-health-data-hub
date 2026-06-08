@@ -140,6 +140,7 @@ export type AppleDailySummary = {
     total_calories: number | null;
     active_minutes: number | null;
     stand_hours: number | null;
+    stand_minutes: number | null;
     avg_hr: number | null;
     max_hr: number | null;
     level: string;

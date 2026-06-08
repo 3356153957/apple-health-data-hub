@@ -1568,6 +1568,12 @@ html {
   padding: 17px 18px;
 }
 
+.apple-kpi.icon {
+  position: relative;
+  min-height: 126px;
+  padding-right: 62px;
+}
+
 .apple-kpi span,
 .apple-kpi small,
 .apple-card-meta,
@@ -1597,6 +1603,56 @@ html {
   margin-top: 9px;
   font-size: 12px;
   line-height: 1.45;
+}
+
+.apple-mini-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  color: var(--signal);
+  background: var(--signal-weak);
+}
+
+.apple-mini-icon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.apple-kpi.icon .apple-mini-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.apple-mini-icon.month,
+.apple-mini-icon.energy {
+  color: var(--warn);
+  background: rgba(232, 180, 95, 0.1);
+  border-color: rgba(232, 180, 95, 0.28);
+}
+
+.apple-mini-icon.trend,
+.apple-mini-icon.activity,
+.apple-mini-icon.workout {
+  color: var(--up);
+  background: rgba(56, 217, 150, 0.1);
+  border-color: rgba(56, 217, 150, 0.28);
+}
+
+.apple-mini-icon.sleep,
+.apple-mini-icon.heart {
+  color: var(--accent);
+  background: rgba(144, 166, 255, 0.1);
+  border-color: rgba(144, 166, 255, 0.28);
 }
 
 .apple-section-head {
@@ -1792,6 +1848,10 @@ html {
   padding: 20px 22px;
 }
 
+.apple-period-overview {
+  margin-top: 14px;
+}
+
 .apple-panel-head {
   display: flex;
   align-items: flex-start;
@@ -1804,6 +1864,158 @@ html {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.apple-period-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 26px;
+  margin-top: 18px;
+}
+
+.apple-period-grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 18px;
+}
+
+.apple-period-card {
+  display: grid;
+  grid-template-columns: 38px 1fr max-content;
+  gap: 13px;
+  align-items: start;
+  min-width: 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.apple-period-card.compact {
+  grid-template-columns: 38px 1fr;
+}
+
+.apple-period-card span,
+.apple-record-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-period-card strong,
+.apple-record-card strong {
+  display: block;
+  margin-top: 7px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 25px;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-period-card strong small,
+.apple-record-card strong small {
+  margin-left: 7px;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 12px;
+}
+
+.apple-period-card p,
+.apple-record-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.apple-period-card em {
+  align-self: start;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--raise);
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.apple-period-card em.good {
+  color: var(--up);
+  background: rgba(56, 217, 150, 0.1);
+}
+
+.apple-period-card em.warn {
+  color: var(--warn);
+  background: rgba(232, 180, 95, 0.1);
+}
+
+.apple-record-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 18px;
+  margin-top: 16px;
+}
+
+.apple-record-grid.raw {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.apple-record-card {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.apple-record-card strong {
+  font-size: 21px;
+}
+
+.apple-record-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.apple-record-tags em {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--raise);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.apple-disclosure {
+  margin-top: 18px;
+}
+
+.apple-disclosure summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--signal);
+  background: var(--signal-weak);
+  cursor: pointer;
+  font-size: 12px;
+  user-select: none;
+}
+
+.apple-disclosure summary:hover {
+  border-color: var(--signal-line);
+}
+
+.apple-disclosure summary:active {
+  opacity: 0.82;
 }
 
 .apple-text-link,
@@ -1836,7 +2048,7 @@ html {
 
 .apple-brief-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-top: 18px;
 }
@@ -1867,6 +2079,34 @@ html {
   display: grid;
   gap: 14px;
   margin-top: 22px;
+}
+
+.apple-sleep-extra {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.apple-sleep-extra div {
+  padding: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  background: var(--raise);
+}
+
+.apple-sleep-extra span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-sleep-extra strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 18px;
 }
 
 .apple-sleep-row {
@@ -2019,6 +2259,12 @@ html {
   color: var(--muted);
 }
 
+.apple-empty-chart.compact {
+  grid-column: 1 / -1;
+  height: 90px;
+  margin-top: 0;
+}
+
 .apple-table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -2073,7 +2319,15 @@ html {
 @media (max-width: 1100px) {
   .apple-kpis,
   .apple-trend-grid,
-  .apple-raw-grid {
+  .apple-raw-grid,
+  .apple-brief-metrics,
+  .apple-sleep-extra,
+  .apple-period-grid.four,
+  .apple-record-grid.raw {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .apple-record-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -2095,7 +2349,12 @@ html {
   .apple-readiness,
   .apple-two-col,
   .apple-raw-grid,
-  .apple-brief-metrics {
+  .apple-brief-metrics,
+  .apple-sleep-extra,
+  .apple-period-grid,
+  .apple-period-grid.four,
+  .apple-record-grid,
+  .apple-record-grid.raw {
     grid-template-columns: 1fr;
   }
   .apple-hero,
@@ -2110,5 +2369,11 @@ html {
   }
   .apple-chart {
     height: 180px;
+  }
+  .apple-period-card {
+    grid-template-columns: 38px 1fr;
+  }
+  .apple-period-card em {
+    grid-column: 2;
   }
 }

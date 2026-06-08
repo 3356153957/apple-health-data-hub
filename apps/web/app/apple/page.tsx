@@ -127,6 +127,10 @@ export default async function AppleHealthPage() {
               <strong>{formatValue(dailySummary?.activity?.active_minutes)} 分钟</strong>
             </div>
             <div>
+              <span>站立时间</span>
+              <strong>{formatHours(dailySummary?.activity?.stand_minutes)}</strong>
+            </div>
+            <div>
               <span>活动能量</span>
               <strong>{formatValue(dailySummary?.activity?.active_calories)} kcal</strong>
             </div>
@@ -167,6 +171,16 @@ export default async function AppleHealthPage() {
                 </div>
               );
             })}
+          </div>
+          <div className="apple-sleep-extra">
+            <div>
+              <span>睡眠效率</span>
+              <strong>{formatValue(dailySummary?.sleep?.efficiency_pct, 1)}%</strong>
+            </div>
+            <div>
+              <span>呼吸频率</span>
+              <strong>{formatValue(dailySummary?.sleep?.respiratory_rate, 1)} 次/分</strong>
+            </div>
           </div>
         </article>
       </section>

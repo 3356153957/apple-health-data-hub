@@ -132,7 +132,15 @@ async def apple_daily_summary(
             text(
                 """
                 SELECT date, steps, distance_m, floors_climbed, active_calories,
-                       total_calories, active_minutes, stand_hours, avg_hr, max_hr
+                       total_calories, active_minutes, stand_hours,
+                       (
+                           SELECT round(sum(qs.value)::numeric, 1)
+                           FROM quantity_samples qs
+                           WHERE qs.owner_id = :owner_id
+                             AND qs.metric_name = 'apple_stand_time'
+                             AND date(qs.time AT TIME ZONE 'Asia/Shanghai') = :target_date
+                       ) AS stand_minutes,
+                       avg_hr, max_hr
                 FROM daily_activity
                 WHERE owner_id = :owner_id AND date = :target_date
                 LIMIT 1
@@ -170,13 +178,24 @@ async def apple_daily_summary(
         await session.execute(
             text(
                 """
-                SELECT start_time, end_time, total_duration_ms, awake_ms,
-                       light_ms, deep_ms, rem_ms, respiratory_rate
-                FROM sleep_sessions
-                WHERE owner_id = :owner_id
-                  AND (start_time AT TIME ZONE 'Asia/Shanghai') >= :sleep_start
-                  AND (start_time AT TIME ZONE 'Asia/Shanghai') < :sleep_end
-                ORDER BY total_duration_ms DESC NULLS LAST, start_time DESC
+                SELECT s.start_time, s.end_time, s.total_duration_ms, s.awake_ms,
+                       s.light_ms, s.deep_ms, s.rem_ms,
+                       COALESCE(
+                           s.respiratory_rate,
+                           (
+                               SELECT round(avg(qs.value)::numeric, 1)
+                               FROM quantity_samples qs
+                               WHERE qs.owner_id = s.owner_id
+                                 AND qs.metric_name = 'respiratory_rate'
+                                 AND qs.time >= s.start_time
+                                 AND qs.time <= s.end_time
+                           )
+                       ) AS respiratory_rate
+                FROM sleep_sessions s
+                WHERE s.owner_id = :owner_id
+                  AND (s.start_time AT TIME ZONE 'Asia/Shanghai') >= :sleep_start
+                  AND (s.start_time AT TIME ZONE 'Asia/Shanghai') < :sleep_end
+                ORDER BY s.total_duration_ms DESC NULLS LAST, s.start_time DESC
                 LIMIT 1
                 """
             ),
@@ -353,13 +372,21 @@ _RAW_TABLES: dict[str, dict[str, Any]] = {
             "total_calories",
             "active_minutes",
             "stand_hours",
+            "stand_minutes",
         ],
         "sql": """
-            SELECT date, steps, distance_m, floors_climbed, active_calories,
-                   total_calories, active_minutes, stand_hours
-            FROM daily_activity
-            WHERE owner_id = :owner_id
-            ORDER BY date DESC
+            SELECT da.date, da.steps, da.distance_m, da.floors_climbed, da.active_calories,
+                   da.total_calories, da.active_minutes, da.stand_hours,
+                   (
+                       SELECT round(sum(qs.value)::numeric, 1)
+                       FROM quantity_samples qs
+                       WHERE qs.owner_id = da.owner_id
+                         AND qs.metric_name = 'apple_stand_time'
+                         AND date(qs.time AT TIME ZONE 'Asia/Shanghai') = da.date
+                   ) AS stand_minutes
+            FROM daily_activity da
+            WHERE da.owner_id = :owner_id
+            ORDER BY da.date DESC
             LIMIT :limit
         """,
     },
@@ -376,16 +403,26 @@ _RAW_TABLES: dict[str, dict[str, Any]] = {
             "respiratory_rate",
         ],
         "sql": """
-            SELECT start_time, end_time,
-                   round(total_duration_ms / 60000.0, 1) AS total_sleep_min,
-                   round(awake_ms / 60000.0, 1) AS awake_min,
-                   round(light_ms / 60000.0, 1) AS core_min,
-                   round(deep_ms / 60000.0, 1) AS deep_min,
-                   round(rem_ms / 60000.0, 1) AS rem_min,
-                   respiratory_rate
-            FROM sleep_sessions
-            WHERE owner_id = :owner_id
-            ORDER BY start_time DESC
+            SELECT s.start_time, s.end_time,
+                   round(s.total_duration_ms / 60000.0, 1) AS total_sleep_min,
+                   round(s.awake_ms / 60000.0, 1) AS awake_min,
+                   round(s.light_ms / 60000.0, 1) AS core_min,
+                   round(s.deep_ms / 60000.0, 1) AS deep_min,
+                   round(s.rem_ms / 60000.0, 1) AS rem_min,
+                   COALESCE(
+                       s.respiratory_rate,
+                       (
+                           SELECT round(avg(qs.value)::numeric, 1)
+                           FROM quantity_samples qs
+                           WHERE qs.owner_id = s.owner_id
+                             AND qs.metric_name = 'respiratory_rate'
+                             AND qs.time >= s.start_time
+                             AND qs.time <= s.end_time
+                       )
+                   ) AS respiratory_rate
+            FROM sleep_sessions s
+            WHERE s.owner_id = :owner_id
+            ORDER BY s.start_time DESC
             LIMIT :limit
         """,
     },
