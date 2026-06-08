@@ -139,8 +139,12 @@ function recentDays(
 ): RecentDay[] {
   const sleepByDate = new Map<string, Record<string, string | number | null>>();
   sleepRows.forEach((row) => {
-    const key = dateKey(rawString(row, "start_time"));
-    if (key && !sleepByDate.has(key)) sleepByDate.set(key, row);
+    const key = dateKey(rawString(row, "end_time") ?? rawString(row, "start_time"));
+    if (!key) return;
+    const current = sleepByDate.get(key);
+    const currentSleep = rawNumber(current, "total_sleep_min") ?? 0;
+    const nextSleep = rawNumber(row, "total_sleep_min") ?? 0;
+    if (!current || nextSleep > currentSleep) sleepByDate.set(key, row);
   });
 
   return activityRows.slice(0, 7).map((row) => {
