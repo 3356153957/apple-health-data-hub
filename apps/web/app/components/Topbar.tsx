@@ -56,8 +56,8 @@ function titleForPath(pathname: string): { title: string; sub: string } {
 }
 
 function processingLabel(provider: string, isLocal: boolean): string {
-  if (isLocal) return "本机处理";
-  if (provider.toLowerCase() === "ollama") return "本机处理";
+  if (isLocal) return "仅自己可见";
+  if (provider.toLowerCase() === "ollama") return "仅自己可见";
   return "云端摘要";
 }
 

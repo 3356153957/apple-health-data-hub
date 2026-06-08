@@ -566,7 +566,7 @@ export default async function AppleHealthPage() {
           <p>{dailySummary?.headline ?? "同步完成后，这里会展示昨日运动、睡眠与恢复建议。"}</p>
         </div>
         <div className="apple-hero-badges">
-          <span className="apple-badge good">{isLocal ? "本机数据" : "云端摘要"}</span>
+          <span className="apple-badge good">{isLocal ? "仅自己可见" : "云端摘要"}</span>
           <span className="apple-badge">{relativeZh(latestSync(readiness, status))}</span>
         </div>
       </section>

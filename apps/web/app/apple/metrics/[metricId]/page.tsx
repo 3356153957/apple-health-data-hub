@@ -371,7 +371,7 @@ function buildMetricInsights({
       body:
         monthDirection === null
           ? `本周变化${weekChange === null ? "暂时无法比较" : `${weekChange >= 0 ? "上升" : "下降"} ${formatValue(Math.abs(weekChange), 1)}%`}，月度对比还需要更多记录。`
-          : `本周${weekChange === null ? "暂无同期对比" : `${weekChange >= 0 ? "高于" : "低于"}上周 ${formatValue(Math.abs(weekChange), 1)}%`}，本月趋势已经可以和上月做初步比较。`,
+          : `本周${weekChange === null ? "暂无同期对比" : `${weekChange >= 0 ? "高于" : "低于"}上周 ${formatValue(Math.abs(weekChange), 1)}%`}，可以和上月放在一起看变化。`,
       meta: "周期回顾",
       tone: insightTone(metric, monthChange ?? weekChange),
     },
@@ -569,16 +569,16 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
         </div>
         <div className="apple-hero-badges">
           <span className="apple-badge">{metric.note}</span>
-          <span className="apple-badge good">本地读取</span>
+          <span className="apple-badge good">已同步</span>
         </div>
       </section>
 
       <section className="apple-related-metrics" aria-label="相关指标">
         <div className="apple-related-copy">
           <span>相关指标</span>
-          <strong>不同指标分开展示</strong>
+          <strong>搭配查看更完整</strong>
           <p>
-            当前页只展示{metric.label}。站立时间在活动里，呼吸次数在睡眠和恢复里，点下面卡片可以直接查看。
+            {metric.label}可以和活动、睡眠、恢复指标一起看，下面是最常用的搭配入口。
           </p>
         </div>
         {relatedCards.map((item) => (
@@ -709,7 +709,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
         <div className="apple-panel-head">
           <div>
             <h3>最近记录</h3>
-            <p>先展示最近 12 条，完整同步记录可以展开查看。</p>
+            <p>按时间回看最近测量，帮助确认一天里的变化。</p>
           </div>
         </div>
         <div className="apple-record-grid">

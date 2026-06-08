@@ -46,7 +46,7 @@ function recentTone(iso: string | null): "good" | "warn" | "neutral" {
 function privacyLabel(privacy: Privacy | null): string {
   if (!privacy) return "本地优先";
   if (privacy.raw_observations_leave_host) return "需要核对";
-  return privacy.cloud_active ? "云端摘要" : "仅本机";
+  return privacy.cloud_active ? "云端摘要" : "仅自己可见";
 }
 
 function privacyTone(privacy: Privacy | null): "good" | "warn" | "neutral" {
@@ -56,8 +56,8 @@ function privacyTone(privacy: Privacy | null): "good" | "warn" | "neutral" {
 }
 
 function providerLabel(provider: string | null | undefined): string {
-  if (!provider) return "本机处理";
-  if (provider.toLowerCase() === "ollama") return "本机处理";
+  if (!provider) return "仅自己可见";
+  if (provider.toLowerCase() === "ollama") return "仅自己可见";
   return provider;
 }
 

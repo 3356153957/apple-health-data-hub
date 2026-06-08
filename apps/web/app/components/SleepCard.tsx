@@ -8,18 +8,18 @@ const STAGE_COLOR: Record<string, string> = {
 };
 
 const STAGE_LABEL: Record<string, string> = {
-  awake: "Awake",
+  awake: "清醒",
   rem: "REM",
-  core: "Core",
-  deep: "Deep",
+  core: "核心",
+  deep: "深睡",
 };
 
 export function SleepCard({ series }: { series: MetricSeries | null }) {
   if (!series) {
     return (
       <article className="card">
-        <h2>Sleep</h2>
-        <p className="empty">Backend unreachable — start datahub and sync from HealthSave.</p>
+        <h2>睡眠</h2>
+        <p className="empty">暂时无法连接健康服务，恢复后会显示睡眠记录。</p>
       </article>
     );
   }
@@ -28,8 +28,8 @@ export function SleepCard({ series }: { series: MetricSeries | null }) {
   if (stages.length === 0) {
     return (
       <article className="card">
-        <h2>Sleep Stages</h2>
-        <p className="empty">No sleep data yet — sync from HealthSave to see your night.</p>
+        <h2>睡眠阶段</h2>
+        <p className="empty">还没有同步到睡眠记录。</p>
       </article>
     );
   }
@@ -40,8 +40,8 @@ export function SleepCard({ series }: { series: MetricSeries | null }) {
 
   return (
     <article className="card">
-      <h2>Sleep Stages</h2>
-      <div className="hypnogram" role="img" aria-label="Sleep stage timeline">
+      <h2>睡眠阶段</h2>
+      <div className="hypnogram" role="img" aria-label="睡眠阶段时间线">
         {stages.map((s, i) => (
           <span
             key={i}
@@ -60,7 +60,7 @@ export function SleepCard({ series }: { series: MetricSeries | null }) {
         ))}
       </div>
       <div className="meta">
-        {stages.length} stage segments · last {series.range}
+        {stages.length} 段睡眠记录 · 最近 {series.range}
       </div>
     </article>
   );

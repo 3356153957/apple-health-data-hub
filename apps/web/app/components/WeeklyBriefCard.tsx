@@ -9,8 +9,8 @@ export function WeeklyBriefCard({ latest }: { latest: InsightsLatest | null }) {
   if (!latest) {
     return (
       <article className="card brief">
-        <h2>Weekly Brief</h2>
-        <p className="empty">Backend unreachable — start datahub and sync from HealthSave.</p>
+        <h2>每周简报</h2>
+        <p className="empty">暂时无法连接健康服务，恢复后会显示简报。</p>
       </article>
     );
   }
@@ -20,23 +20,23 @@ export function WeeklyBriefCard({ latest }: { latest: InsightsLatest | null }) {
   if (!brief) {
     return (
       <article className="card brief">
-        <h2>Weekly Brief</h2>
+        <h2>每周简报</h2>
         <p className="empty">
-          No briefing yet — these are generated locally once you have a few days of data.
+          还没有生成简报。同步几天健康记录后会自动整理。
         </p>
       </article>
     );
   }
 
-  const scope = brief.insight_type === "weekly_summary" ? "This week" : "Today";
+  const scope = brief.insight_type === "weekly_summary" ? "本周" : "今天";
   const when = brief.created_at ? ` · ${formatDate(brief.created_at)}` : "";
 
   return (
     <article className="card brief">
-      <h2>Weekly Brief</h2>
+      <h2>每周简报</h2>
       <div className="brief-meta">
         {scope}
-        {when} · interpreted locally
+        {when} · 私密整理
       </div>
       <p className="brief-body">{brief.narrative}</p>
     </article>

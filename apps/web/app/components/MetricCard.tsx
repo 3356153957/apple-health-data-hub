@@ -29,7 +29,7 @@ export function MetricCard({
     return (
       <article className="card">
         <h2>{fallbackTitle}</h2>
-        <p className="empty">Backend unreachable — start datahub and sync from HealthSave.</p>
+        <p className="empty">暂时无法连接健康服务，恢复后会自动显示。</p>
       </article>
     );
   }
@@ -43,7 +43,7 @@ export function MetricCard({
     return (
       <article className="card">
         <h2>{series.metric.display_name}</h2>
-        <p className="empty">No data yet — sync from HealthSave to populate this.</p>
+        <p className="empty">还没有同步到这项健康记录。</p>
       </article>
     );
   }
@@ -59,11 +59,11 @@ export function MetricCard({
         <span className="unit">{series.metric.canonical_unit}</span>
       </div>
       <div className={`delta ${delta >= 0 ? "up" : "down"}`}>
-        {delta >= 0 ? "▲" : "▼"} {Math.abs(delta).toFixed(0)} vs {series.range} average
+        {delta >= 0 ? "▲" : "▼"} 较 {series.range} 平均 {Math.abs(delta).toFixed(0)}
       </div>
       <Sparkline values={values} />
       <div className="meta">
-        {values.length} readings · last {series.range}
+        {values.length} 条记录 · 最近 {series.range}
       </div>
     </article>
   );

@@ -93,8 +93,8 @@ export function ReadinessCard({
   if (!readiness) {
     return (
       <article className="card readiness">
-        <h2>Data Readiness</h2>
-        <p className="empty">Backend unreachable — start datahub and sync from HealthSave.</p>
+        <h2>数据状态</h2>
+        <p className="empty">暂时无法连接健康服务，恢复后会显示同步状态。</p>
       </article>
     );
   }
@@ -102,8 +102,8 @@ export function ReadinessCard({
   if (readiness.metrics.length === 0) {
     return (
       <article className="card readiness">
-        <h2>Data Readiness</h2>
-        <p className="empty">No data yet — sync from HealthSave to populate your hub.</p>
+        <h2>数据状态</h2>
+        <p className="empty">还没有同步到健康记录。</p>
       </article>
     );
   }
@@ -112,22 +112,21 @@ export function ReadinessCard({
 
   return (
     <article className="card readiness">
-      <h2>Data Readiness</h2>
+      <h2>数据状态</h2>
 
       <div className="readiness-head">
         <div className="big">
           {readiness.summary.metrics_with_data}
-          <span className="unit">metrics with data</span>
+          <span className="unit">项已有数据</span>
         </div>
         <div className={`freshness ${stale ? "down" : "up"}`}>
-          {stale ? "▼" : "▲"} last reading {formatAgo(readiness.last_observation_at)}
+          {stale ? "▼" : "▲"} 最近记录 {formatAgo(readiness.last_observation_at)}
         </div>
       </div>
 
       {stale && (
         <p className="note">
-          Data may be behind — HealthKit only syncs while your iPhone is unlocked. Open HealthSave
-          to catch up.
+          数据可能还没有更新。请确认 iPhone 已解锁，并打开手机端同步一次。
         </p>
       )}
 

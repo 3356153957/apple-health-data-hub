@@ -115,18 +115,18 @@ function sourceSummaries(details: Array<AppleRawDetail | null>): SourceSummary[]
 function privacyLabel(privacy: Privacy | null): string {
   if (!privacy) return "本地优先";
   if (privacy.raw_observations_leave_host) return "有原始数据外发";
-  return privacy.is_local ? "仅本机读取" : "云端模式";
+  return privacy.is_local ? "仅自己可见" : "云端摘要";
 }
 
 function privacyHelper(privacy: Privacy | null): string {
   if (!privacy) return "暂时无法读取隐私状态，但页面不会主动上传健康明细。";
   if (privacy.raw_observations_leave_host) return "建议到隐私设置里核对外发范围。";
-  return privacy.cloud_active ? "当前启用了云端能力，但原始健康记录不会直接离开本机。" : "当前分析和读取都在本机完成。";
+  return privacy.cloud_active ? "当前启用了云端摘要，但原始健康记录不会直接离开本机。" : "健康明细只保留在你的设备和本地服务里。";
 }
 
 function providerLabel(provider: string | null | undefined): string {
-  if (!provider) return "本机处理";
-  if (provider.toLowerCase() === "ollama") return "本机处理";
+  if (!provider) return "仅自己可见";
+  if (provider.toLowerCase() === "ollama") return "仅自己可见";
   return provider;
 }
 

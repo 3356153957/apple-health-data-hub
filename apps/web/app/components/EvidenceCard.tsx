@@ -108,8 +108,8 @@ export function EvidenceCard({ findings }: { findings: Finding[] | null }) {
   if (findings === null) {
     return (
       <article className="card evidence">
-        <h2>Evidence</h2>
-        <p className="empty">Backend unreachable — start datahub and sync from HealthSave.</p>
+        <h2>健康发现</h2>
+        <p className="empty">暂时无法连接健康服务，恢复后会显示发现。</p>
       </article>
     );
   }
@@ -117,9 +117,9 @@ export function EvidenceCard({ findings }: { findings: Finding[] | null }) {
   if (findings.length === 0) {
     return (
       <article className="card evidence">
-        <h2>Evidence</h2>
+        <h2>健康发现</h2>
         <p className="empty">
-          No findings yet — anomalies, trends and correlations appear here as the engine runs.
+          还没有新的发现。同步更多记录后，这里会显示趋势和异常提醒。
         </p>
       </article>
     );
@@ -127,7 +127,7 @@ export function EvidenceCard({ findings }: { findings: Finding[] | null }) {
 
   return (
     <article className="card evidence">
-      <h2>Evidence</h2>
+      <h2>健康发现</h2>
       <ul className="evidence-list">
         {findings.map((finding) => (
           <EvidenceRow key={finding.id} finding={finding} />

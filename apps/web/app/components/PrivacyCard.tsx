@@ -36,7 +36,7 @@ export function PrivacyCard({ privacy }: { privacy: Privacy | null }) {
       <h2>隐私状态</h2>
 
       <div className="readiness-head">
-        <span className="cand-hyp">{local ? "仅本机处理" : "云端摘要已开启"}</span>
+        <span className="cand-hyp">{local ? "仅自己可见" : "云端摘要已开启"}</span>
         <span className={`badge ${local ? "ready" : "waiting"}`}>
           {local ? "无外发" : `→ ${privacy.provider}`}
         </span>

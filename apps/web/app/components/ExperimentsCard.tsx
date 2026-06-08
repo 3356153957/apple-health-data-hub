@@ -29,13 +29,13 @@ function pairKey(lever: string | null, outcome: string | null): string {
 function inferenceLabel(inference: string | null): string {
   switch (inference) {
     case "randomization_test":
-      return "randomization test";
+      return "随机对照检验";
     case "descriptive_only":
-      return "descriptive only — too few blocks to test";
+      return "记录较少，先作为描述参考";
     case "observational":
-      return "observational — association, not cause";
+      return "观察性关联，不代表因果";
     case "insufficient":
-      return "not enough data yet";
+      return "数据还不够";
     default:
       return inference ?? "—";
   }
@@ -62,7 +62,7 @@ function ResultBlock({ result }: { result: ExperimentResult }) {
   return (
     <div className="exp-result">
       <div className="exp-result-head">
-        <span className="type-badge">{observational ? "early read" : "result"}</span>
+        <span className="type-badge">{observational ? "早期观察" : "结果"}</span>
         {result.summary && <span className="evidence-sum">{result.summary}</span>}
       </div>
       {!insufficient && (
@@ -75,33 +75,33 @@ function ResultBlock({ result }: { result: ExperimentResult }) {
           {result.effect_size != null && <span>d={num(result.effect_size)}</span>}
           {result.n_a != null && result.n_b != null && (
             <span>
-              {result.n_a} vs {result.n_b} days
+              {result.n_a} 天 vs {result.n_b} 天
             </span>
           )}
-          {adherence && <span className={`adherence ${adherence}`}>adherence: {adherence}</span>}
+          {adherence && <span className={`adherence ${adherence}`}>执行情况：{adherence}</span>}
         </div>
       )}
       {(result.caveat || adherenceNote(result)) && (
         <details className="calc">
-          <summary>caveat &amp; calculation</summary>
+          <summary>说明与计算</summary>
           <div className="exp-caveat">
             {adherenceNote(result) && <p>{adherenceNote(result)}</p>}
             {result.caveat && <p>{result.caveat}</p>}
             <dl className="calc-grid">
               <div className="calc-row">
-                <dt>baseline mean</dt>
+                <dt>基线平均</dt>
                 <dd>{num(result.mean_a)}</dd>
               </div>
               <div className="calc-row">
-                <dt>intervention mean</dt>
+                <dt>尝试后平均</dt>
                 <dd>{num(result.mean_b)}</dd>
               </div>
               <div className="calc-row">
-                <dt>difference</dt>
+                <dt>差异</dt>
                 <dd>{num(result.diff)}</dd>
               </div>
               <div className="calc-row">
-                <dt>inference</dt>
+                <dt>判断方式</dt>
                 <dd>{inferenceLabel(result.inference)}</dd>
               </div>
             </dl>
@@ -136,10 +136,10 @@ function ExperimentRow({ experiment }: { experiment: Experiment }) {
           </div>
           <div className="meta">
             {prog.is_complete
-              ? "window complete — analyze now"
-              : `day ${prog.day_index}/${prog.total_days}${
-                  prog.current_phase ? ` · phase ${prog.current_phase}` : ""
-                } · ${prog.days_remaining} days left`}
+              ? "周期已完成，可以分析"
+              : `第 ${prog.day_index}/${prog.total_days} 天${
+                  prog.current_phase ? ` · 阶段 ${prog.current_phase}` : ""
+                } · 还剩 ${prog.days_remaining} 天`}
           </div>
         </div>
       )}
@@ -162,7 +162,7 @@ function TestableRow({ candidate }: { candidate: Candidate }) {
         <span className="cand-hyp">
           {short(lever)} → {short(outcome)}
         </span>
-        <span className="badge ready">testable</span>
+        <span className="badge ready">可尝试</span>
         {r && <span className="cand-strength">r={r}</span>}
       </div>
       {candidate.readiness.suggested_protocol && (
@@ -181,7 +181,7 @@ function NotTestableRow({ candidate }: { candidate: Candidate }) {
         <span className="cand-hyp">
           {short(candidate.metric_a)} ~ {short(candidate.metric_b)}
         </span>
-        <span className="badge waiting">not testable</span>
+        <span className="badge waiting">暂不适合直接尝试</span>
         {r && <span className="cand-strength">r={r}</span>}
       </div>
       <p className="cand-rationale">{candidate.readiness.rationale}</p>
@@ -199,8 +199,8 @@ export function ExperimentsCard({
   if (experiments === null && candidates === null) {
     return (
       <article className="card experiments">
-        <h2>What to Try Next</h2>
-        <p className="empty">Backend unreachable — start datahub and sync from HealthSave.</p>
+        <h2>接下来可以尝试</h2>
+        <p className="empty">暂时无法连接健康服务，恢复后会显示建议。</p>
       </article>
     );
   }
@@ -222,11 +222,11 @@ export function ExperimentsCard({
 
   return (
     <article className="card experiments">
-      <h2>What to Try Next</h2>
+      <h2>接下来可以尝试</h2>
 
       {exps.length > 0 && (
         <>
-          <div className="brief-meta">Your experiments</div>
+          <div className="brief-meta">正在进行</div>
           <ul className="cand-list">
             {exps.map((experiment) => (
               <ExperimentRow key={experiment.id} experiment={experiment} />
@@ -237,8 +237,8 @@ export function ExperimentsCard({
 
       <div className="brief-meta">
         {startable.length > 0
-          ? `${startable.length} ${startable.length === 1 ? "idea" : "ideas"} to start`
-          : "Start something new"}
+          ? `${startable.length} 个可开始的想法`
+          : "开始新的尝试"}
       </div>
       {startable.length > 0 ? (
         <ul className="cand-list">
@@ -249,14 +249,14 @@ export function ExperimentsCard({
       ) : (
         <p className="empty">
           {exps.length > 0
-            ? "Nothing new to start right now — the strongest fresh correlations link metrics you can't set by choice."
-            : "No candidates yet — correlations become experiment ideas once the engine finds them."}
+            ? "现在暂时没有新的尝试建议。"
+            : "还没有形成建议，同步更多记录后会自动整理。"}
         </p>
       )}
 
       {notTestable.length > 0 && (
         <details className="calc">
-          <summary>{notTestable.length} not directly testable</summary>
+          <summary>{notTestable.length} 项暂不适合直接尝试</summary>
           <ul className="cand-list">
             {notTestable.map((candidate) => (
               <NotTestableRow
