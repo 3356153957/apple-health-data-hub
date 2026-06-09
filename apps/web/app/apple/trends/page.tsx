@@ -151,7 +151,7 @@ export default async function AppleTrendsPage() {
           <div>
             <span>整体节奏</span>
             <strong>{upward} 上升 · {downward} 下降</strong>
-            <p>{comparable.length} 个指标已有 30 天对比，当前趋势来自 {totalPoints.toLocaleString("zh-CN")} 个数据点。</p>
+            <p>{comparable.length} 个指标已有 30 天对比，当前趋势来自 {totalPoints.toLocaleString("zh-CN")} 条健康记录。</p>
           </div>
         </Link>
       </section>
@@ -163,7 +163,7 @@ export default async function AppleTrendsPage() {
           <small>已形成 30 天对比</small>
         </div>
         <div className="apple-kpi">
-          <span>数据点</span>
+          <span>健康记录</span>
           <strong>{totalPoints.toLocaleString("zh-CN")}</strong>
           <small>来自 Apple Watch 与 iPhone</small>
         </div>
@@ -172,7 +172,7 @@ export default async function AppleTrendsPage() {
           <strong>
             {upward} / {downward}
           </strong>
-          <small>按最近半段对比前半段</small>
+          <small>近 30 天前后对比</small>
         </div>
         <div className="apple-kpi">
           <span>最大变化</span>
@@ -227,7 +227,7 @@ export default async function AppleTrendsPage() {
                 <span>{groupForMetric(item.metric.id)}</span>
                 <strong>{item.metric.label}</strong>
                 <p>
-                  {item.nums.length.toLocaleString("zh-CN")} 个点 · {zhDate(item.series?.start)} 到 {zhDate(item.series?.end)}
+                  {item.nums.length.toLocaleString("zh-CN")} 条记录 · {zhDate(item.series?.start)} 到 {zhDate(item.series?.end)}
                 </p>
               </div>
               <div className="apple-trend-row-value">

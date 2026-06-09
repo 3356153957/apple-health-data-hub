@@ -865,7 +865,7 @@ export default async function AppleHealthPage() {
 
       <div className="apple-section-head">
         <h3>健康指标</h3>
-        <p>点击任意指标查看最近数据点和详细趋势。</p>
+        <p>点击任意指标查看最近记录、本周和本月趋势。</p>
       </div>
       <section className="apple-trend-grid">
         {APPLE_METRICS.map((metric, index) => {
@@ -888,7 +888,7 @@ export default async function AppleHealthPage() {
               </div>
               <Sparkline nums={nums} />
               <div className="apple-card-meta">
-                {nums.length.toLocaleString("zh-CN")} 个点 · {zhDate(series?.start)} 到 {zhDate(series?.end)}
+                {nums.length.toLocaleString("zh-CN")} 条记录 · {zhDate(series?.start)} 到 {zhDate(series?.end)}
               </div>
             </Link>
           );

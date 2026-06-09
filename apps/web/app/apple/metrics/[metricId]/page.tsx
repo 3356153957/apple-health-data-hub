@@ -428,7 +428,7 @@ function buildMetricInsights({
       title: trendDirection === null ? "趋势还不明显" : `${windowLabel}${trendDirection} ${formatValue(Math.abs(trendPct ?? 0), 1)}%`,
       body:
         trendDirection === null
-          ? "最近数据点还不足以形成稳定趋势，先继续观察。"
+          ? "最近记录还不足以形成稳定趋势，先继续观察。"
           : `最近半段相对前半段${trendDirection}，适合和睡眠、活动量、训练安排一起看。`,
       meta: "阶段对比",
       tone: insightTone(metric, trendPct),
@@ -591,7 +591,7 @@ function MetricDetailChart({
       </svg>
       <div className="apple-chart-axis">
         <span>{compactDate(start.t)}</span>
-        <span>{values.length.toLocaleString("zh-CN")} 个点</span>
+        <span>{values.length.toLocaleString("zh-CN")} 条记录</span>
         <span>{compactDate(end.t)}</span>
       </div>
       <div className="apple-chart-extremes">
@@ -856,10 +856,10 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
         <div className="apple-panel-head">
           <div>
             <h3>{windowLabel}趋势</h3>
-            <p>{nums.length.toLocaleString("zh-CN")} 个数据点</p>
+            <p>{nums.length.toLocaleString("zh-CN")} 条健康记录</p>
           </div>
           <span className="apple-badge">
-            {`90 天总计 ${longNums.length.toLocaleString("zh-CN")} 点`}
+            {`近 90 天 ${longNums.length.toLocaleString("zh-CN")} 条记录`}
           </span>
         </div>
         <MetricDetailChart metric={metric} points={chartPoints} avg={avg} />
@@ -889,7 +889,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
           {!recentRows.length && <div className="apple-empty-chart compact">暂无最近记录</div>}
         </div>
         <details className="apple-disclosure">
-          <summary>查看完整字段</summary>
+          <summary>查看健康明细</summary>
         <div className="apple-table-wrap">
           <table className="apple-table">
             <thead>

@@ -601,7 +601,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
         <div className="apple-panel-head">
           <div>
             <h3>最近记录</h3>
-            <p>最近 12 条以卡片展示；需要核对更多字段时可以展开详情。</p>
+            <p>最近 12 条以卡片展示；需要核对完整内容时可以展开详情。</p>
           </div>
         </div>
         <div className="apple-record-grid raw">
@@ -646,7 +646,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
         </div>
 
         <details className="apple-disclosure">
-          <summary>查看完整字段</summary>
+          <summary>查看健康明细</summary>
         <div className="apple-table-wrap">
           <table className="apple-table">
             <thead>
@@ -666,7 +666,7 @@ export default async function AppleRawTablePage({ params }: PageProps) {
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={Math.max(1, columns.length)}>暂无详细记录。</td>
+                  <td colSpan={Math.max(1, columns.length)}>暂无健康明细。</td>
                 </tr>
               )}
             </tbody>

@@ -392,7 +392,7 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
                 </div>
                 <Sparkline nums={nums} />
                 <div className="apple-card-meta">
-                  {trendLabel(trend.pct)} · {nums.length.toLocaleString("zh-CN")} 个点 · {zhDate(firstPoint?.t)} 到 {zhDate(latestPoint?.t)}
+                  {trendLabel(trend.pct)} · {nums.length.toLocaleString("zh-CN")} 条记录 · {zhDate(firstPoint?.t)} 到 {zhDate(latestPoint?.t)}
                 </div>
                 <p className="apple-metric-note">{metricHint(metric.id)}</p>
               </Link>

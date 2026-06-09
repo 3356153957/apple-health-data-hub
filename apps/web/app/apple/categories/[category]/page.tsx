@@ -175,9 +175,9 @@ export default async function AppleCategoryPage({ params }: PageProps) {
           <small>{spec.subtitle}</small>
         </div>
         <div className="apple-kpi">
-          <span>30 天数据点</span>
+          <span>30 天记录</span>
           <strong>{seriesTotal.toLocaleString("zh-CN")}</strong>
-          <small>用于趋势判断</small>
+          <small>用于趋势查看</small>
         </div>
         <div className="apple-kpi">
           <span>记录数量</span>
@@ -218,7 +218,7 @@ export default async function AppleCategoryPage({ params }: PageProps) {
                   </div>
                   <Sparkline nums={nums} />
                   <div className="apple-card-meta">
-                    {nums.length.toLocaleString("zh-CN")} 个点 · {zhDate(series?.start)} 到 {zhDate(series?.end)}
+                    {nums.length.toLocaleString("zh-CN")} 条记录 · {zhDate(series?.start)} 到 {zhDate(series?.end)}
                   </div>
                 </Link>
               );

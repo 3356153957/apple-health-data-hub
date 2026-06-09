@@ -136,9 +136,9 @@ export default async function AppleFavoritesPage() {
     },
     {
       href: "/apple/trends",
-      label: "30 天数据点",
+      label: "30 天记录",
       value: totalPoints.toLocaleString("zh-CN"),
-      detail: "用于小图和趋势",
+      detail: "用于趋势图",
       tone: "",
     },
     {
@@ -197,7 +197,7 @@ export default async function AppleFavoritesPage() {
           <AppleCategoryIcon name="data" />
           <div>
             <span>记录覆盖</span>
-            <strong>{totalPoints.toLocaleString("zh-CN")} 个数据点</strong>
+            <strong>{totalPoints.toLocaleString("zh-CN")} 条健康记录</strong>
             <p>{favorites.length} 个收藏指标已接入 30 天趋势，适合每天快速扫一眼。</p>
           </div>
         </Link>
@@ -246,7 +246,7 @@ export default async function AppleFavoritesPage() {
         <div className="apple-panel-head">
           <div>
             <h3>收藏明细</h3>
-            <p>按最近同步时间和数据点数量核对每个收藏项。</p>
+            <p>按最近同步时间和记录数量查看每个收藏项。</p>
           </div>
         </div>
         <div className="apple-favorite-list">
@@ -257,7 +257,7 @@ export default async function AppleFavoritesPage() {
                 <span>{item.metric.note}</span>
                 <strong>{item.metric.label}</strong>
                 <p>
-                  {item.nums.length.toLocaleString("zh-CN")} 个点 · {zhDate(item.series?.start)} 到 {zhDate(item.series?.end)}
+                  {item.nums.length.toLocaleString("zh-CN")} 条记录 · {zhDate(item.series?.start)} 到 {zhDate(item.series?.end)}
                 </p>
               </div>
               <em className={item.tone}>{favoriteTrendLabel(item.trend.pct)}</em>
