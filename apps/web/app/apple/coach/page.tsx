@@ -318,7 +318,17 @@ export default async function AppleCoachPage() {
         </div>
       </section>
 
-      <section className="apple-kpis">
+      <section className="apple-kpis apple-coach-kpis">
+        <Link className="apple-kpi clickable" href="/apple/metrics/respiratory-rate">
+          <span>夜间呼吸</span>
+          <strong className="compact">{formatRespiratoryRate(sleep?.respiratory_rate)}</strong>
+          <small>睡眠期间平均</small>
+        </Link>
+        <Link className="apple-kpi clickable" href="/apple/metrics/stand-time">
+          <span>昨日站立</span>
+          <strong className="compact">{formatHours(activity?.stand_minutes)}</strong>
+          <small>按站立分钟汇总</small>
+        </Link>
         <Link className="apple-kpi clickable" href="/apple/daily">
           <span>今日建议</span>
           <strong>{actions.length}</strong>
@@ -333,16 +343,6 @@ export default async function AppleCoachPage() {
           <span>昨夜睡眠</span>
           <strong>{formatHours(sleep?.total_sleep_min)}</strong>
           <small>{sleep ? `效率 ${formatValue(sleep.efficiency_pct, 1)}%` : "等待睡眠记录"}</small>
-        </Link>
-        <Link className="apple-kpi clickable" href="/apple/metrics/respiratory-rate">
-          <span>夜间呼吸</span>
-          <strong className="compact">{formatRespiratoryRate(sleep?.respiratory_rate)}</strong>
-          <small>睡眠期间平均</small>
-        </Link>
-        <Link className="apple-kpi clickable" href="/apple/metrics/stand-time">
-          <span>昨日站立</span>
-          <strong className="compact">{formatHours(activity?.stand_minutes)}</strong>
-          <small>按站立分钟汇总</small>
         </Link>
         <Link className="apple-kpi clickable" href="/apple/categories/activity">
           <span>昨日活动</span>

@@ -2033,6 +2033,10 @@ html {
   padding: 17px 18px;
 }
 
+.apple-coach-kpis .apple-kpi {
+  min-height: 112px;
+}
+
 .apple-kpi.clickable {
   display: block;
   text-decoration: none;
@@ -5889,6 +5893,25 @@ a.apple-record-card:active {
   .apple-record-grid,
   .apple-record-grid.raw {
     grid-template-columns: 1fr;
+  }
+
+  .apple-coach-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .apple-coach-kpis .apple-kpi {
+    min-height: 106px;
+    padding: 14px;
+  }
+
+  .apple-coach-kpis .apple-kpi strong {
+    font-size: 25px;
+  }
+
+  .apple-coach-kpis .apple-kpi strong.compact {
+    font-size: 18px;
+    line-height: 1.18;
   }
   .apple-report-score-panel {
     grid-template-columns: 1fr;
