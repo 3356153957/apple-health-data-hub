@@ -336,6 +336,38 @@ export default async function AppleReportPage() {
   const insights = buildInsights(weekStats, previousStats);
   const advice = adviceFor(weekStats, previousStats);
   const recentDays = days.slice(0, 10);
+  const reportKpis = [
+    {
+      href: "/apple/metrics/steps",
+      label: "本周步数",
+      value: formatValue(weekStats.steps),
+      detail: changeText(weekStats.avgSteps, previousStats.avgSteps).label,
+    },
+    {
+      href: "/apple/categories/sleep",
+      label: "平均睡眠",
+      value: formatHours(weekStats.avgSleep),
+      detail: `${weekStats.sleepNights} 晚 · ${changeText(weekStats.avgSleep, previousStats.avgSleep).label}`,
+    },
+    {
+      href: "/apple/metrics/stand-time",
+      label: "站立时间",
+      value: formatHours(weekStats.standMinutes),
+      detail: "Apple Watch 站立分钟数",
+    },
+    {
+      href: "/apple/metrics/respiratory-rate",
+      label: "夜间呼吸",
+      value: formatRespiratoryRate(weekStats.avgRespiration),
+      detail: "本周睡眠平均",
+    },
+    {
+      href: "/apple/raw/workouts",
+      label: "训练",
+      value: String(weekStats.workouts),
+      detail: "本周体能训练记录",
+    },
+  ];
 
   return (
     <>
@@ -383,26 +415,13 @@ export default async function AppleReportPage() {
       </section>
 
       <section className="apple-kpis">
-        <div className="apple-kpi">
-          <span>本周步数</span>
-          <strong>{formatValue(weekStats.steps)}</strong>
-          <small>{changeText(weekStats.avgSteps, previousStats.avgSteps).label}</small>
-        </div>
-        <div className="apple-kpi">
-          <span>平均睡眠</span>
-          <strong>{formatHours(weekStats.avgSleep)}</strong>
-          <small>{weekStats.sleepNights} 晚 · {changeText(weekStats.avgSleep, previousStats.avgSleep).label}</small>
-        </div>
-        <div className="apple-kpi">
-          <span>站立时间</span>
-          <strong>{formatHours(weekStats.standMinutes)}</strong>
-          <small>Apple Watch 站立分钟数</small>
-        </div>
-        <div className="apple-kpi">
-          <span>训练</span>
-          <strong>{weekStats.workouts}</strong>
-          <small>本周体能训练记录</small>
-        </div>
+        {reportKpis.map((item) => (
+          <Link className="apple-kpi clickable" href={item.href} key={item.label}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+            <small>{item.detail}</small>
+          </Link>
+        ))}
       </section>
 
       <section className="apple-report-insight-grid">
