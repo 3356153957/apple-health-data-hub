@@ -11,8 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_readme_and_bridge_list_all_shipped_grafana_dashboards():
-    readme = (ROOT / "README.md").read_text()
-    bridge = (ROOT / "BRIDGE.md").read_text()
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    bridge = (ROOT / "BRIDGE.md").read_text(encoding="utf-8")
 
     for text in (readme, bridge):
         for expected in (
@@ -213,8 +213,8 @@ def test_ci_workflow_uses_node24_ready_action_majors():
 
 
 def test_readme_and_bridge_list_shipped_importers():
-    readme = (ROOT / "README.md").read_text()
-    bridge = (ROOT / "BRIDGE.md").read_text()
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    bridge = (ROOT / "BRIDGE.md").read_text(encoding="utf-8")
 
     for text in (readme, bridge):
         assert "scripts/import_garmin.py" in text

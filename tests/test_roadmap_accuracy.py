@@ -12,7 +12,7 @@ _README = Path(__file__).resolve().parents[1] / "README.md"
 
 
 def _roadmap_not_yet_line() -> str:
-    for line in _README.read_text().splitlines():
+    for line in _README.read_text(encoding="utf-8").splitlines():
         low = line.lower()
         if "not" in low and "yet" in low and "includ" in low:
             return low
