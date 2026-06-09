@@ -46,6 +46,10 @@ type InsightCard = {
   meta: string;
 };
 
+type PlanItem = InsightCard & {
+  action: string;
+};
+
 function rawNumber(row: RawRow | null | undefined, key: string): number | null {
   const value = row?.[key];
   if (value === null || value === undefined || value === "") return null;
@@ -306,6 +310,183 @@ function buildInsights(stats: ReportStats, previous: ReportStats): InsightCard[]
   ];
 }
 
+function buildSignals(stats: ReportStats, previous: ReportStats): InsightCard[] {
+  const signals: InsightCard[] = [];
+  const sleepChange = changePct(stats.avgSleep, previous.avgSleep);
+  const stepsChange = changePct(stats.avgSteps, previous.avgSteps);
+  const respirationChange = changePct(stats.avgRespiration, previous.avgRespiration);
+
+  if ((stats.avgSleep ?? 0) > 0 && (stats.avgSleep ?? 0) < 360) {
+    signals.push({
+      title: "睡眠是本周优先项",
+      body: `平均睡眠 ${formatHours(stats.avgSleep)}，已经低于 6 小时。下周先把入睡时间和起床时间稳定下来。`,
+      href: "/apple/categories/sleep",
+      icon: "sleep",
+      tone: "warn",
+      meta: "恢复提醒",
+    });
+  } else if ((stats.avgSleep ?? 0) >= 420) {
+    signals.push({
+      title: "睡眠恢复表现不错",
+      body: `平均睡眠 ${formatHours(stats.avgSleep)}，能支撑正常学习和训练。继续保持固定作息。`,
+      href: "/apple/categories/sleep",
+      icon: "sleep",
+      tone: "good",
+      meta: "恢复优势",
+    });
+  }
+
+  if ((stats.avgSteps ?? 0) > 0 && (stats.avgSteps ?? 0) < 5000) {
+    signals.push({
+      title: "基础活动偏少",
+      body: `日均 ${formatValue(stats.avgSteps)} 步，低于基础活动目标。下周先补低门槛活动，而不是直接追高强度。`,
+      href: "/apple/categories/activity",
+      icon: "activity",
+      tone: "warn",
+      meta: "活动提醒",
+    });
+  } else if ((stats.avgSteps ?? 0) >= 8000) {
+    signals.push({
+      title: "基础活动已经够用",
+      body: `日均 ${formatValue(stats.avgSteps)} 步，本周活动底盘比较稳。下周重点看训练后的恢复。`,
+      href: "/apple/categories/activity",
+      icon: "activity",
+      tone: "good",
+      meta: "活动优势",
+    });
+  }
+
+  if (stats.workouts === 0) {
+    signals.push({
+      title: "训练记录缺口",
+      body: "本周没有同步到体能训练记录。如果实际训练过，下次从 Apple Watch 开始记录，周报才能判断训练负荷。",
+      href: "/apple/raw/workouts",
+      icon: "cardio",
+      tone: "warn",
+      meta: "记录提醒",
+    });
+  }
+
+  if (sleepChange !== null && sleepChange < -10) {
+    signals.push({
+      title: "睡眠较上周下降",
+      body: `平均睡眠较上周低 ${formatValue(Math.abs(sleepChange), 1)}%。如果同时训练增加，下周需要留恢复日。`,
+      href: "/apple/report",
+      icon: "recovery",
+      tone: "warn",
+      meta: "周间变化",
+    });
+  }
+
+  if (stepsChange !== null && stepsChange > 15) {
+    signals.push({
+      title: "活动量明显增加",
+      body: `日均步数较上周高 ${formatValue(Math.abs(stepsChange), 1)}%。如果腿部疲劳明显，下周不要继续加量。`,
+      href: "/apple/categories/activity",
+      icon: "activity",
+      tone: "good",
+      meta: "周间变化",
+    });
+  }
+
+  if (respirationChange !== null && Math.abs(respirationChange) > 8) {
+    signals.push({
+      title: "夜间呼吸变化较大",
+      body: `呼吸次数较上周${respirationChange > 0 ? "高" : "低"} ${formatValue(Math.abs(respirationChange), 1)}%，建议结合睡眠时长和疲劳感一起看。`,
+      href: "/apple/metrics/respiratory-rate",
+      icon: "recovery",
+      tone: "warn",
+      meta: "睡眠呼吸",
+    });
+  }
+
+  if (!signals.length) {
+    signals.push({
+      title: "本周没有明显风险点",
+      body: "活动、睡眠和训练没有出现特别突出的偏离。下周继续用目标闭环保持节奏。",
+      href: "/apple/goals",
+      icon: "recovery",
+      tone: "good",
+      meta: "本周复盘",
+    });
+  }
+
+  return signals.slice(0, 4);
+}
+
+function buildNextWeekPlan(stats: ReportStats, previous: ReportStats): PlanItem[] {
+  const plan: PlanItem[] = [];
+  const sleepChange = changePct(stats.avgSleep, previous.avgSleep);
+
+  if ((stats.avgSleep ?? 0) > 0 && (stats.avgSleep ?? 0) < 390) {
+    plan.push({
+      title: "先把睡眠拉回 6.5 小时以上",
+      body: "连续 3 晚把睡前强刺激内容提前结束，训练安排转为保守。",
+      action: "今晚先把入睡时间提前 30 分钟。",
+      href: "/apple/categories/sleep",
+      icon: "sleep",
+      tone: "warn",
+      meta: "下周优先级 1",
+    });
+  } else {
+    plan.push({
+      title: "保持固定作息",
+      body: "睡眠没有成为明显短板，下周重点保持节奏，不为了训练牺牲睡眠。",
+      action: "把入睡和起床时间控制在固定区间。",
+      href: "/apple/categories/sleep",
+      icon: "sleep",
+      tone: "good",
+      meta: "下周优先级 1",
+    });
+  }
+
+  if ((stats.avgSteps ?? 0) < 6500 || (stats.activeMinutes ?? 0) < 120) {
+    plan.push({
+      title: "补基础活动，不先追强度",
+      body: "下周安排 4 次 20-30 分钟轻活动，优先快走、骑行或低强度力量。",
+      action: "明天先补一段 20 分钟步行。",
+      href: "/apple/goals",
+      icon: "activity",
+      tone: "warn",
+      meta: "下周优先级 2",
+    });
+  } else {
+    plan.push({
+      title: "活动底盘保持住",
+      body: "基础活动已经有支撑，下周可以把注意力放到训练质量和恢复。",
+      action: "继续保持每天至少一次主动活动。",
+      href: "/apple/goals",
+      icon: "activity",
+      tone: "good",
+      meta: "下周优先级 2",
+    });
+  }
+
+  if (stats.workouts < 2) {
+    plan.push({
+      title: "补一到两次可记录训练",
+      body: "下周选择能稳定完成的训练，关键是开始记录，让后续周报能判断负荷。",
+      action: "训练时从 Apple Watch 开始体能训练。",
+      href: "/apple/raw/workouts",
+      icon: "cardio",
+      tone: "neutral",
+      meta: "下周优先级 3",
+    });
+  } else {
+    plan.push({
+      title: "训练后留恢复窗口",
+      body: "已有训练记录时，下周不要连续加量。观察睡眠、HRV 和腿部疲劳。",
+      action: "训练后第二天优先看睡眠和恢复指标。",
+      href: "/apple/coach",
+      icon: "recovery",
+      tone: sleepChange !== null && sleepChange < -10 ? "warn" : "neutral",
+      meta: "下周优先级 3",
+    });
+  }
+
+  return plan;
+}
+
 function latestWorkout(day: DayRecord): string {
   const workout = day.workouts[0];
   return workout ? workoutLabel(String(workout.sport_type ?? "")) : "无训练";
@@ -334,6 +515,8 @@ export default async function AppleReportPage() {
   const monthStats = statsFor(monthDays);
   const score = scoreFor(weekStats, targetDays);
   const insights = buildInsights(weekStats, previousStats);
+  const signals = buildSignals(weekStats, previousStats);
+  const nextWeekPlan = buildNextWeekPlan(weekStats, previousStats);
   const advice = adviceFor(weekStats, previousStats);
   const recentDays = days.slice(0, 10);
   const reportKpis = [
@@ -437,6 +620,55 @@ export default async function AppleReportPage() {
         ))}
       </section>
 
+      <section className="apple-panel health-next-plan-panel">
+        <div className="apple-panel-head">
+          <div>
+            <h3>下周计划</h3>
+            <p>把周报结论拆成可以直接执行的 3 个动作。</p>
+          </div>
+          <Link href="/apple/coach" className="apple-text-link">
+            今日教练
+          </Link>
+        </div>
+        <div className="health-plan-grid">
+          {nextWeekPlan.map((item) => (
+            <Link className={`health-plan-card ${item.tone}`} href={item.href} key={item.title}>
+              <AppleCategoryIcon name={item.icon} />
+              <div>
+                <span>{item.meta}</span>
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
+                <em>{item.action}</em>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="apple-panel health-signal-panel">
+        <div className="apple-panel-head">
+          <div>
+            <h3>本周复盘</h3>
+            <p>先看哪些信号值得保留，哪些需要下周修正。</p>
+          </div>
+          <Link href="/apple/assistant" className="apple-text-link">
+            健康问答
+          </Link>
+        </div>
+        <div className="health-signal-grid">
+          {signals.map((item) => (
+            <Link className={`health-signal-card ${item.tone}`} href={item.href} key={item.title}>
+              <AppleCategoryIcon name={item.icon} />
+              <div>
+                <span>{item.meta}</span>
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <section className="apple-panel apple-report-progress-panel">
         <div className="apple-panel-head">
           <div>
@@ -448,7 +680,7 @@ export default async function AppleReportPage() {
           </Link>
         </div>
         <div className="apple-report-progress-list">
-          <div className="apple-report-progress-row" style={progressStyle(weekStats.steps, 56000, "var(--signal)")}>
+          <div className="apple-report-progress-row" style={progressStyle(weekStats.steps, 8000 * targetDays, "var(--signal)")}>
             <span>步数</span>
             <div><i /></div>
             <strong>{formatValue(weekStats.steps)} / {formatValue(8000 * targetDays)}</strong>

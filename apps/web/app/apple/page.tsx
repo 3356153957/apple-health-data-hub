@@ -723,6 +723,63 @@ export default async function AppleHealthPage() {
         </section>
       )}
 
+      <section className="apple-panel health-command-panel">
+        <div className="apple-panel-head">
+          <div>
+            <h3>下一步做什么</h3>
+            <p>这里把健康记录转成行动，而不是只展示数字。</p>
+          </div>
+          <Link href="/apple/assistant" className="apple-text-link">
+            健康问答
+          </Link>
+        </div>
+        <div className="health-command-grid">
+          {[
+            {
+              href: "/apple/coach",
+              icon: "recovery" as AppleIconName,
+              meta: "今天",
+              title: "先看健康教练",
+              body: todayReadiness(dailySummary),
+              tone: dailySummary?.sleep?.level === "偏少" ? "warn" : "good",
+            },
+            {
+              href: "/apple/goals",
+              icon: "activity" as AppleIconName,
+              meta: "本周",
+              title: "检查目标闭环",
+              body: "步数、站立、睡眠和训练差距会自动排序。",
+              tone: "neutral",
+            },
+            {
+              href: "/apple/report",
+              icon: "data" as AppleIconName,
+              meta: "下周",
+              title: "生成下周计划",
+              body: "用本周记录决定下一周先补什么。",
+              tone: "neutral",
+            },
+            {
+              href: "/experiments",
+              icon: "cardio" as AppleIconName,
+              meta: "长期",
+              title: "开始个人实验",
+              body: "验证睡眠、活动和训练习惯到底影响什么。",
+              tone: "neutral",
+            },
+          ].map((item) => (
+            <Link className={`health-command-card ${item.tone}`} href={item.href} key={item.title}>
+              <AppleCategoryIcon name={item.icon} />
+              <div>
+                <span>{item.meta}</span>
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {!!sevenDayReview.length && (
         <section className="apple-panel apple-week-review">
           <div className="apple-panel-head">

@@ -334,11 +334,14 @@ export default async function AppleGoalsPage() {
               每周报告
             </Link>
           </div>
-          <ul className="apple-report-advice-list">
+          <div className="apple-goal-action-list">
             {(nextActions.length ? nextActions : cards.slice(0, 2)).map((item) => (
-              <li key={item.title}>{item.action}</li>
+              <Link className={`apple-goal-action ${item.tone}`} href={item.href} key={item.title}>
+                <span>{item.title}</span>
+                <strong>{item.action}</strong>
+              </Link>
             ))}
-          </ul>
+          </div>
         </article>
       </section>
 

@@ -4886,6 +4886,59 @@ a.apple-home-favorite:active {
   content: "";
 }
 
+.apple-goal-action-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.apple-goal-action {
+  display: block;
+  padding: 12px 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  background: var(--raise);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-goal-action:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.apple-goal-action:active {
+  transform: scale(0.99);
+}
+
+.apple-goal-action.warn {
+  border-color: rgba(232, 180, 95, 0.24);
+}
+
+.apple-goal-action.good {
+  border-color: rgba(56, 217, 150, 0.22);
+}
+
+.apple-goal-action span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.apple-goal-action strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 .apple-report-insight-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -5072,6 +5125,269 @@ a.apple-home-favorite:active {
 
 .apple-report-day em {
   margin-top: 6px;
+}
+
+.health-command-panel,
+.health-next-plan-panel,
+.health-signal-panel,
+.health-question-bank {
+  margin-top: 18px;
+}
+
+.health-command-grid,
+.health-plan-grid,
+.health-signal-grid,
+.health-answer-grid,
+.health-question-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.health-command-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.health-plan-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.health-signal-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.health-answer-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.health-question-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 16px;
+}
+
+.health-question-grid.compact {
+  grid-template-columns: 1fr;
+}
+
+.health-command-card,
+.health-plan-card,
+.health-signal-card,
+.health-answer-card,
+.health-question-grid a,
+.health-question-grid span,
+.health-lab-question-link {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.health-command-card,
+.health-plan-card,
+.health-signal-card,
+.health-answer-card {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  padding: 17px;
+}
+
+.health-command-card:hover,
+.health-plan-card:hover,
+.health-signal-card:hover,
+.health-answer-card:hover,
+.health-question-grid a:hover,
+.health-lab-question-link:hover {
+  transform: translateY(-1px);
+  border-color: var(--signal-line);
+  background: var(--surface-3);
+}
+
+.health-command-card:active,
+.health-plan-card:active,
+.health-signal-card:active,
+.health-answer-card:active,
+.health-question-grid a:active,
+.health-lab-question-link:active {
+  transform: scale(0.99);
+}
+
+.health-command-card.warn,
+.health-plan-card.warn,
+.health-signal-card.warn,
+.health-answer-card.warn {
+  border-color: rgba(232, 180, 95, 0.25);
+}
+
+.health-command-card.good,
+.health-plan-card.good,
+.health-signal-card.good,
+.health-answer-card.good {
+  border-color: rgba(56, 217, 150, 0.24);
+}
+
+.health-command-card span,
+.health-plan-card span,
+.health-signal-card span,
+.health-answer-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.health-command-card strong,
+.health-plan-card strong,
+.health-signal-card strong,
+.health-answer-card strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.health-command-card p,
+.health-plan-card p,
+.health-signal-card p,
+.health-answer-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.health-plan-card em {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 12px;
+  padding: 6px 9px;
+  border: 1px solid var(--signal-line);
+  border-radius: 999px;
+  color: var(--signal);
+  background: var(--signal-weak);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.health-answer-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.health-answer-evidence em {
+  padding: 6px 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--raise);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.health-lab-hero,
+.health-assistant-hero {
+  background:
+    linear-gradient(135deg, rgba(56, 217, 150, 0.1), transparent 40%),
+    var(--surface);
+}
+
+.health-lab-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.health-lab-card {
+  min-width: 0;
+}
+
+.health-lab-card h2 {
+  margin-bottom: 10px;
+}
+
+.health-lab-guide {
+  align-self: start;
+}
+
+.health-lab-steps {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.health-lab-steps article {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px 12px;
+  padding: 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  background: var(--raise);
+}
+
+.health-lab-steps article span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--signal);
+  background: var(--signal-weak);
+  font-family: var(--mono);
+  font-size: 12px;
+  grid-row: span 2;
+}
+
+.health-lab-steps article strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.health-lab-steps article p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.health-lab-steps.small article {
+  padding: 12px;
+}
+
+.health-lab-question-link {
+  display: block;
+  margin-top: 16px;
+  padding: 13px;
+  color: var(--signal);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.health-question-grid a,
+.health-question-grid span {
+  display: block;
+  padding: 14px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.health-assistant-script {
+  margin-top: 18px;
 }
 
 .apple-period-card em {
@@ -5799,6 +6115,12 @@ a.apple-record-card:active {
   .apple-day-detail-grid,
   .apple-period-grid.four,
   .apple-report-insight-grid,
+  .health-command-grid,
+  .health-plan-grid,
+  .health-signal-grid,
+  .health-answer-grid,
+  .health-question-grid,
+  .health-lab-grid,
   .apple-record-grid.raw {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -5890,6 +6212,12 @@ a.apple-record-card:active {
   .apple-period-grid,
   .apple-period-grid.four,
   .apple-report-insight-grid,
+  .health-command-grid,
+  .health-plan-grid,
+  .health-signal-grid,
+  .health-answer-grid,
+  .health-question-grid,
+  .health-lab-grid,
   .apple-record-grid,
   .apple-record-grid.raw {
     grid-template-columns: 1fr;

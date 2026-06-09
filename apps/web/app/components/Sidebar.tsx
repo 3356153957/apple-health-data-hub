@@ -108,6 +108,13 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M11.5 11V8.5" />
     </>
   ),
+  assistant: (
+    <>
+      <path d="M4 4.8a4.2 4.2 0 0 1 8 1.8c0 2.2-1.7 3.7-4 3.7H5.8L3.5 12.5v-3A4.2 4.2 0 0 1 4 4.8z" />
+      <path d="M6.2 6.8h3.6" />
+      <path d="M6.2 8.8h2.2" />
+    </>
+  ),
   goals: (
     <>
       <circle cx="8" cy="8" r="5.5" />
@@ -154,6 +161,8 @@ export const NAV: readonly NavItem[] = [
   { href: "/apple/calendar", label: "日历", icon: "calendar", activePrefixes: ["/apple/days/"] },
   { href: "/apple/goals", label: "目标闭环", icon: "goals" },
   { href: "/apple/report", label: "报告", icon: "report" },
+  { href: "/apple/assistant", label: "健康问答", icon: "assistant" },
+  { href: "/experiments", label: "个人实验", icon: "experiments" },
   { href: "/apple/favorites", label: "收藏", icon: "favorite" },
   { href: "/apple/browse", label: "浏览", icon: "overview" },
   { href: "/apple/trends", label: "趋势", icon: "trend" },
@@ -170,6 +179,7 @@ export const MOBILE_NAV: readonly NavItem[] = [
   { href: "/apple", label: "概览", icon: "apple", exact: true },
   { href: "/apple/coach", label: "教练", icon: "coach" },
   { href: "/apple/daily", label: "总结", icon: "daily", activePrefixes: ["/apple/days/"] },
+  { href: "/apple/assistant", label: "问答", icon: "assistant", activePrefixes: ["/experiments"] },
   { href: "/apple/browse", label: "浏览", icon: "overview", activePrefixes: ["/apple/categories/", "/apple/metrics/"] },
   { href: "/apple/sources", label: "同步", icon: "experiments", activePrefixes: ["/apple/raw/", "/apple/categories/data"] },
 ];

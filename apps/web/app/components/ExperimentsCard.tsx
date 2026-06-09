@@ -9,8 +9,24 @@ import { ExperimentActions } from "./ExperimentActions";
 import { StartExperimentButton } from "./StartExperimentButton";
 
 function short(metricId: string | null): string {
-  if (!metricId) return "—";
-  return (metricId.split(".").pop() ?? metricId).replace(/_/g, " ");
+  if (!metricId) return "待确认";
+  const label = (metricId.split(".").pop() ?? metricId).replace(/_/g, " ");
+  const labels: Record<string, string> = {
+    steps: "步数",
+    active_energy: "活动能量",
+    active_calories: "活动能量",
+    active_minutes: "活动分钟",
+    stand_minutes: "站立时间",
+    sleep: "睡眠",
+    total_sleep_min: "睡眠时长",
+    hrv_sdnn: "HRV",
+    resting_heart_rate: "静息心率",
+    respiratory_rate: "呼吸次数",
+    heart_rate: "心率",
+    wrist_temperature: "腕温",
+    vo2_max: "心肺适能",
+  };
+  return labels[label] ?? label;
 }
 
 function coeffLabel(candidate: Candidate): string | null {
@@ -18,7 +34,7 @@ function coeffLabel(candidate: Candidate): string | null {
 }
 
 function num(value: number | null, digits = 2): string {
-  return typeof value === "number" ? value.toFixed(digits) : "—";
+  return typeof value === "number" ? value.toFixed(digits) : "暂无";
 }
 
 function pairKey(lever: string | null, outcome: string | null): string {
@@ -46,6 +62,29 @@ function adherenceStatus(result: ExperimentResult): string | null {
   if (!adherence || typeof adherence !== "object") return null;
   const status = (adherence as { status?: unknown }).status;
   return typeof status === "string" ? status : null;
+}
+
+function statusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    collecting: "观察中",
+    completed: "已完成",
+    abandoned: "已停止",
+  };
+  return labels[status] ?? status;
+}
+
+function adherenceLabel(status: string): string {
+  const labels: Record<string, string> = {
+    strong: "执行良好",
+    weak: "执行偏弱",
+    none: "未执行",
+    insufficient: "记录不足",
+  };
+  return labels[status] ?? status;
+}
+
+function experimentTitle(experiment: Experiment): string {
+  return `${short(experiment.lever_metric_id)} 对 ${short(experiment.outcome_metric_id)} 的影响`;
 }
 
 function adherenceNote(result: ExperimentResult): string | null {
@@ -78,7 +117,7 @@ function ResultBlock({ result }: { result: ExperimentResult }) {
               {result.n_a} 天 vs {result.n_b} 天
             </span>
           )}
-          {adherence && <span className={`adherence ${adherence}`}>执行情况：{adherence}</span>}
+          {adherence && <span className={`adherence ${adherence}`}>执行情况：{adherenceLabel(adherence)}</span>}
         </div>
       )}
       {(result.caveat || adherenceNote(result)) && (
@@ -120,11 +159,9 @@ function ExperimentRow({ experiment }: { experiment: Experiment }) {
   return (
     <li className={`exp-item ${experiment.status === "abandoned" ? "muted-item" : ""}`}>
       <div className="cand-head">
-        <span className="cand-hyp">
-          {experiment.lever} → {experiment.outcome}
-        </span>
+        <span className="cand-hyp">{experimentTitle(experiment)}</span>
         <span className={`badge ${experiment.status === "completed" ? "ready" : "waiting"}`}>
-          {experiment.status}
+          {statusLabel(experiment.status)}
         </span>
       </div>
       {experiment.hypothesis && <p className="cand-rationale">&ldquo;{experiment.hypothesis}&rdquo;</p>}
@@ -160,7 +197,7 @@ function TestableRow({ candidate }: { candidate: Candidate }) {
     <li className="cand-item">
       <div className="cand-head">
         <span className="cand-hyp">
-          {short(lever)} → {short(outcome)}
+          {short(lever)} 对 {short(outcome)} 的影响
         </span>
         <span className="badge ready">可尝试</span>
         {r && <span className="cand-strength">r={r}</span>}
@@ -198,8 +235,8 @@ export function ExperimentsCard({
 }) {
   if (experiments === null && candidates === null) {
     return (
-      <article className="card experiments">
-        <h2>接下来可以尝试</h2>
+      <article className="card experiments health-lab-card">
+        <h2>个人实验</h2>
         <p className="empty">暂时无法连接健康记录，恢复后会显示建议。</p>
       </article>
     );
@@ -221,12 +258,12 @@ export function ExperimentsCard({
   );
 
   return (
-    <article className="card experiments">
-      <h2>接下来可以尝试</h2>
+    <article className="card experiments health-lab-card">
+      <h2>个人实验</h2>
 
       {exps.length > 0 && (
         <>
-          <div className="brief-meta">正在进行</div>
+          <div className="brief-meta">正在跟踪</div>
           <ul className="cand-list">
             {exps.map((experiment) => (
               <ExperimentRow key={experiment.id} experiment={experiment} />
@@ -237,8 +274,8 @@ export function ExperimentsCard({
 
       <div className="brief-meta">
         {startable.length > 0
-          ? `${startable.length} 个可开始的想法`
-          : "开始新的尝试"}
+          ? `${startable.length} 个可以开始的尝试`
+          : "新的尝试"}
       </div>
       {startable.length > 0 ? (
         <ul className="cand-list">

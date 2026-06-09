@@ -268,8 +268,8 @@ function phaseCards(): CoachCard[] {
     },
     {
       title: "个人实验系统 + 健康问答助手",
-      body: "用真实数据回答咖啡、训练、睡眠时间等习惯对状态的影响。",
-      href: "/experiments",
+      body: "把常见健康问题变成可验证的个人尝试，并用现有记录先给出可执行回答。",
+      href: "/apple/assistant",
       icon: "cardio",
       tone: "neutral",
       meta: "第三阶段",
@@ -402,8 +402,8 @@ export default async function AppleCoachPage() {
       <section className="apple-panel apple-category-section">
         <div className="apple-panel-head">
           <div>
-            <h3>后续能力</h3>
-            <p>按已确认的优先级推进，先把数据转成行动，再做目标、实验和多源数据中心。</p>
+            <h3>产品能力</h3>
+            <p>先把数据转成行动，再做目标、实验、问答和长期数据中心。</p>
           </div>
         </div>
         <div className="apple-category-guide">
