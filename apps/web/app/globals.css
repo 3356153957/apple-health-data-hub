@@ -7877,3 +7877,405 @@ a.apple-record-card:active {
     white-space: normal;
   }
 }
+
+/* Product polish layer: visual depth, stronger feedback, calmer mobile chrome. */
+:root {
+  --surface-glass: color-mix(in srgb, var(--surface) 88%, transparent);
+  --surface-raised: color-mix(in srgb, var(--surface-3) 86%, var(--surface));
+  --shadow-shell: 0 28px 80px rgba(0, 0, 0, 0.26);
+  --shadow-soft: 0 14px 42px rgba(0, 0, 0, 0.18);
+  --shadow-lift: 0 18px 48px rgba(0, 0, 0, 0.26);
+}
+
+[data-theme="light"] {
+  --surface-glass: rgba(255, 255, 255, 0.86);
+  --surface-raised: #ffffff;
+  --shadow-shell: 0 28px 70px rgba(38, 49, 82, 0.12);
+  --shadow-soft: 0 14px 36px rgba(38, 49, 82, 0.09);
+  --shadow-lift: 0 18px 42px rgba(38, 49, 82, 0.14);
+}
+
+html {
+  scroll-padding-top: 112px;
+}
+
+body {
+  background-image:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg-radial) 68%, transparent) 0%, transparent 38%),
+    linear-gradient(115deg, rgba(94, 234, 212, 0.06) 0%, transparent 28%, rgba(124, 131, 255, 0.06) 62%, transparent 100%),
+    linear-gradient(180deg, var(--bg), var(--bg));
+}
+
+.sidebar {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 92%, var(--accent-weak)) 0%, var(--surface-2) 62%),
+    var(--surface-2);
+  box-shadow: 18px 0 52px rgba(0, 0, 0, 0.18);
+}
+
+.brand {
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: 12px;
+  padding-bottom: 18px;
+}
+
+.brand-mark,
+.apple-category-icon,
+.apple-mini-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 26px rgba(0, 0, 0, 0.12);
+}
+
+.nav-item {
+  min-height: 40px;
+  font-weight: 680;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.nav-item:hover {
+  transform: translateX(2px);
+  border-color: var(--line-soft);
+}
+
+.nav-item.active {
+  background:
+    linear-gradient(135deg, var(--accent-weak), color-mix(in srgb, var(--signal-weak) 46%, transparent)),
+    var(--surface-3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 26px rgba(0, 0, 0, 0.12);
+}
+
+.topbar {
+  align-items: center;
+  border-bottom-color: var(--line-soft);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 86%, transparent), color-mix(in srgb, var(--bg) 72%, transparent)),
+    var(--surface-glass);
+  backdrop-filter: blur(18px) saturate(1.08);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
+}
+
+.topbar-title h1 {
+  font-weight: 820;
+}
+
+.pill,
+.apple-badge,
+.apple-text-link,
+.apple-back-link,
+.health-coach-evidence-link {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.pill {
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+}
+
+.theme-toggle,
+.menu-btn {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 24px rgba(0, 0, 0, 0.12);
+  transition:
+    color 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    transform 0.16s ease;
+}
+
+.theme-toggle:hover,
+.menu-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.theme-toggle:active,
+.menu-btn:active {
+  transform: translateY(0);
+}
+
+.content {
+  width: min(100%, 1320px);
+  margin: 0 auto;
+}
+
+.apple-hero,
+.apple-detail-hero,
+.apple-panel,
+.apple-kpi,
+.apple-trend-card,
+.apple-ready-row,
+.apple-search-panel,
+.apple-table-wrap {
+  border-color: var(--line-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.apple-hero,
+.apple-detail-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--signal-weak) 68%, transparent), transparent 36%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, white 2%), var(--surface));
+}
+
+.apple-hero::after,
+.apple-detail-hero::after,
+.health-coach-status::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 34%);
+  content: "";
+}
+
+.apple-hero > *,
+.apple-detail-hero > *,
+.health-coach-status > * {
+  position: relative;
+  z-index: 1;
+}
+
+.apple-panel {
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, white 2%), var(--surface)),
+    var(--surface);
+}
+
+.health-coach-status,
+.health-coach-loop-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.health-coach-status {
+  box-shadow: 0 18px 54px rgba(232, 180, 95, 0.08), var(--shadow-soft);
+}
+
+.health-coach-status.good {
+  box-shadow: 0 18px 54px rgba(56, 217, 150, 0.08), var(--shadow-soft);
+}
+
+.health-coach-status-score,
+.health-coach-loop-score,
+.apple-report-score-ring,
+.apple-alert-ring {
+  box-shadow: inset 0 0 0 1px var(--line-soft), 0 18px 38px rgba(0, 0, 0, 0.2);
+}
+
+.health-coach-status-score::after,
+.health-coach-loop-score::after {
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.06), transparent 36%),
+    var(--surface);
+}
+
+.health-coach-factor,
+.apple-category-guide-card,
+.apple-favorite-card,
+.apple-trend-card.clickable,
+.apple-kpi.clickable,
+.apple-raw-tile,
+.apple-source-metric-card,
+.apple-source-status-row,
+.health-coach-loop-item {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-raised) 94%, white 2%), var(--surface-raised)),
+    var(--surface-raised);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    opacity 0.16s ease;
+}
+
+.health-coach-factor:hover,
+.apple-category-guide-card:hover,
+.apple-favorite-card:hover,
+.apple-trend-card.clickable:hover,
+.apple-kpi.clickable:hover,
+.apple-raw-tile:hover,
+.apple-source-metric-card:hover,
+.apple-source-status-row:hover,
+.health-coach-loop-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--signal-line);
+  box-shadow: var(--shadow-lift);
+}
+
+.health-coach-factor:active,
+.apple-category-guide-card:active,
+.apple-favorite-card:active,
+.apple-trend-card.clickable:active,
+.apple-kpi.clickable:active,
+.apple-raw-tile:active,
+.apple-source-metric-card:active,
+.apple-source-status-row:active {
+  transform: translateY(0) scale(0.995);
+  opacity: 0.9;
+}
+
+.apple-category-guide-card.warn,
+.health-coach-factor.warn,
+.health-coach-loop-item.warn {
+  background:
+    linear-gradient(135deg, rgba(232, 180, 95, 0.08), transparent 52%),
+    var(--surface-raised);
+}
+
+.apple-category-guide-card.good,
+.health-coach-factor.good,
+.health-coach-loop-item.good {
+  background:
+    linear-gradient(135deg, rgba(56, 217, 150, 0.07), transparent 52%),
+    var(--surface-raised);
+}
+
+.apple-text-link,
+.apple-back-link,
+.health-coach-evidence-link,
+.health-coach-loop-foot button,
+.unlock-form button {
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    color 0.16s ease,
+    opacity 0.16s ease;
+}
+
+.apple-text-link:hover,
+.health-coach-evidence-link:hover {
+  transform: translateY(-1px);
+}
+
+.apple-text-link:active,
+.apple-back-link:active,
+.health-coach-evidence-link:active,
+.health-coach-loop-foot button:active,
+.unlock-form button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.unlock-page {
+  background:
+    linear-gradient(180deg, rgba(94, 234, 212, 0.1), transparent 34%),
+    linear-gradient(115deg, rgba(124, 131, 255, 0.12), transparent 32%, rgba(232, 180, 95, 0.07) 100%),
+    var(--bg);
+}
+
+.unlock-card {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--line-soft);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, white 2%), var(--surface)),
+    var(--surface);
+  box-shadow: var(--shadow-shell);
+}
+
+.unlock-card::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(94, 234, 212, 0.12), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 32%);
+  content: "";
+}
+
+.unlock-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.unlock-form input[type="password"] {
+  min-height: 52px;
+  border-color: var(--line-soft);
+  background: color-mix(in srgb, var(--raise) 86%, transparent);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.unlock-form input[type="password"]:hover {
+  border-color: var(--line-strong);
+}
+
+.unlock-form button {
+  min-height: 52px;
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--signal) 20%, transparent);
+}
+
+.mobile-tabs {
+  border-top-color: var(--line-soft);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 82%, transparent), color-mix(in srgb, var(--surface-2) 95%, transparent)),
+    var(--surface-2);
+}
+
+.mobile-tab {
+  position: relative;
+  font-weight: 720;
+}
+
+.mobile-tab.active {
+  background:
+    linear-gradient(135deg, var(--accent-weak), color-mix(in srgb, var(--signal-weak) 55%, transparent)),
+    var(--surface-3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.mobile-tab.active::before {
+  position: absolute;
+  top: 5px;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--signal);
+  content: "";
+}
+
+@media (max-width: 760px) {
+  html {
+    scroll-padding-top: 78px;
+  }
+
+  .topbar {
+    min-height: 64px;
+    padding: 14px 18px 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+  }
+
+  .content {
+    padding-top: 24px;
+  }
+
+  .apple-hero,
+  .apple-detail-hero,
+  .apple-panel {
+    border-radius: 18px;
+  }
+
+  .apple-hero h2,
+  .apple-detail-hero h2 {
+    font-size: 25px;
+  }
+
+  .health-coach-factor,
+  .apple-category-guide-card {
+    padding: 15px;
+  }
+
+  .mobile-tabs {
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+}
