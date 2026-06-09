@@ -205,6 +205,45 @@ export default async function AppleDailyPage() {
   const workouts = summary?.workouts ?? [];
   const tone = dailyTone(summary);
   const days = recentDays(activityRaw?.rows ?? [], sleepRaw?.rows ?? []);
+  const dayDetailHref = summary?.date ? `/apple/days/${encodeURIComponent(summary.date)}` : "/apple/calendar";
+  const dailyKpis = [
+    {
+      href: "/apple/metrics/steps",
+      label: "昨日步数",
+      value: formatValue(activity?.steps),
+      detail: activity?.level ?? "暂无活动记录",
+    },
+    {
+      href: "/apple/categories/activity",
+      label: "活动分钟",
+      value: formatValue(activity?.active_minutes),
+      detail: "目标 30 分钟",
+    },
+    {
+      href: "/apple/metrics/stand-time",
+      label: "站立时间",
+      value: formatHours(activity?.stand_minutes),
+      detail: "目标 3 小时",
+    },
+    {
+      href: dayDetailHref,
+      label: "昨夜睡眠",
+      value: formatHours(sleep?.total_sleep_min),
+      detail: `效率 ${formatValue(sleep?.efficiency_pct, 1)}%`,
+    },
+    {
+      href: "/apple/metrics/respiratory-rate",
+      label: "呼吸次数",
+      value: formatRespiratoryRate(sleep?.respiratory_rate),
+      detail: "睡眠期间",
+    },
+    {
+      href: "/apple/raw/workouts",
+      label: "训练记录",
+      value: String(workouts.length),
+      detail: workouts[0] ? workoutLabel(workouts[0].sport_type) : "昨日未记录训练",
+    },
+  ];
 
   return (
     <>
@@ -259,36 +298,13 @@ export default async function AppleDailyPage() {
       </section>
 
       <section className="apple-kpis">
-        <div className="apple-kpi">
-          <span>昨日步数</span>
-          <strong>{formatValue(activity?.steps)}</strong>
-          <small>{activity?.level ?? "暂无活动记录"}</small>
-        </div>
-        <div className="apple-kpi">
-          <span>活动分钟</span>
-          <strong>{formatValue(activity?.active_minutes)}</strong>
-          <small>目标 30 分钟</small>
-        </div>
-        <div className="apple-kpi">
-          <span>站立时间</span>
-          <strong>{formatHours(activity?.stand_minutes)}</strong>
-          <small>目标 3 小时</small>
-        </div>
-        <div className="apple-kpi">
-          <span>昨夜睡眠</span>
-          <strong>{formatHours(sleep?.total_sleep_min)}</strong>
-          <small>效率 {formatValue(sleep?.efficiency_pct, 1)}%</small>
-        </div>
-        <div className="apple-kpi">
-          <span>呼吸次数</span>
-          <strong>{formatRespiratoryRate(sleep?.respiratory_rate)}</strong>
-          <small>睡眠期间</small>
-        </div>
-        <div className="apple-kpi">
-          <span>训练记录</span>
-          <strong>{workouts.length}</strong>
-          <small>{workouts[0] ? workoutLabel(workouts[0].sport_type) : "昨日未记录训练"}</small>
-        </div>
+        {dailyKpis.map((item) => (
+          <Link className="apple-kpi clickable" href={item.href} key={item.label}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+            <small>{item.detail}</small>
+          </Link>
+        ))}
       </section>
 
       <section className="apple-two-col apple-daily-main">
