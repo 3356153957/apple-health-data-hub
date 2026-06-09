@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 import type { AppleRawDetail } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleRawDetail } from "../../lib/load";
-import { AppleCategoryIcon, cleanRespiratoryRate, formatHours, formatValue, workoutLabel } from "../appleHealth";
+import { AppleCategoryIcon, cleanRespiratoryRate, formatHours, formatRespiratoryRate, formatValue, workoutLabel } from "../appleHealth";
 
 export const metadata: Metadata = { title: "健康日历 · 健康" };
 export const dynamic = "force-dynamic";
@@ -32,6 +32,7 @@ type PeriodStats = {
   activeMinutes: number | null;
   standMinutes: number | null;
   avgSleep: number | null;
+  avgRespiration: number | null;
   workouts: number;
 };
 
@@ -195,6 +196,7 @@ function statsFor(days: DayRecord[]): PeriodStats {
   const activeMinutes = days.reduce((sum, day) => sum + (day.activeMinutes ?? 0), 0);
   const standMinutes = days.reduce((sum, day) => sum + (day.standMinutes ?? 0), 0);
   const sleepValues = days.map((day) => day.sleepMinutes).filter((value): value is number => value !== null);
+  const respirationValues = days.map((day) => day.respiratoryRate).filter((value): value is number => value !== null);
   const workouts = days.reduce((sum, day) => sum + day.workouts.length, 0);
 
   return {
@@ -205,6 +207,7 @@ function statsFor(days: DayRecord[]): PeriodStats {
     activeMinutes: activeMinutes > 0 ? activeMinutes : null,
     standMinutes: standMinutes > 0 ? standMinutes : null,
     avgSleep: sleepValues.length ? sleepValues.reduce((sum, value) => sum + value, 0) / sleepValues.length : null,
+    avgRespiration: respirationValues.length ? respirationValues.reduce((sum, value) => sum + value, 0) / respirationValues.length : null,
     workouts,
   };
 }
@@ -252,6 +255,38 @@ export default async function AppleCalendarPage() {
   const weekStats = statsFor(weekDays);
   const cells = calendarCells(activeDate, dayMap);
   const recentDays = days.slice(0, 14);
+  const calendarKpis = [
+    {
+      href: "/apple/metrics/steps",
+      label: "本月步数",
+      value: formatValue(monthStats.steps),
+      detail: `${monthStats.activeDays} 天有活动记录`,
+    },
+    {
+      href: "/apple/categories/activity",
+      label: "本周活动",
+      value: formatValue(weekStats.activeMinutes),
+      detail: `分钟 · ${formatHours(weekStats.standMinutes)} 站立`,
+    },
+    {
+      href: "/apple/categories/sleep",
+      label: "平均睡眠",
+      value: formatHours(monthStats.avgSleep),
+      detail: `本月 ${monthStats.sleepNights} 晚记录`,
+    },
+    {
+      href: "/apple/metrics/respiratory-rate",
+      label: "夜间呼吸",
+      value: formatRespiratoryRate(monthStats.avgRespiration),
+      detail: "本月睡眠平均",
+    },
+    {
+      href: "/apple/raw/workouts",
+      label: "训练",
+      value: String(monthStats.workouts),
+      detail: "本月 Apple Watch 训练记录",
+    },
+  ];
 
   return (
     <>
@@ -271,26 +306,13 @@ export default async function AppleCalendarPage() {
       </section>
 
       <section className="apple-kpis">
-        <div className="apple-kpi">
-          <span>本月步数</span>
-          <strong>{formatValue(monthStats.steps)}</strong>
-          <small>{monthStats.activeDays} 天有活动记录</small>
-        </div>
-        <div className="apple-kpi">
-          <span>本周活动</span>
-          <strong>{formatValue(weekStats.activeMinutes)}</strong>
-          <small>分钟 · {formatHours(weekStats.standMinutes)} 站立</small>
-        </div>
-        <div className="apple-kpi">
-          <span>平均睡眠</span>
-          <strong>{formatHours(monthStats.avgSleep)}</strong>
-          <small>本月 {monthStats.sleepNights} 晚记录</small>
-        </div>
-        <div className="apple-kpi">
-          <span>训练</span>
-          <strong>{monthStats.workouts}</strong>
-          <small>本月 Apple Watch 训练记录</small>
-        </div>
+        {calendarKpis.map((item) => (
+          <Link className="apple-kpi clickable" href={item.href} key={item.label}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+            <small>{item.detail}</small>
+          </Link>
+        ))}
       </section>
 
       <section className="apple-panel apple-calendar-panel">
