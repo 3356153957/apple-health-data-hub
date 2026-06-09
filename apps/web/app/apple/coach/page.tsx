@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 
 import type { AppleDailySummary, AppleStatus, MetricSeries } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleStatus, safeSeries } from "../../lib/load";
@@ -40,6 +41,23 @@ type CoachTrend = {
   latest: number | null;
   pct: number | null;
   tone: string;
+};
+
+type CoachStatusFactor = {
+  label: string;
+  title: string;
+  body: string;
+  href: string;
+  icon: AppleIconName;
+  tone: Tone;
+};
+
+type CoachStatus = {
+  score: number;
+  title: string;
+  body: string;
+  tone: Tone;
+  factors: CoachStatusFactor[];
 };
 
 const COACH_METRIC_IDS = [
@@ -91,6 +109,20 @@ function readinessTitle(summary: AppleDailySummary | null, alerts: CoachCard[]):
   if (summary.sleep?.level === "偏少") return "今天优先恢复";
   if (summary.activity?.level === "偏少") return "今天补足基础活动";
   return "今天保持稳定节奏";
+}
+
+function clampScore(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function scoreTone(score: number): Tone {
+  if (score >= 82) return "good";
+  if (score < 68) return "warn";
+  return "neutral";
+}
+
+function trendById(trends: CoachTrend[], metricId: string): CoachTrend | null {
+  return trends.find((item) => item.metric.id === metricId) ?? null;
 }
 
 function buildActions(summary: AppleDailySummary | null): CoachCard[] {
@@ -292,6 +324,106 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
   return alerts.slice(0, 5);
 }
 
+function buildCoachStatus(
+  summary: AppleDailySummary | null,
+  alerts: CoachCard[],
+  trends: CoachTrend[],
+  status: AppleStatus | null,
+): CoachStatus {
+  const sleep = summary?.sleep ?? null;
+  const activity = summary?.activity ?? null;
+  const newest = rawNewest(status);
+  const warningCount = alerts.filter((alert) => alert.tone === "warn").length;
+  const hrv = trendById(trends, "vital.hrv_sdnn");
+  const restingHeartRate = trendById(trends, "vital.resting_heart_rate");
+  const respiration = trendById(trends, "vital.respiratory_rate");
+  let score = summary ? 86 : 45;
+
+  if (!newest) score -= 18;
+  if (warningCount) score -= Math.min(18, warningCount * 6);
+  if (sleep?.total_sleep_min !== null && sleep?.total_sleep_min !== undefined) {
+    if (sleep.total_sleep_min < 360) score -= 18;
+    else if (sleep.total_sleep_min < 420) score -= 7;
+    else score += 3;
+  }
+  if (activity) {
+    if ((activity.steps ?? 0) < 5000 && (activity.active_minutes ?? 0) < 30) score -= 12;
+    else if ((activity.active_minutes ?? 0) >= 30 || (activity.steps ?? 0) >= 8000) score += 4;
+  }
+  if (hrv?.pct !== null && hrv?.pct !== undefined && hrv.pct < -8) score -= 8;
+  if (restingHeartRate?.pct !== null && restingHeartRate?.pct !== undefined && restingHeartRate.pct > 5) score -= 7;
+  if (respiration?.pct !== null && respiration?.pct !== undefined && Math.abs(respiration.pct) > 8) score -= 5;
+
+  const finalScore = clampScore(score);
+  const tone = scoreTone(finalScore);
+  const title = !summary
+    ? "等待同步后生成今日状态"
+    : warningCount
+      ? "今天先稳住恢复和基础活动"
+      : finalScore >= 82
+        ? "今天可以按计划推进"
+        : finalScore >= 68
+          ? "今天保持稳定节奏"
+          : "今天降低强度更稳";
+  const body = !summary
+    ? "同步完成后，会把睡眠、活动、恢复趋势和提醒合成一个今日判断。"
+    : warningCount
+      ? "不需要盯着每个参数看，先处理下方提醒，再按建议安排今天的训练和学习。"
+      : "目前没有需要优先处理的信号，按计划推进，同时继续保持佩戴和同步。";
+
+  const factors: CoachStatusFactor[] = [
+    {
+      label: "恢复",
+      title: sleep?.level === "偏少" ? "恢复偏紧" : sleep ? "恢复可用" : "等待睡眠",
+      body: sleep
+        ? `${formatHours(sleep.total_sleep_min)} 睡眠，效率 ${formatValue(sleep.efficiency_pct, 1)}%`
+        : "同步后显示昨夜睡眠和恢复判断。",
+      href: summaryHref(summary),
+      icon: "sleep",
+      tone: sleep?.level === "偏少" ? "warn" : sleep ? "good" : "neutral",
+    },
+    {
+      label: "活动",
+      title: activity?.level === "偏少" ? "需要补活动" : activity ? "基础活动够用" : "等待活动",
+      body: activity
+        ? `${formatValue(activity.steps)} 步，活动 ${formatValue(activity.active_minutes)} 分钟`
+        : "同步后显示昨日步数、站立和活动分钟。",
+      href: "/apple/categories/activity",
+      icon: "activity",
+      tone: activity?.level === "偏少" ? "warn" : activity ? "good" : "neutral",
+    },
+    {
+      label: "身体信号",
+      title:
+        (hrv?.pct !== null && hrv?.pct !== undefined && hrv.pct < -8) ||
+        (restingHeartRate?.pct !== null && restingHeartRate?.pct !== undefined && restingHeartRate.pct > 5)
+          ? "恢复信号偏紧"
+          : "趋势没有明显压力",
+      body:
+        hrv?.pct !== null && hrv?.pct !== undefined
+          ? `HRV 近 30 天${trendLabel(hrv.pct)}`
+          : `夜间呼吸 ${formatRespiratoryRate(sleep?.respiratory_rate)}`,
+      href: "/apple/trends",
+      icon: "recovery",
+      tone:
+        (hrv?.pct !== null && hrv?.pct !== undefined && hrv.pct < -8) ||
+        (restingHeartRate?.pct !== null && restingHeartRate?.pct !== undefined && restingHeartRate.pct > 5)
+          ? "warn"
+          : "neutral",
+    },
+    {
+      label: "提醒",
+      title: warningCount ? `${warningCount} 条需要处理` : "暂无优先提醒",
+      body: newest ? `${relativeZh(newest)}，提醒会随每日同步更新。` : "先检查设备与同步状态。",
+      href: warningCount ? "#alerts" : "/apple/sources",
+      icon: warningCount ? "heart" : "data",
+      tone: warningCount ? "warn" : newest ? "good" : "warn",
+    },
+  ];
+
+  return { score: finalScore, title, body, tone, factors };
+}
+
 function coachAlertsForPanel(alerts: CoachCard[]): HealthAlert[] {
   return alerts.map((alert) => ({
     id: alert.id,
@@ -357,10 +489,9 @@ export default async function AppleCoachPage() {
   const alerts = buildAlerts(summary, trends, status);
   const alertPanelItems = coachAlertsForPanel(alerts);
   const actions = buildActions(summary);
+  const coachStatus = buildCoachStatus(summary, alerts, trends, status);
   const warningCount = alerts.filter((item) => item.tone === "warn").length;
   const newest = rawNewest(status);
-  const sleep = summary?.sleep ?? null;
-  const activity = summary?.activity ?? null;
 
   return (
     <>
@@ -381,37 +512,33 @@ export default async function AppleCoachPage() {
         </div>
       </section>
 
-      <section className="apple-kpis apple-coach-kpis">
-        <Link className="apple-kpi clickable" href="/apple/metrics/respiratory-rate">
-          <span>夜间呼吸</span>
-          <strong className="compact">{formatRespiratoryRate(sleep?.respiratory_rate)}</strong>
-          <small>睡眠期间平均</small>
-        </Link>
-        <Link className="apple-kpi clickable" href="/apple/metrics/stand-time">
-          <span>昨日站立</span>
-          <strong className="compact">{formatHours(activity?.stand_minutes)}</strong>
-          <small>按站立分钟汇总</small>
-        </Link>
-        <Link className="apple-kpi clickable" href="/apple/daily">
-          <span>今日建议</span>
-          <strong>{actions.length}</strong>
-          <small>按执行优先级排列</small>
-        </Link>
-        <a className="apple-kpi clickable" href="#alerts">
-          <span>需要关注</span>
-          <strong className={warningCount ? "warn" : "good"}>{warningCount}</strong>
-          <small>{warningCount ? "先处理这些信号" : "当前无明显异常"}</small>
-        </a>
-        <Link className="apple-kpi clickable" href={summaryHref(summary)}>
-          <span>昨夜睡眠</span>
-          <strong>{formatHours(sleep?.total_sleep_min)}</strong>
-          <small>{sleep ? `效率 ${formatValue(sleep.efficiency_pct, 1)}%` : "等待睡眠记录"}</small>
-        </Link>
-        <Link className="apple-kpi clickable" href="/apple/categories/activity">
-          <span>昨日活动</span>
-          <strong>{formatValue(activity?.steps)}</strong>
-          <small>{formatValue(activity?.active_minutes)} 分钟活动</small>
-        </Link>
+      <section className={`apple-panel health-coach-status ${coachStatus.tone}`}>
+        <div className="health-coach-status-head">
+          <div>
+            <span>今日状态</span>
+            <strong>{coachStatus.title}</strong>
+            <p>{coachStatus.body}</p>
+          </div>
+          <div
+            className="health-coach-status-score"
+            style={{ "--coach-status-pct": `${coachStatus.score}%` } as CSSProperties}
+          >
+            <b>{coachStatus.score}</b>
+            <small>分</small>
+          </div>
+        </div>
+        <div className="health-coach-factor-grid">
+          {coachStatus.factors.map((factor) => (
+            <Link className={`health-coach-factor ${factor.tone}`} href={factor.href} key={factor.label}>
+              <AppleCategoryIcon name={factor.icon} />
+              <div>
+                <span>{factor.label}</span>
+                <strong>{factor.title}</strong>
+                <p>{factor.body}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="apple-panel apple-category-section">
