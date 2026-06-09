@@ -30,8 +30,8 @@ export function ThemeToggle() {
       type="button"
       className="theme-toggle"
       onClick={toggle}
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-      title="Toggle theme"
+      aria-label={theme === "dark" ? "切换到浅色模式" : "切换到深色模式"}
+      title={theme === "dark" ? "切换到浅色模式" : "切换到深色模式"}
     >
       <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         {theme === "dark" ? (

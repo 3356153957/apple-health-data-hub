@@ -4,7 +4,7 @@ import { EvidenceCard } from "../components/EvidenceCard";
 import { WeeklyBriefCard } from "../components/WeeklyBriefCard";
 import { safeFindings, safeLatest } from "../lib/load";
 
-export const metadata: Metadata = { title: "Evidence · HealthSave" };
+export const metadata: Metadata = { title: "健康发现 · 健康" };
 export const dynamic = "force-dynamic";
 
 export default async function EvidencePage() {

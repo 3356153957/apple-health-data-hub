@@ -1,11 +1,11 @@
 import type { Finding } from "../lib/api";
 
 const TYPE_LABELS: Record<string, string> = {
-  anomaly: "Anomaly",
-  trend: "Trend",
-  correlation: "Correlation",
-  summary: "Summary",
-  recovery_score: "Recovery",
+  anomaly: "异常",
+  trend: "趋势",
+  correlation: "关联",
+  summary: "摘要",
+  recovery_score: "恢复",
 };
 
 // structured_data is untyped JSON — narrow before use so nothing unknown lands
@@ -18,6 +18,14 @@ function num(value: unknown, digits = 2): string | null {
   return typeof value === "number" && Number.isFinite(value) ? value.toFixed(digits) : null;
 }
 
+function directionLabel(value: unknown): string {
+  if (value === "down") return "下降";
+  if (value === "up") return "上升";
+  if (value === "below") return "低于";
+  if (value === "above") return "高于";
+  return typeof value === "string" ? value : "变化";
+}
+
 // One-line human summary derived purely from the structured finding — no LLM
 // involved (Tier-1: the evidence reads even when narration is off).
 function summarize(finding: Finding): string {
@@ -25,12 +33,12 @@ function summarize(finding: Finding): string {
   switch (finding.finding_type) {
     case "anomaly": {
       const z = num(d.magnitude);
-      const dir = str(d.direction) === "down" ? "below" : "above";
-      return `${dir} baseline${z ? ` · z=${z}` : ""}`;
+      const dir = str(d.direction) === "down" ? "低于" : "高于";
+      return `${dir}个人基线${z ? ` · z=${z}` : ""}`;
     }
     case "trend": {
       const p = num(d.p_value, 3);
-      return `${str(d.direction) ?? "?"} trend over ${num(d.period_days, 0) ?? "?"}d${p ? ` · p=${p}` : ""}`;
+      return `${directionLabel(str(d.direction))}趋势 · ${num(d.period_days, 0) ?? "?"} 天${p ? ` · p=${p}` : ""}`;
     }
     case "correlation": {
       const r = num(d.coefficient);
@@ -40,11 +48,11 @@ function summarize(finding: Finding): string {
       const avg = num(d.avg, 1);
       const delta = num(d.delta_pct_vs_baseline, 1);
       const sign = delta && Number(delta) >= 0 ? "+" : "";
-      return `avg ${avg ?? "?"}${delta ? ` · ${sign}${delta}% vs baseline` : ""}`;
+      return `平均 ${avg ?? "?"}${delta ? ` · 较基线 ${sign}${delta}%` : ""}`;
     }
     case "recovery_score": {
       const score = num(d.score, 0);
-      return score ? `score ${score}/100` : "recovery score";
+      return score ? `恢复分 ${score}/100` : "恢复评分";
     }
     default:
       return finding.metric ?? "finding";
@@ -57,21 +65,21 @@ function why(finding: Finding): string {
   const d = finding.structured_data ?? {};
   switch (finding.finding_type) {
     case "anomaly":
-      return `${finding.severity ?? "flagged"} severity · deviated from your baseline`;
+      return `${finding.severity ?? "已标记"} · 偏离你的个人基线`;
     case "trend": {
       const p = num(d.p_value, 3);
-      return p ? `statistically significant trend (p=${p})` : "a sustained multi-day direction";
+      return p ? `统计上较明显的趋势（p=${p}）` : "多天持续朝同一方向变化";
     }
     case "correlation": {
       const p = num(d.p_value, 3);
       return p
-        ? `strong and significant enough to act on (p=${p})`
-        : "a strong cross-metric association";
+        ? `关联强度达到可参考水平（p=${p}）`
+        : "两个指标之间出现较强关联";
     }
     case "summary":
-      return "period rollup vs your 30-day baseline";
+      return "周期汇总相对 30 天基线发生变化";
     default:
-      return "surfaced by the analysis engine";
+      return "由健康分析自动整理";
   }
 }
 
@@ -86,10 +94,10 @@ function EvidenceRow({ finding }: { finding: Finding }) {
         <span className="evidence-metric">{finding.metric ?? "—"}</span>
         <span className="evidence-sum">{summarize(finding)}</span>
       </div>
-      <div className="why">Why included: {why(finding)}</div>
+      <div className="why">纳入原因：{why(finding)}</div>
       {entries.length > 0 && (
         <details className="calc">
-          <summary>show calculation</summary>
+          <summary>查看计算</summary>
           <dl className="calc-grid">
             {entries.map(([key, value]) => (
               <div className="calc-row" key={key}>
@@ -134,7 +142,7 @@ export function EvidenceCard({ findings }: { findings: Finding[] | null }) {
         ))}
       </ul>
       <div className="meta">
-        {findings.length} finding{findings.length === 1 ? "" : "s"} · computed, not guessed
+        {findings.length} 条发现 · 基于计算生成
       </div>
     </article>
   );

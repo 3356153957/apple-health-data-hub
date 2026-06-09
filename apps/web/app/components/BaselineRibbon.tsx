@@ -51,7 +51,7 @@ export function BaselineRibbon({ values, band, anomalies = [], height = 76, axis
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           role="img"
-          aria-label="Recent trace against your personal baseline range"
+          aria-label="近期记录与个人基线范围对比"
         >
           <rect
             className="ribbon-band"

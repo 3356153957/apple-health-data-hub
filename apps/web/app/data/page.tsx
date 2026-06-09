@@ -11,7 +11,7 @@ import {
   safeSeries,
 } from "../lib/load";
 
-export const metadata: Metadata = { title: "Data · HealthSave" };
+export const metadata: Metadata = { title: "健康数据 · 健康" };
 export const dynamic = "force-dynamic";
 
 export default async function DataPage() {
@@ -26,7 +26,7 @@ export default async function DataPage() {
       <section className="lead">
         <ReadinessCard readiness={readiness} sparklines={sparklines} />
       </section>
-      <div className="section-label">Metrics</div>
+      <div className="section-label">健康指标</div>
       <section className="grid">
         {GRID_METRICS.map((metric, index) => (
           <MetricCard key={metric.id} series={gridSeries[index]} fallbackTitle={metric.title} />

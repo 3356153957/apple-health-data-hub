@@ -28,13 +28,13 @@ import {
 // Curated sparkline metrics for the Data view grid. Each is a real ontology
 // metric_id the v2 series endpoint serves; an empty one renders its own state.
 export const GRID_METRICS: { id: string; title: string }[] = [
-  { id: "vital.heart_rate", title: "Heart Rate" },
-  { id: "vital.resting_heart_rate", title: "Resting Heart Rate" },
-  { id: "vital.hrv_sdnn", title: "Heart Rate Variability" },
-  { id: "vital.respiratory_rate", title: "Respiratory Rate" },
-  { id: "activity.steps", title: "Steps" },
-  { id: "activity.active_energy", title: "Active Energy" },
-  { id: "body.weight", title: "Body Weight" },
+  { id: "vital.heart_rate", title: "心率" },
+  { id: "vital.resting_heart_rate", title: "静息心率" },
+  { id: "vital.hrv_sdnn", title: "HRV" },
+  { id: "vital.respiratory_rate", title: "呼吸次数" },
+  { id: "activity.steps", title: "步数" },
+  { id: "activity.active_energy", title: "活动能量" },
+  { id: "body.weight", title: "体重" },
 ];
 
 export async function safeSeries(id: string, range = "7d"): Promise<MetricSeries | null> {

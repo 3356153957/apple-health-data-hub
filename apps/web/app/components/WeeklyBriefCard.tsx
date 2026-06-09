@@ -2,7 +2,7 @@ import type { InsightsLatest, Narrative } from "../lib/api";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return new Date(iso).toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
 }
 
 export function WeeklyBriefCard({ latest }: { latest: InsightsLatest | null }) {

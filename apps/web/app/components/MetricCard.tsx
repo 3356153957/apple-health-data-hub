@@ -1,4 +1,5 @@
 import type { MetricSeries } from "../lib/api";
+import { metricLabel, rangeLabel } from "../lib/labels";
 
 function Sparkline({ values }: { values: number[] }) {
   if (values.length < 2) return null;
@@ -42,7 +43,7 @@ export function MetricCard({
   if (last === undefined) {
     return (
       <article className="card">
-        <h2>{series.metric.display_name}</h2>
+        <h2>{metricLabel(series.metric.id, series.metric.display_name)}</h2>
         <p className="empty">还没有同步到这项健康记录。</p>
       </article>
     );
@@ -53,17 +54,17 @@ export function MetricCard({
 
   return (
     <article className="card">
-      <h2>{series.metric.display_name}</h2>
+      <h2>{metricLabel(series.metric.id, series.metric.display_name)}</h2>
       <div className="big">
         {Math.round(last)}
         <span className="unit">{series.metric.canonical_unit}</span>
       </div>
       <div className={`delta ${delta >= 0 ? "up" : "down"}`}>
-        {delta >= 0 ? "▲" : "▼"} 较 {series.range} 平均 {Math.abs(delta).toFixed(0)}
+        {delta >= 0 ? "▲" : "▼"} 较 {rangeLabel(series.range)}平均 {Math.abs(delta).toFixed(0)}
       </div>
       <Sparkline values={values} />
       <div className="meta">
-        {values.length} 条记录 · 最近 {series.range}
+        {values.length} 条记录 · 最近 {rangeLabel(series.range)}
       </div>
     </article>
   );

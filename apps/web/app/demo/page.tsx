@@ -7,7 +7,7 @@ import { LocalVaultReceipt, type VaultStep } from "../components/LocalVaultRecei
 // recovery dip, so a fresh clone (or the README screenshot) shows the product
 // alive before any real data is synced. Pure fixtures; no API required.
 
-export const metadata: Metadata = { title: "Today · demo · datahub" };
+export const metadata: Metadata = { title: "今日演示 · 健康" };
 
 // HRV (ms) over 30 days — steady, then a clear multi-day decline at the end.
 const HRV_30D = [
@@ -19,34 +19,34 @@ const HRV_ANOMALIES = [27, 28];
 
 const CONTRIBUTORS = [
   { name: "HRV", val: "−18%", pct: 78, dir: "down" as const },
-  { name: "Resting HR", val: "+6 bpm", pct: 54, dir: "down" as const },
-  { name: "Deep sleep", val: "−42 min", pct: 46, dir: "down" as const },
-  { name: "Training load", val: "+31%", pct: 33, dir: "down" as const },
+  { name: "静息心率", val: "+6 bpm", pct: 54, dir: "down" as const },
+  { name: "深睡", val: "−42 分钟", pct: 46, dir: "down" as const },
+  { name: "训练负荷", val: "+31%", pct: 33, dir: "down" as const },
 ];
 
 const VAULT: VaultStep[] = [
-  { label: "Apple Watch → ingest", meta: "07:42" },
-  { label: "TimescaleDB", meta: "1.42M rows" },
-  { label: "Statistical engine", meta: "07:45" },
-  { label: "Ollama · llama3.2 (local)", meta: "07:46" },
-  { label: "Cloud egress", meta: "blocked", blocked: true },
+  { label: "Apple Watch → 接收", meta: "07:42" },
+  { label: "私密健康库", meta: "142 万条记录" },
+  { label: "健康分析", meta: "07:45" },
+  { label: "本地模型整理", meta: "07:46" },
+  { label: "云端出口", meta: "已阻止", blocked: true },
 ];
 
 const EVIDENCE = [
   {
-    title: "HRV anomaly",
-    calc: "42 ms vs expected 55–71 ms · z = −2.1",
-    conf: "confidence high · source: Apple Watch",
+    title: "HRV 异常",
+    calc: "42 ms，对比预期 55-71 ms · z = -2.1",
+    conf: "置信度高 · 来自 Apple Watch",
   },
   {
-    title: "Sleep architecture shift",
-    calc: "deep sleep −42 min vs 30-day baseline",
-    conf: "confidence moderate · source: Apple Watch",
+    title: "睡眠结构变化",
+    calc: "深睡比 30 天基线少 42 分钟",
+    conf: "置信度中等 · 来自 Apple Watch",
   },
   {
-    title: "Elevated training load",
-    calc: "+31% vs baseline, two days ago",
-    conf: "context · source: Workouts",
+    title: "训练负荷升高",
+    calc: "两天前比基线高 31%",
+    conf: "背景信息 · 来自体能训练",
   },
 ];
 
@@ -55,20 +55,20 @@ export default function DemoToday() {
     <>
       <div className="today-grid">
         <section className="hero col-8">
-          <div className="hero-eyebrow">Today · this morning</div>
+          <div className="hero-eyebrow">今日 · 今天早上</div>
           <div className="recovery">
             <div className="recovery-score">63</div>
-            <div className="recovery-state state-caution">Caution</div>
+            <div className="recovery-state state-caution">需要留意</div>
           </div>
           <p className="recovery-line">
-            Below your baseline. <strong>Three independent signals agree</strong> — HRV is down,
-            resting heart rate is up, and deep sleep fell.
+            低于你的个人基线。<strong>三个独立信号指向同一件事</strong>：HRV 下降、
+            静息心率上升，深睡减少。
           </p>
           <BaselineRibbon
             values={HRV_30D}
             band={HRV_BAND}
             anomalies={HRV_ANOMALIES}
-            axis={["30 days ago", "today"]}
+            axis={["30 天前", "今天"]}
           />
           <ul className="contribs">
             {CONTRIBUTORS.map((c) => (
@@ -88,9 +88,9 @@ export default function DemoToday() {
         </div>
 
         <section className="card col-12">
-          <div className="card-title">Evidence</div>
+          <div className="card-title">证据</div>
           <p className="empty" style={{ margin: "0 0 6px" }}>
-            Every finding traces to a calculation — computed, not guessed.
+            每条发现都来自可追溯计算，而不是凭空猜测。
           </p>
           <div>
             {EVIDENCE.map((e) => (
@@ -107,7 +107,7 @@ export default function DemoToday() {
         </section>
       </div>
 
-      <footer className="foot">demo data · a believable 30-day story · nothing left this host</footer>
+      <footer className="foot">演示数据 · 30 天健康故事 · 健康明细不外发</footer>
     </>
   );
 }

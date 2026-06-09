@@ -51,7 +51,7 @@ export function Shell({
       <button
         type="button"
         className="nav-scrim"
-        aria-label="Close navigation"
+        aria-label="关闭导航"
         tabIndex={open ? 0 : -1}
         onClick={() => setOpen(false)}
       />

@@ -6,7 +6,7 @@ export type VaultStep = { label: string; meta: string; blocked?: boolean };
 
 export function LocalVaultReceipt({
   steps,
-  seal = "No cloud egress",
+  seal = "无云端外发",
 }: {
   steps: VaultStep[];
   seal?: string;
@@ -14,7 +14,7 @@ export function LocalVaultReceipt({
   return (
     <article className="card vault">
       <div className="vault-head">
-        <div className="card-title">Local Vault</div>
+        <div className="card-title">私密处理</div>
         <span className="vault-seal">{seal}</span>
       </div>
       <ul className="chain">

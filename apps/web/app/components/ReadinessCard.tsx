@@ -1,9 +1,10 @@
 import type { MetricReadiness, Readiness } from "../lib/api";
+import { metricLabel, sourcePluginLabel } from "../lib/labels";
 
 // Human-meaningful labels for the per-metric gates the backend grades.
 const GATE_LABELS: Record<string, string> = {
-  anomaly_detection: "Anomalies",
-  trend_analysis: "Trends",
+  anomaly_detection: "异常提醒",
+  trend_analysis: "趋势判断",
 };
 
 // Data older than this is likely behind because HealthKit can't sync while the
@@ -11,14 +12,14 @@ const GATE_LABELS: Record<string, string> = {
 const STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 
 function formatAgo(iso: string | null): string {
-  if (!iso) return "never";
+  if (!iso) return "从未";
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return "刚刚";
+  if (mins < 60) return `${mins} 分钟前`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+  if (hrs < 24) return `${hrs} 小时前`;
+  return `${Math.floor(hrs / 24)} 天前`;
 }
 
 function isStale(iso: string | null): boolean {
@@ -31,7 +32,7 @@ function GateBadge({ label, verdict }: { label: string; verdict: MetricReadiness
     return <span className="badge ready">{label} ✓</span>;
   }
   const more =
-    verdict.days_until_sufficient != null ? `${verdict.days_until_sufficient}d` : "more data";
+    verdict.days_until_sufficient != null ? `还需 ${verdict.days_until_sufficient} 天` : "需要更多记录";
   return <span className="badge waiting">{`${label} · ${more}`}</span>;
 }
 
@@ -67,9 +68,9 @@ function MetricRow({ metric, values }: { metric: MetricReadiness; values?: numbe
   return (
     <li className="metric-row">
       <div className="metric-id">
-        <span className="metric-name">{metric.display_name}</span>
+        <span className="metric-name">{metricLabel(metric.metric_id, metric.display_name)}</span>
         <span className="metric-cov">
-          {metric.observation_count.toLocaleString()} readings · {metric.days_with_data} days
+          {metric.observation_count.toLocaleString("zh-CN")} 条记录 · {metric.days_with_data} 天
         </span>
       </div>
       {values && values.length >= 2 && <MiniSparkline values={values} />}
@@ -134,7 +135,7 @@ export function ReadinessCard({
         <div className="chips">
           {readiness.sources.map((source) => (
             <span className="chip" key={source.source_plugin_id ?? "unknown"}>
-              {source.source_plugin_id ?? "unknown"} · {source.observation_count.toLocaleString()}
+              {sourcePluginLabel(source.source_plugin_id)} · {source.observation_count.toLocaleString("zh-CN")}
             </span>
           ))}
         </div>
@@ -150,7 +151,7 @@ export function ReadinessCard({
         ))}
       </ul>
 
-      <div className="meta">{readiness.metrics.length} metrics · ✓ = ready to analyze now</div>
+      <div className="meta">{readiness.metrics.length} 项指标 · ✓ 表示现在可以分析</div>
     </article>
   );
 }

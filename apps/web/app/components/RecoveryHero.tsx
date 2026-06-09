@@ -4,10 +4,10 @@ import { BaselineRibbon } from "./BaselineRibbon";
 // itself is the backend's open formula (analysis/statistical/scoring.py); we
 // only translate it to a word + colour.
 const STATES = [
-  { min: 75, label: "Prime", cls: "state-prime" },
-  { min: 60, label: "Steady", cls: "state-steady" },
-  { min: 45, label: "Caution", cls: "state-caution" },
-  { min: 0, label: "Suppressed", cls: "state-suppressed" },
+  { min: 75, label: "状态很好", cls: "state-prime" },
+  { min: 60, label: "状态平稳", cls: "state-steady" },
+  { min: 45, label: "需要留意", cls: "state-caution" },
+  { min: 0, label: "恢复偏低", cls: "state-suppressed" },
 ] as const;
 
 function stateFor(score: number) {
@@ -38,7 +38,7 @@ export function RecoveryHero({
 
   return (
     <section className="hero col-8">
-      <div className="hero-eyebrow">Today · last reading {freshness}</div>
+      <div className="hero-eyebrow">今日 · 最近记录 {freshness}</div>
 
       {score !== null && state && (
         <div className="recovery">
