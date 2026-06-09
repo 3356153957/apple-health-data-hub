@@ -16,9 +16,10 @@ import {
   relativeZh,
   trendTone,
 } from "../appleHealth";
+import { AlertResolutionPanel, type HealthAlert } from "../alerts/AlertResolutionPanel";
 import { CoachActionChecklist } from "./CoachActionChecklist";
 
-export const metadata: Metadata = { title: "健康教练 · 健康" };
+export const metadata: Metadata = { title: "今日教练 · 健康" };
 export const dynamic = "force-dynamic";
 
 type Tone = "good" | "warn" | "neutral";
@@ -31,6 +32,7 @@ type CoachCard = {
   icon: AppleIconName;
   tone: Tone;
   meta: string;
+  evidence?: string[];
 };
 
 type CoachTrend = {
@@ -172,6 +174,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       tone: "warn",
       meta: "同步",
       id: "summary-missing",
+      evidence: ["等待每日摘要", relativeZh(newest)],
     });
   }
 
@@ -184,6 +187,11 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       tone: "warn",
       meta: "恢复提醒",
       id: "sleep-under-six-hours",
+      evidence: [
+        `昨夜睡眠 ${formatHours(sleep.total_sleep_min)}`,
+        `睡眠效率 ${formatValue(sleep.efficiency_pct, 1)}%`,
+        `呼吸 ${formatRespiratoryRate(sleep.respiratory_rate)}`,
+      ],
     });
   }
 
@@ -196,10 +204,15 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       tone: "warn",
       meta: "活动提醒",
       id: "low-foundation-activity",
+      evidence: [
+        `昨日 ${formatValue(activity.steps)} 步`,
+        `活动 ${formatValue(activity.active_minutes)} 分钟`,
+        `站立 ${formatHours(activity.stand_minutes)}`,
+      ],
     });
   }
 
-  if (hrvPct != null && hrvPct < -8) {
+  if (hrv && hrvPct != null && hrvPct < -8) {
     alerts.push({
       title: "HRV 下降较明显",
       body: `HRV 近 30 天${trendLabel(hrvPct)}，适合和睡眠、训练负荷一起看。`,
@@ -208,10 +221,14 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       tone: "warn",
       meta: "恢复趋势",
       id: "hrv-down",
+      evidence: [
+        `近 30 天${trendLabel(hrvPct)}`,
+        `最新 ${formatValue(hrv.latest, hrv.metric.digits ?? 0)} ${hrv.metric.unit}`,
+      ],
     });
   }
 
-  if (restingHrPct != null && restingHrPct > 5) {
+  if (restingHr && restingHrPct != null && restingHrPct > 5) {
     alerts.push({
       title: "静息心率上升",
       body: `静息心率近 30 天${trendLabel(restingHrPct)}，如果同时睡眠偏少，今天降低强度。`,
@@ -220,10 +237,14 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       tone: "warn",
       meta: "心脏趋势",
       id: "resting-heart-rate-up",
+      evidence: [
+        `近 30 天${trendLabel(restingHrPct)}`,
+        `最新 ${formatValue(restingHr.latest, restingHr.metric.digits ?? 0)} ${restingHr.metric.unit}`,
+      ],
     });
   }
 
-  if (respirationPct != null && Math.abs(respirationPct) > 8) {
+  if (respiration && respirationPct != null && Math.abs(respirationPct) > 8) {
     alerts.push({
       title: "夜间呼吸变化较大",
       body: `呼吸次数近 30 天${trendLabel(respirationPct)}，需要结合睡眠质量一起判断。`,
@@ -232,6 +253,10 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       tone: "warn",
       meta: "睡眠呼吸",
       id: "respiration-shift",
+      evidence: [
+        `近 30 天${trendLabel(respirationPct)}`,
+        `最新 ${formatValue(respiration.latest, respiration.metric.digits ?? 0)} ${respiration.metric.unit}`,
+      ],
     });
   }
 
@@ -244,6 +269,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       tone: "warn",
       meta: "设备与同步",
       id: "sync-missing",
+      evidence: ["没有可用同步记录", `${Object.keys(status ?? {}).length} 类记录`],
     });
   }
 
@@ -256,10 +282,28 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       tone: "good",
       meta: "异常提醒",
       id: "no-priority-alerts",
+      evidence: [
+        sleep ? `睡眠 ${formatHours(sleep.total_sleep_min)}` : "睡眠暂无提醒",
+        activity ? `活动 ${formatValue(activity.steps)} 步` : "活动暂无提醒",
+      ],
     });
   }
 
   return alerts.slice(0, 5);
+}
+
+function coachAlertsForPanel(alerts: CoachCard[]): HealthAlert[] {
+  return alerts.map((alert) => ({
+    id: alert.id,
+    title: alert.title,
+    body: alert.body,
+    href: alert.href,
+    icon: alert.icon,
+    tone: alert.tone,
+    meta: alert.meta,
+    action: "查看依据",
+    evidence: alert.evidence ?? [alert.meta, alert.tone === "warn" ? "建议今天处理" : "当前无需处理"],
+  }));
 }
 
 function phaseCards(): CoachCard[] {
@@ -311,6 +355,7 @@ export default async function AppleCoachPage() {
   ]);
   const trends = buildTrends(seriesList);
   const alerts = buildAlerts(summary, trends, status);
+  const alertPanelItems = coachAlertsForPanel(alerts);
   const actions = buildActions(summary);
   const warningCount = alerts.filter((item) => item.tone === "warn").length;
   const newest = rawNewest(status);
@@ -324,7 +369,7 @@ export default async function AppleCoachPage() {
           <Link href="/apple" className="apple-back-link">
             返回健康概览
           </Link>
-          <div className="hero-eyebrow">健康教练</div>
+          <div className="hero-eyebrow">今日教练</div>
           <h2>{readinessTitle(summary, alerts)}</h2>
           <p>
             这里不复制 Apple 健康的数据列表，而是把昨日运动、睡眠、恢复趋势转换成今天的执行建议和需要关注的提醒。
@@ -352,11 +397,11 @@ export default async function AppleCoachPage() {
           <strong>{actions.length}</strong>
           <small>按执行优先级排列</small>
         </Link>
-        <Link className="apple-kpi clickable" href="/apple/highlights">
+        <a className="apple-kpi clickable" href="#alerts">
           <span>需要关注</span>
           <strong className={warningCount ? "warn" : "good"}>{warningCount}</strong>
           <small>{warningCount ? "先处理这些信号" : "当前无明显异常"}</small>
-        </Link>
+        </a>
         <Link className="apple-kpi clickable" href={summaryHref(summary)}>
           <span>昨夜睡眠</span>
           <strong>{formatHours(sleep?.total_sleep_min)}</strong>
@@ -395,7 +440,7 @@ export default async function AppleCoachPage() {
 
       <CoachActionChecklist actions={actions.slice(0, 4)} dateKey={summary?.date ?? "today"} />
 
-      <section className="apple-panel apple-category-section">
+      <section className="apple-panel apple-category-section" id="alerts">
         <div className="apple-panel-head">
           <div>
             <h3>需要关注的提醒</h3>
@@ -405,18 +450,7 @@ export default async function AppleCoachPage() {
             查看趋势
           </Link>
         </div>
-        <div className="apple-metric-insights">
-          {alerts.map((item) => (
-            <Link className={`apple-metric-insight ${item.tone}`} href={item.href} key={`${item.meta}-${item.title}`}>
-              <AppleCategoryIcon name={item.icon} />
-              <div>
-                <span>{item.meta}</span>
-                <strong>{item.title}</strong>
-                <p>{item.body}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <AlertResolutionPanel alerts={alertPanelItems} dateKey={summary?.date ?? "today"} compact />
       </section>
 
       <section className="apple-panel apple-category-section">

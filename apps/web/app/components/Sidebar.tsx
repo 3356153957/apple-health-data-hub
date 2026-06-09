@@ -78,6 +78,13 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M5.8 10.2l-1.4 1.4" />
     </>
   ),
+  alerts: (
+    <>
+      <path d="M8 2.5l5.4 10H2.6z" />
+      <path d="M8 6v3.2" />
+      <path d="M8 11.6h.01" />
+    </>
+  ),
   checklist: (
     <>
       <path d="M5.5 4.5l1.3 1.3 2.5-2.6" />
@@ -153,35 +160,30 @@ export type NavItem = {
 };
 
 export const NAV: readonly NavItem[] = [
+  {
+    href: "/apple/coach",
+    label: "今日教练",
+    icon: "coach",
+    activePrefixes: ["/apple/alerts", "/apple/goals", "/apple/report", "/apple/assistant", "/experiments"],
+  },
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
-  { href: "/apple/coach", label: "健康教练", icon: "coach" },
-  { href: "/apple/daily", label: "每日总结", icon: "daily" },
-  { href: "/apple/highlights", label: "亮点", icon: "highlight" },
-  { href: "/apple/checklist", label: "健康清单", icon: "checklist" },
-  { href: "/apple/calendar", label: "日历", icon: "calendar", activePrefixes: ["/apple/days/"] },
-  { href: "/apple/goals", label: "目标闭环", icon: "goals" },
-  { href: "/apple/report", label: "报告", icon: "report" },
-  { href: "/apple/assistant", label: "健康问答", icon: "assistant" },
-  { href: "/experiments", label: "个人实验", icon: "experiments" },
-  { href: "/apple/favorites", label: "收藏", icon: "favorite" },
-  { href: "/apple/browse", label: "浏览", icon: "overview" },
-  { href: "/apple/trends", label: "趋势", icon: "trend" },
-  { href: "/apple/metrics/stand-time", label: "站立时间", icon: "stand", activePrefixes: ["/apple/metrics/activity.stand_minutes"] },
-  { href: "/apple/metrics/respiratory-rate", label: "呼吸次数", icon: "breath", activePrefixes: ["/apple/metrics/vital.respiratory_rate"] },
-  { href: "/apple/categories/activity", label: "活动", icon: "overview" },
-  { href: "/apple/categories/sleep", label: "睡眠", icon: "data" },
-  { href: "/apple/categories/recovery", label: "恢复", icon: "evidence" },
-  { href: "/apple/sources", label: "设备与同步", icon: "experiments", activePrefixes: ["/apple/raw/", "/apple/categories/data"] },
+  { href: "/apple/daily", label: "每日总结", icon: "daily", activePrefixes: ["/apple/days/", "/apple/calendar"] },
+  {
+    href: "/apple/browse",
+    label: "健康明细",
+    icon: "overview",
+    activePrefixes: ["/apple/categories/", "/apple/metrics/", "/apple/raw/", "/apple/highlights", "/apple/favorites", "/apple/trends"],
+  },
+  { href: "/apple/sources", label: "设备与同步", icon: "experiments", activePrefixes: ["/apple/checklist", "/apple/categories/data"] },
   { href: "/privacy", label: "隐私设置", icon: "privacy" },
 ];
 
 export const MOBILE_NAV: readonly NavItem[] = [
-  { href: "/apple", label: "概览", icon: "apple", exact: true },
   { href: "/apple/coach", label: "教练", icon: "coach" },
+  { href: "/apple", label: "概览", icon: "apple", exact: true },
   { href: "/apple/daily", label: "总结", icon: "daily", activePrefixes: ["/apple/days/"] },
-  { href: "/apple/assistant", label: "问答", icon: "assistant", activePrefixes: ["/experiments"] },
-  { href: "/apple/browse", label: "浏览", icon: "overview", activePrefixes: ["/apple/categories/", "/apple/metrics/"] },
-  { href: "/apple/sources", label: "同步", icon: "experiments", activePrefixes: ["/apple/raw/", "/apple/categories/data"] },
+  { href: "/apple/browse", label: "明细", icon: "overview", activePrefixes: ["/apple/categories/", "/apple/metrics/", "/apple/raw/"] },
+  { href: "/apple/sources", label: "同步", icon: "experiments", activePrefixes: ["/apple/checklist", "/apple/categories/data"] },
 ];
 
 export function isNavItemActive(item: NavItem, pathname: string): boolean {
@@ -239,6 +241,7 @@ export function Sidebar({
         <span className="brand-sub">Apple Watch</span>
       </div>
 
+      <div className="nav-section-label">日常入口</div>
       <nav className="nav">
         {NAV.map((item) => {
           const active = isNavItemActive(item, pathname);

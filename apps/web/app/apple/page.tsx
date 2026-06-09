@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 
 import type { AppleDailySummary, AppleStatus, MetricSeries, Readiness } from "../lib/api";
-import type { AppleIconName, AppleMetric } from "./appleHealth";
+import type { AppleIconName } from "./appleHealth";
 import {
   safeAppleDailySummary,
   safeAppleRawDetail,
@@ -15,11 +15,7 @@ import {
 import {
   APPLE_METRICS,
   AppleCategoryIcon,
-  BROWSE_CATEGORIES,
   CORE_METRICS,
-  FAVORITE_METRIC_IDS,
-  RAW_TABLES,
-  Sparkline,
   formatHours,
   formatRespiratoryRate,
   formatValue,
@@ -29,8 +25,6 @@ import {
   relativeZh,
   trendTone,
   workoutLabel,
-  zhDate,
-  zhTime,
 } from "./appleHealth";
 
 export const metadata: Metadata = { title: "健康概览 · 健康" };
@@ -62,15 +56,6 @@ function todayReadiness(summary: AppleDailySummary | null): string {
   return "保持稳定节奏";
 }
 
-function iconForMetric(metricId: string): AppleIconName {
-  if (metricId.startsWith("activity.")) return "activity";
-  if (metricId.startsWith("cardio.")) return "cardio";
-  if (metricId.startsWith("body.")) return "body";
-  if (metricId === "vital.respiratory_rate") return "sleep";
-  if (metricId === "vital.hrv_sdnn" || metricId === "vital.resting_heart_rate") return "recovery";
-  return "heart";
-}
-
 function pct(value: number | null | undefined, goal: number): number {
   if (value === null || value === undefined || !Number.isFinite(value) || goal <= 0) return 0;
   return Math.max(0, Math.min(1, value / goal));
@@ -81,34 +66,6 @@ function ringStyle(value: number | null | undefined, goal: number, color: string
     "--ring-pct": `${pct(value, goal) * 100}%`,
     "--ring-color": color,
   } as CSSProperties;
-}
-
-function ActivityRing({
-  label,
-  value,
-  goal,
-  unit,
-  color,
-}: {
-  label: string;
-  value: number | null | undefined;
-  goal: number;
-  unit: string;
-  color: string;
-}) {
-  return (
-    <div className="apple-ring-item">
-      <i className="apple-ring" style={ringStyle(value, goal, color)} />
-      <div>
-        <span>{label}</span>
-        <strong>
-          {formatValue(value)}
-          <small>{unit}</small>
-        </strong>
-        <p>目标 {formatValue(goal)} {unit}</p>
-      </div>
-    </div>
-  );
 }
 
 function HeroRing({
@@ -136,24 +93,6 @@ function HeroRing({
       </div>
     </div>
   );
-}
-
-function trendHighlights(seriesList: Array<MetricSeries | null>) {
-  return APPLE_METRICS.map((metric, index) => {
-    const nums = metricSeriesValues(metric, seriesList[index]);
-    const trend = recentTrend(nums);
-    const latest = nums.length ? nums[nums.length - 1] : latestValue(seriesList[index]);
-    return {
-      metric,
-      latest,
-      trend,
-      tone: trendTone(metric, trend.delta),
-      absPct: Math.abs(trend.pct ?? 0),
-    };
-  })
-    .filter((item) => item.trend.pct !== null)
-    .sort((a, b) => b.absPct - a.absPct)
-    .slice(0, 3);
 }
 
 type FocusInsight = {
@@ -346,40 +285,11 @@ function buildHomeFavorites(
   ];
 }
 
-function favoriteMetricCards(seriesList: Array<MetricSeries | null>) {
-  return FAVORITE_METRIC_IDS.map((metricId) => {
-    const metricIndex = APPLE_METRICS.findIndex((item) => item.id === metricId);
-    const metric = APPLE_METRICS[metricIndex];
-    if (!metric) return null;
-    const series = seriesList[metricIndex];
-    const nums = metricSeriesValues(metric, series);
-    const latest = nums.length ? nums[nums.length - 1] : latestValue(series);
-    const trend = recentTrend(nums);
-    return {
-      metric,
-      nums,
-      latest,
-      trend,
-      tone: trendTone(metric, trend.delta),
-    };
-  }).filter((item): item is {
-    metric: AppleMetric;
-    nums: number[];
-    latest: number | null;
-    trend: { delta: number | null; pct: number | null };
-    tone: string;
-  } => Boolean(item));
-}
-
-function favoriteTrendLabel(metric: AppleMetric, pctValue: number | null): string {
-  if (pctValue === null) return metric.note;
-  const direction = pctValue > 0 ? "上升" : "下降";
-  return `30 天${direction} ${formatValue(Math.abs(pctValue), 1)}%`;
-}
+const HOME_FOCUS_METRIC_IDS = ["vital.hrv_sdnn", "vital.respiratory_rate"] as const;
 
 function metricSnapshot(seriesList: Array<MetricSeries | null>, metricId: string) {
-  const index = APPLE_METRICS.findIndex((item) => item.id === metricId);
-  const metric = APPLE_METRICS[index];
+  const index = HOME_FOCUS_METRIC_IDS.findIndex((item) => item === metricId);
+  const metric = APPLE_METRICS.find((item) => item.id === metricId);
   if (!metric) return null;
   const nums = metricSeriesValues(metric, seriesList[index]);
   const trend = recentTrend(nums);
@@ -570,15 +480,13 @@ export default async function AppleHealthPage() {
     safeAppleStatus(),
     safePrivacy(),
     safeAppleDailySummary(),
-    Promise.all(APPLE_METRICS.map((metric) => safeSeries(metric.id, "30d"))),
+    Promise.all(HOME_FOCUS_METRIC_IDS.map((metricId) => safeSeries(metricId, "30d"))),
     safeAppleRawDetail("daily_activity", 14),
     safeAppleRawDetail("sleep_sessions", 20),
   ]);
   const observationRows = readiness?.sources.reduce((sum, source) => sum + source.observation_count, 0) ?? totalRows(status);
   const coreReadyCount = readyCount(readiness);
   const isLocal = privacy ? !privacy.cloud_active : true;
-  const highlights = trendHighlights(seriesList);
-  const favorites = favoriteMetricCards(seriesList);
   const focusInsights = buildFocusInsights(dailySummary, seriesList);
   const sevenDayReview = buildSevenDayReview(activityDetail?.rows ?? [], sleepDetail?.rows ?? []);
   const summaryFeed = buildSummaryFeed(dailySummary);
@@ -614,19 +522,7 @@ export default async function AppleHealthPage() {
           </div>
           <div className="apple-link-group">
             <Link href="/apple/coach" className="apple-text-link">
-              健康教练
-            </Link>
-            <Link href="/apple/daily" className="apple-text-link">
-              每日总结
-            </Link>
-            <Link href="/apple/goals" className="apple-text-link">
-              目标闭环
-            </Link>
-            <Link href="/apple/highlights" className="apple-text-link">
-              全部亮点
-            </Link>
-            <Link href="/apple/report" className="apple-text-link">
-              健康报告
+              今天怎么安排
             </Link>
             {dailySummary?.date && (
               <Link href={summaryDateHref(dailySummary)} className="apple-text-link">
@@ -744,6 +640,14 @@ export default async function AppleHealthPage() {
               tone: dailySummary?.sleep?.level === "偏少" ? "warn" : "good",
             },
             {
+              href: "/apple/alerts",
+              icon: "heart" as AppleIconName,
+              meta: "提醒",
+              title: "处理需要关注的信号",
+              body: "把睡眠、活动、恢复和同步异常集中到一个处理清单。",
+              tone: dailySummary?.sleep?.level === "偏少" ? "warn" : "neutral",
+            },
+            {
               href: "/apple/goals",
               icon: "activity" as AppleIconName,
               meta: "本周",
@@ -752,19 +656,11 @@ export default async function AppleHealthPage() {
               tone: "neutral",
             },
             {
-              href: "/apple/report",
-              icon: "data" as AppleIconName,
-              meta: "下周",
-              title: "生成下周计划",
-              body: "用本周记录决定下一周先补什么。",
-              tone: "neutral",
-            },
-            {
-              href: "/experiments",
+              href: "/apple/assistant",
               icon: "cardio" as AppleIconName,
-              meta: "长期",
-              title: "开始个人实验",
-              body: "验证睡眠、活动和训练习惯到底影响什么。",
+              meta: "疑问",
+              title: "问一句具体问题",
+              body: "例如今天能不能训练、睡眠为什么变差、这周先补什么。",
               tone: "neutral",
             },
           ].map((item) => (
@@ -814,162 +710,50 @@ export default async function AppleHealthPage() {
         </section>
       )}
 
-      <section className="apple-panel apple-favorites-panel">
+      <section className="apple-panel health-continue-panel">
         <div className="apple-panel-head">
           <div>
-            <h3>常看指标</h3>
-            <p>活动、心率、恢复和睡眠的关键状态。</p>
+            <h3>继续查看</h3>
+            <p>首页只保留判断和行动。需要更多细节时，从这里进入完整记录。</p>
           </div>
-          <Link href="/apple/favorites" className="apple-text-link">
-            查看全部
-          </Link>
         </div>
-        <div className="apple-favorite-grid">
-          {favorites.map(({ metric, nums, latest, trend, tone }) => (
-            <Link className="apple-favorite-card" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
-              <div className="apple-favorite-top">
-                <AppleCategoryIcon name={iconForMetric(metric.id)} />
-                <em className={tone}>{favoriteTrendLabel(metric, trend.pct)}</em>
+        <div className="health-command-grid compact">
+          {[
+            {
+              href: "/apple/browse",
+              icon: "data" as AppleIconName,
+              meta: "明细",
+              title: "查看全部健康明细",
+              body: "活动、睡眠、心脏、恢复和身体指标都在这里。",
+              tone: "neutral",
+            },
+            {
+              href: "/apple/trends",
+              icon: "recovery" as AppleIconName,
+              meta: "变化",
+              title: "查看趋势亮点",
+              body: "只看最近变化更明显的指标。",
+              tone: "neutral",
+            },
+            {
+              href: "/apple/sources",
+              icon: "activity" as AppleIconName,
+              meta: "同步",
+              title: "检查设备与同步",
+              body: "同步时间、记录覆盖和权限状态。",
+              tone: "neutral",
+            },
+          ].map((item) => (
+            <Link className={`health-command-card ${item.tone}`} href={item.href} key={item.title}>
+              <AppleCategoryIcon name={item.icon} />
+              <div>
+                <span>{item.meta}</span>
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
               </div>
-              <span>{metric.label}</span>
-              <strong>
-                {formatValue(latest, metric.digits ?? 0)}
-                <small>{metric.unit}</small>
-              </strong>
-              <Sparkline nums={nums} />
-              <p>{metric.description}</p>
             </Link>
           ))}
         </div>
-      </section>
-
-      <section className="apple-two-col apple-ios-summary">
-        <article className="apple-panel apple-rings-panel">
-          <div className="apple-panel-head">
-            <div>
-              <h3>活动状态</h3>
-              <p>按常用运动目标快速看昨日完成度。</p>
-            </div>
-            <Link href="/apple/raw/daily_activity" className="apple-text-link">
-              查看活动
-            </Link>
-          </div>
-          <div className="apple-rings-grid">
-            <ActivityRing
-              label="活动能量"
-              value={dailySummary?.activity?.active_calories}
-              goal={600}
-              unit="kcal"
-              color="var(--down)"
-            />
-            <ActivityRing
-              label="活动分钟"
-              value={dailySummary?.activity?.active_minutes}
-              goal={30}
-              unit="分钟"
-              color="var(--up)"
-            />
-            <ActivityRing
-              label="站立时间"
-              value={dailySummary?.activity?.stand_minutes}
-              goal={180}
-              unit="分钟"
-              color="var(--accent)"
-            />
-          </div>
-        </article>
-
-        <article className="apple-panel apple-highlight-panel">
-          <div className="apple-panel-head">
-            <div>
-              <h3>趋势亮点</h3>
-              <p>自动挑出最近变化最明显的指标。</p>
-            </div>
-            <Link href="/apple/trends" className="apple-text-link">
-              查看全部
-            </Link>
-          </div>
-          <div className="apple-highlight-list">
-            {highlights.map(({ metric, latest, trend, tone }) => (
-              <Link className="apple-highlight-row" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
-                <AppleCategoryIcon name={iconForMetric(metric.id)} />
-                <div>
-                  <span>{metric.label}</span>
-                  <strong>
-                    {formatValue(latest, metric.digits ?? 0)}
-                    <small>{metric.unit}</small>
-                  </strong>
-                </div>
-                <em className={tone}>
-                  {trend.pct === null ? "暂无" : `${trend.pct > 0 ? "+" : ""}${formatValue(trend.pct, 1)}%`}
-                </em>
-              </Link>
-            ))}
-            {!highlights.length && <div className="apple-empty-line">暂无可比较的趋势亮点</div>}
-          </div>
-        </article>
-      </section>
-
-      <div className="apple-section-head">
-        <h3>浏览</h3>
-        <p>按 Apple 健康式分类快速进入你关心的数据。</p>
-      </div>
-      <section className="apple-category-grid">
-        {BROWSE_CATEGORIES.map((category) => (
-          <Link className="apple-category-card" href={category.slug === "data" ? "/apple/sources" : `/apple/categories/${category.slug}`} key={category.title}>
-            <AppleCategoryIcon name={category.icon} />
-            <div>
-              <span>{category.title}</span>
-              <small>{category.subtitle}</small>
-            </div>
-          </Link>
-        ))}
-      </section>
-
-      <div className="apple-section-head">
-        <h3>健康指标</h3>
-        <p>点击任意指标查看最近记录、本周和本月趋势。</p>
-      </div>
-      <section className="apple-trend-grid">
-        {APPLE_METRICS.map((metric, index) => {
-          const series = seriesList[index];
-          const nums = metricSeriesValues(metric, series);
-          const latest = nums.length ? nums[nums.length - 1] : latestValue(series);
-          const trend = recentTrend(nums);
-          const tone = trendTone(metric, trend.delta);
-          return (
-            <Link className="apple-trend-card clickable" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
-              <div className="apple-card-title">
-                <span>{metric.label}</span>
-                <em className={tone}>
-                  {trend.pct === null ? metric.note : `${trend.pct > 0 ? "+" : ""}${formatValue(trend.pct, 1)}%`}
-                </em>
-              </div>
-              <div className="apple-value">
-                {formatValue(latest, metric.digits ?? 0)}
-                <span>{metric.unit}</span>
-              </div>
-              <Sparkline nums={nums} />
-              <div className="apple-card-meta">
-                {nums.length.toLocaleString("zh-CN")} 条记录 · {zhDate(series?.start)} 到 {zhDate(series?.end)}
-              </div>
-            </Link>
-          );
-        })}
-      </section>
-
-      <div className="apple-section-head">
-        <h3>同步数据</h3>
-        <p>每一类都可以点进去看最近明细。</p>
-      </div>
-      <section className="apple-raw-grid">
-        {Object.entries(status ?? {}).map(([key, row]) => (
-          <Link className="apple-raw-tile" href={`/apple/raw/${encodeURIComponent(key)}`} key={key}>
-            <span>{RAW_TABLES[key]?.label ?? key}</span>
-            <strong>{row.count.toLocaleString("zh-CN")}</strong>
-            <small>最近：{zhTime(row.newest)}</small>
-          </Link>
-        ))}
       </section>
     </>
   );

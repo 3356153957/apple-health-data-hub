@@ -8,7 +8,8 @@ import { ThemeToggle } from "./ThemeToggle";
 const TITLES: Record<string, { title: string; sub: string }> = {
   "/": { title: "健康概览", sub: "Apple Watch 与 iPhone 健康数据。" },
   "/apple": { title: "健康概览", sub: "运动、睡眠、恢复和同步状态。" },
-  "/apple/coach": { title: "健康教练", sub: "每日建议、异常提醒和行动优先级。" },
+  "/apple/coach": { title: "今日教练", sub: "每日建议、需要关注的信号和行动优先级。" },
+  "/apple/alerts": { title: "提醒处理", sub: "今日教练里需要处理的健康信号。" },
   "/apple/daily": { title: "每日总结", sub: "昨日运动、睡眠和今天建议。" },
   "/apple/highlights": { title: "健康亮点", sub: "运动、睡眠、恢复和趋势重点。" },
   "/apple/checklist": { title: "健康清单", sub: "关键数据、同步和隐私检查。" },
@@ -17,7 +18,7 @@ const TITLES: Record<string, { title: string; sub: string }> = {
   "/apple/report": { title: "健康报告", sub: "本周运动、睡眠、恢复和建议。" },
   "/apple/assistant": { title: "健康问答", sub: "用当前记录回答今天该怎么安排。" },
   "/apple/favorites": { title: "收藏", sub: "每天优先查看的健康指标。" },
-  "/apple/browse": { title: "浏览", sub: "按活动、睡眠、心脏和恢复查看。" },
+  "/apple/browse": { title: "健康明细", sub: "按活动、睡眠、心脏和恢复查看。" },
   "/apple/trends": { title: "趋势", sub: "最近 30 天变化更明显的健康指标。" },
   "/apple/sources": { title: "设备与同步", sub: "查看 Apple Watch、iPhone 和同步状态。" },
   "/demo": { title: "演示数据", sub: "示例健康故事。" },
