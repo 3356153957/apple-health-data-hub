@@ -1863,6 +1863,113 @@ html {
   font-weight: 700;
 }
 
+.apple-metric-method-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+  gap: 14px;
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(94, 234, 212, 0.08), transparent 46%),
+    var(--surface);
+}
+
+.apple-metric-method-copy {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 14px;
+  min-width: 0;
+}
+
+.apple-metric-method-copy span,
+.apple-metric-method-stats span,
+.apple-metric-method-stats small {
+  display: block;
+  color: var(--muted);
+}
+
+.apple-metric-method-copy span,
+.apple-metric-method-stats span {
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.apple-metric-method-copy strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.apple-metric-method-copy p {
+  max-width: 680px;
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.apple-metric-method-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.apple-metric-method-chips em {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--signal-line);
+  border-radius: 999px;
+  background: var(--signal-weak);
+  color: var(--signal);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.apple-metric-method-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.apple-metric-method-stats div {
+  min-width: 0;
+  padding: 14px 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.apple-metric-method-stats strong {
+  display: block;
+  margin-top: 9px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 24px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-metric-method-stats strong.compact {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.28;
+}
+
+.apple-metric-method-stats small {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .apple-kpis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -5707,6 +5814,10 @@ a.apple-record-card:active {
   .apple-record-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .apple-metric-method-panel {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
@@ -5955,6 +6066,19 @@ a.apple-record-card:active {
   .apple-source-metric-value b,
   .apple-source-metric-value small {
     white-space: normal;
+  }
+
+  .apple-metric-method-panel,
+  .apple-metric-method-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .apple-metric-method-panel {
+    padding: 16px;
+  }
+
+  .apple-metric-method-copy {
+    grid-template-columns: 38px minmax(0, 1fr);
   }
 
   .apple-source-summary-row small,

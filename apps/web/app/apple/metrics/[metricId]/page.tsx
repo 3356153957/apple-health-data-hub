@@ -125,6 +125,15 @@ type MetricInsight = {
   tone: "good" | "warn" | "neutral";
 };
 
+type MetricMethodContext = {
+  title: string;
+  body: string;
+  chips: string[];
+  footnote: string;
+  countLabel: string;
+  latestLabel: string;
+};
+
 const RANGE_OPTIONS = [
   { key: "24h", label: "日", title: "24 小时" },
   { key: "7d", label: "周", title: "7 天" },
@@ -134,6 +143,25 @@ const RANGE_OPTIONS = [
 ] as const;
 
 type RangeKey = (typeof RANGE_OPTIONS)[number]["key"];
+
+const SPECIAL_METRIC_CONTEXT: Record<string, MetricMethodContext> = {
+  "activity.stand_minutes": {
+    title: "站立分钟，不是圆环小时",
+    body: "这里显示 Apple Watch 同步到的站立分钟数，按天累计。健身圆环里的站立小时是另一种完成口径，所以不会直接写成 12 小时。",
+    chips: ["按天累计", "来自站立分钟样本", "适合观察久坐"],
+    footnote: "当天还没结束时，最新一天可能只显示已经同步到的几分钟；完整数值通常要等一天结束后再看。",
+    countLabel: "当前范围记录",
+    latestLabel: "最新一天",
+  },
+  "vital.respiratory_rate": {
+    title: "睡眠期间的每分钟呼吸",
+    body: "呼吸次数通常只在睡眠期间由 Apple Watch 记录。详情页显示夜间样本，每日总结会把昨夜睡眠时段内的读数求平均。",
+    chips: ["睡眠期间", "按样本平均", "白天不持续更新"],
+    footnote: "如果某晚没有佩戴手表睡觉，或睡眠与呼吸权限没有开放，那一晚可能不会出现呼吸记录。",
+    countLabel: "当前范围样本",
+    latestLabel: "最新读数",
+  },
+};
 
 const RELATED_METRICS: Array<{
   id: string;
@@ -406,6 +434,64 @@ function compactDate(iso: string | null | undefined): string {
   }).format(date);
 }
 
+function coverageLabel(points: DetailPoint[]): string {
+  if (!points.length) return "等待同步";
+  const first = points[0];
+  const last = points[points.length - 1];
+  return `${compactDate(first.t)} - ${compactDate(last.t)}`;
+}
+
+function MetricMethodPanel({
+  context,
+  metric,
+  points,
+  selectedCount,
+  latest,
+  windowLabel,
+}: {
+  context: MetricMethodContext;
+  metric: AppleMetric;
+  points: DetailPoint[];
+  selectedCount: number;
+  latest: number | null;
+  windowLabel: string;
+}) {
+  return (
+    <section className="apple-metric-method-panel" aria-label={`${metric.label}记录口径`}>
+      <div className="apple-metric-method-copy">
+        <MetricIcon name="records" />
+        <div>
+          <span>记录口径</span>
+          <strong>{context.title}</strong>
+          <p>{context.body}</p>
+          <div className="apple-metric-method-chips">
+            {context.chips.map((chip) => (
+              <em key={chip}>{chip}</em>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="apple-metric-method-stats">
+        <div>
+          <span>{context.countLabel}</span>
+          <strong>{selectedCount.toLocaleString("zh-CN")}</strong>
+          <small>{windowLabel}</small>
+        </div>
+        <div>
+          <span>{context.latestLabel}</span>
+          <strong>{formatValue(latest, metric.digits ?? 0)}</strong>
+          <small>{metric.unit}</small>
+        </div>
+        <div>
+          <span>最近覆盖</span>
+          <strong className="compact">{coverageLabel(points)}</strong>
+          <small>{context.footnote}</small>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function sampleChartPoints(points: ChartPoint[], target = 180): ChartPoint[] {
   if (points.length <= target) return points;
   const step = points.length / target;
@@ -521,6 +607,9 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
   const selectedRawPoints = pointsBetween(rawPointsAsc, startForRange(activeRange, now), now);
   const selectedDetailPointsAsc = mergePoints(selectedPointsAsc, selectedRawPoints);
   const detailPointsAsc = mergePoints(seriesPoints, rawPointsAsc);
+  const methodPointsAsc = selectedPointsAsc.length ? selectedPointsAsc : selectedRawPoints;
+  const methodCoveragePoints = seriesPoints.length ? seriesPoints : rawPointsAsc;
+  const metricContext = SPECIAL_METRIC_CONTEXT[metric.id] ?? null;
   const chartPoints = selectedDetailPointsAsc.length ? selectedDetailPointsAsc : detailPointsAsc;
   const nums = selectedDetailPointsAsc.map((point) => point.value).filter((value): value is number => value !== null);
   const longNums = detailPointsAsc.map((point) => point.value).filter((value): value is number => value !== null);
@@ -616,6 +705,17 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
           </Link>
         ))}
       </nav>
+
+      {metricContext && (
+        <MetricMethodPanel
+          context={metricContext}
+          metric={metric}
+          points={methodCoveragePoints}
+          selectedCount={methodPointsAsc.length}
+          latest={latest}
+          windowLabel={windowLabel}
+        />
+      )}
 
       <section className="apple-kpis">
         <div className="apple-kpi icon">
