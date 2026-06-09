@@ -9,11 +9,14 @@ import { abandonExperimentAction, analyzeExperimentAction } from "../lib/actions
 export function ExperimentActions({ id, status }: { id: string; status: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
-  const run = (action: () => Promise<ActionResult>) =>
+  const run = (action: () => Promise<ActionResult>, success: string) =>
     startTransition(async () => {
+      setMessage(null);
       const result = await action();
       setError(result.ok ? null : (result.error ?? "操作失败，请稍后再试。"));
+      if (result.ok) setMessage(success);
     });
 
   if (status === "abandoned") return null;
@@ -24,7 +27,7 @@ export function ExperimentActions({ id, status }: { id: string; status: string }
         type="button"
         className="btn"
         disabled={pending}
-        onClick={() => run(() => analyzeExperimentAction(id))}
+        onClick={() => run(() => analyzeExperimentAction(id), "分析已更新。")}
       >
         {pending ? "正在分析..." : "立即分析"}
       </button>
@@ -33,11 +36,12 @@ export function ExperimentActions({ id, status }: { id: string; status: string }
           type="button"
           className="btn btn-ghost"
           disabled={pending}
-          onClick={() => run(() => abandonExperimentAction(id))}
+          onClick={() => run(() => abandonExperimentAction(id), "已停止继续观察。")}
         >
           停止
         </button>
       )}
+      {message && <span className="exp-success" aria-live="polite">{message}</span>}
       {error && <span className="exp-error">{error}</span>}
     </div>
   );

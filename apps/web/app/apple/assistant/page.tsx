@@ -14,20 +14,10 @@ import {
   recentTrend,
   trendTone,
 } from "../appleHealth";
+import { HealthAssistantPanel, type AssistantAnswer, type AssistantTone } from "./HealthAssistantPanel";
 
 export const metadata: Metadata = { title: "健康问答 · 健康" };
 export const dynamic = "force-dynamic";
-
-type Tone = "good" | "warn" | "neutral";
-
-type AnswerCard = {
-  question: string;
-  answer: string;
-  evidence: string[];
-  href: string;
-  tone: Tone;
-  icon: "activity" | "sleep" | "recovery" | "cardio";
-};
 
 const ASSISTANT_METRICS = [
   "vital.hrv_sdnn",
@@ -52,11 +42,11 @@ function metricTrend(seriesList: Array<MetricSeries | null>, metricId: string) {
     metric,
     latest: nums.length ? nums[nums.length - 1] : latestValue(seriesList[index]),
     pct: trend.pct,
-    tone: trendTone(metric, trend.delta) as Tone,
+    tone: trendTone(metric, trend.delta) as AssistantTone,
   };
 }
 
-function sleepAnswer(summary: AppleDailySummary | null, hrv: ReturnType<typeof metricTrend>): AnswerCard {
+function sleepAnswer(summary: AppleDailySummary | null, hrv: ReturnType<typeof metricTrend>): AssistantAnswer {
   const sleep = summary?.sleep ?? null;
   const lowSleep = sleep?.total_sleep_min !== null && sleep?.total_sleep_min !== undefined && sleep.total_sleep_min < 360;
   const hrvDown = hrv?.pct !== null && hrv?.pct !== undefined && hrv.pct < -5;
@@ -76,7 +66,7 @@ function sleepAnswer(summary: AppleDailySummary | null, hrv: ReturnType<typeof m
   };
 }
 
-function activityAnswer(summary: AppleDailySummary | null): AnswerCard {
+function activityAnswer(summary: AppleDailySummary | null): AssistantAnswer {
   const activity = summary?.activity ?? null;
   const lowActivity = (activity?.steps ?? 0) < 5000 && (activity?.active_minutes ?? 0) < 30;
   return {
@@ -95,7 +85,7 @@ function activityAnswer(summary: AppleDailySummary | null): AnswerCard {
   };
 }
 
-function breathingAnswer(respiration: ReturnType<typeof metricTrend>, hrv: ReturnType<typeof metricTrend>): AnswerCard {
+function breathingAnswer(respiration: ReturnType<typeof metricTrend>, hrv: ReturnType<typeof metricTrend>): AssistantAnswer {
   const changed = respiration?.pct !== null && respiration?.pct !== undefined && Math.abs(respiration.pct) > 8;
   return {
     question: "呼吸次数变化需要担心吗？",
@@ -113,7 +103,7 @@ function breathingAnswer(respiration: ReturnType<typeof metricTrend>, hrv: Retur
   };
 }
 
-function experimentAnswer(testableCount: number): AnswerCard {
+function experimentAnswer(testableCount: number): AssistantAnswer {
   return {
     question: "我应该从哪个个人实验开始？",
     answer: testableCount > 0
@@ -165,6 +155,8 @@ export default async function AppleAssistantPage() {
         </div>
       </section>
 
+      <HealthAssistantPanel answers={answers} />
+
       <section className="health-answer-grid">
         {answers.map((item) => (
           <Link className={`health-answer-card ${item.tone}`} href={item.href} key={item.question}>
@@ -206,25 +198,25 @@ export default async function AppleAssistantPage() {
         <article className="apple-panel health-assistant-script">
           <div className="apple-panel-head">
             <div>
-              <h3>下一步会升级什么</h3>
-              <p>先把答案做准，再做真正的对话。</p>
+              <h3>回答会怎么落到行动</h3>
+              <p>先给判断，再带你进入对应记录、目标或个人实验。</p>
             </div>
           </div>
           <div className="health-lab-steps small">
             <article>
               <span>1</span>
-              <strong>引用具体日期</strong>
-              <p>回答时直接指出是哪几天影响了判断。</p>
+              <strong>看今天安排</strong>
+              <p>判断今天适合正常训练、补活动，还是优先恢复。</p>
             </article>
             <article>
               <span>2</span>
-              <strong>关联个人实验</strong>
-              <p>把回答直接转成一次可跟踪的习惯尝试。</p>
+              <strong>进入相关记录</strong>
+              <p>每个回答都能进入睡眠、活动、呼吸或目标详情。</p>
             </article>
             <article>
               <span>3</span>
-              <strong>接入更多来源</strong>
-              <p>把体重、饮食、心情和学习压力加入判断。</p>
+              <strong>转成习惯尝试</strong>
+              <p>适合验证的问题，可以继续进入个人实验观察。</p>
             </article>
           </div>
         </article>

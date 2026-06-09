@@ -16,6 +16,7 @@ import {
   relativeZh,
   trendTone,
 } from "../appleHealth";
+import { CoachActionChecklist } from "./CoachActionChecklist";
 
 export const metadata: Metadata = { title: "健康教练 · 健康" };
 export const dynamic = "force-dynamic";
@@ -23,6 +24,7 @@ export const dynamic = "force-dynamic";
 type Tone = "good" | "warn" | "neutral";
 
 type CoachCard = {
+  id: string;
   title: string;
   body: string;
   href: string;
@@ -105,6 +107,7 @@ function buildActions(summary: AppleDailySummary | null): CoachCard[] {
     icon: sleep?.level === "偏少" ? "sleep" : "activity",
     tone: sleep?.level === "偏少" ? "warn" : "good",
     meta: "今日安排",
+    id: "training-intensity",
   });
 
   actions.push({
@@ -117,6 +120,7 @@ function buildActions(summary: AppleDailySummary | null): CoachCard[] {
     icon: "activity",
     tone: activity?.level === "偏少" ? "warn" : "good",
     meta: "活动目标",
+    id: "activity-baseline",
   });
 
   actions.push({
@@ -128,6 +132,7 @@ function buildActions(summary: AppleDailySummary | null): CoachCard[] {
     icon: "cardio",
     tone: workouts.length ? "neutral" : "warn",
     meta: "训练闭环",
+    id: "workout-recording",
   });
 
   const advice = summary?.advice ?? [];
@@ -139,6 +144,7 @@ function buildActions(summary: AppleDailySummary | null): CoachCard[] {
       icon: "recovery",
       tone: "neutral",
       meta: "每日建议",
+      id: `daily-advice-${index}`,
     });
   });
 
@@ -165,6 +171,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       icon: "data",
       tone: "warn",
       meta: "同步",
+      id: "summary-missing",
     });
   }
 
@@ -176,6 +183,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       icon: "sleep",
       tone: "warn",
       meta: "恢复提醒",
+      id: "sleep-under-six-hours",
     });
   }
 
@@ -187,6 +195,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       icon: "activity",
       tone: "warn",
       meta: "活动提醒",
+      id: "low-foundation-activity",
     });
   }
 
@@ -198,6 +207,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       icon: "recovery",
       tone: "warn",
       meta: "恢复趋势",
+      id: "hrv-down",
     });
   }
 
@@ -209,6 +219,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       icon: "heart",
       tone: "warn",
       meta: "心脏趋势",
+      id: "resting-heart-rate-up",
     });
   }
 
@@ -220,6 +231,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       icon: "sleep",
       tone: "warn",
       meta: "睡眠呼吸",
+      id: "respiration-shift",
     });
   }
 
@@ -231,6 +243,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       icon: "data",
       tone: "warn",
       meta: "设备与同步",
+      id: "sync-missing",
     });
   }
 
@@ -242,6 +255,7 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
       icon: "recovery",
       tone: "good",
       meta: "异常提醒",
+      id: "no-priority-alerts",
     });
   }
 
@@ -251,36 +265,40 @@ function buildAlerts(summary: AppleDailySummary | null, trends: CoachTrend[], st
 function phaseCards(): CoachCard[] {
   return [
     {
-      title: "每日健康教练 + 异常提醒",
-      body: "每天先给执行建议，再列出需要关注的信号。",
+      title: "每天先看教练",
+      body: "打开后先确认今天该正常训练、补活动，还是优先恢复。",
       href: "/apple/coach",
       icon: "recovery",
       tone: "good",
-      meta: "第一阶段",
+      meta: "日常使用",
+      id: "phase-one",
     },
     {
-      title: "目标闭环 + 每周报告",
-      body: "把步数、活动分钟、站立、睡眠和训练变成周目标、完成度和下一步动作。",
+      title: "每周检查目标",
+      body: "把步数、活动分钟、站立、睡眠和训练放进一周闭环。",
       href: "/apple/goals",
       icon: "activity",
       tone: "neutral",
-      meta: "第二阶段",
+      meta: "目标管理",
+      id: "phase-two",
     },
     {
-      title: "个人实验系统 + 健康问答助手",
-      body: "把常见健康问题变成可验证的个人尝试，并用现有记录先给出可执行回答。",
+      title: "有疑问就问",
+      body: "用当前记录回答今天怎么安排，再把问题变成可观察的习惯尝试。",
       href: "/apple/assistant",
       icon: "cardio",
       tone: "neutral",
-      meta: "第三阶段",
+      meta: "问答与实验",
+      id: "phase-three",
     },
     {
-      title: "多源融合 + 长期数据中心",
-      body: "接入体重、饮食、心情、学习压力和课程作息，形成长期个人状态系统。",
+      title: "需要时核对设备",
+      body: "查看 Apple Watch、iPhone、同步时间和隐私状态是否正常。",
       href: "/apple/sources",
       icon: "data",
       tone: "neutral",
-      meta: "第四阶段",
+      meta: "设备与同步",
+      id: "phase-four",
     },
   ];
 }
@@ -375,6 +393,8 @@ export default async function AppleCoachPage() {
         </div>
       </section>
 
+      <CoachActionChecklist actions={actions.slice(0, 4)} dateKey={summary?.date ?? "today"} />
+
       <section className="apple-panel apple-category-section">
         <div className="apple-panel-head">
           <div>
@@ -402,8 +422,8 @@ export default async function AppleCoachPage() {
       <section className="apple-panel apple-category-section">
         <div className="apple-panel-head">
           <div>
-            <h3>产品能力</h3>
-            <p>先把数据转成行动，再做目标、实验、问答和长期数据中心。</p>
+            <h3>常用入口</h3>
+            <p>按真实使用场景整理，少看数字，多做决定。</p>
           </div>
         </div>
         <div className="apple-category-guide">
