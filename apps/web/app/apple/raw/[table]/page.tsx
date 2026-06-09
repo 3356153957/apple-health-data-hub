@@ -396,6 +396,7 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
   return rows.slice(0, 12).map((row) => {
     if (decodedTable === "workouts") {
       const maxHr = numeric(row, "max_hr");
+      const calories = numeric(row, "calories");
       return {
         icon: "workout",
         title: workoutLabel(String(row.sport_type ?? "")),
@@ -403,24 +404,28 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
         unit: "分钟",
         meta: `${zhTime(String(row.start_time ?? ""))} 开始`,
         details: [
-          `${formatValue(numeric(row, "calories"), 1)} kcal`,
-          maxHr === null ? "最高心率暂无" : `最高 ${formatValue(maxHr)} bpm`,
+          calories === null ? "训练能量未记录" : `${formatValue(calories, 1)} kcal`,
+          maxHr === null ? "最高心率未记录" : `最高 ${formatValue(maxHr)} bpm`,
         ],
         href: rowDayHref(row),
       };
     }
 
     if (decodedTable === "daily_activity") {
+      const activeMinutes = numeric(row, "active_minutes");
+      const distance = numeric(row, "distance_m");
+      const standMinutes = numeric(row, "stand_minutes");
+      const activeCalories = numeric(row, "active_calories");
       return {
         icon: "activity",
         title: String(row.date ?? "每日活动"),
         value: formatValue(numeric(row, "steps")),
         unit: "步",
-        meta: `${formatMinutes(numeric(row, "active_minutes"))} 活动`,
+        meta: activeMinutes === null ? "活动分钟未记录" : `${formatMinutes(activeMinutes)} 活动`,
         details: [
-          `${formatKm(numeric(row, "distance_m"))}`,
-          `${formatHours(numeric(row, "stand_minutes"))} 站立`,
-          `${formatValue(numeric(row, "active_calories"))} kcal`,
+          distance === null ? "距离未记录" : `${formatKm(distance)} 距离`,
+          standMinutes === null ? "站立时间未记录" : `${formatHours(standMinutes)} 站立`,
+          activeCalories === null ? "活动能量未记录" : `${formatValue(activeCalories)} kcal`,
         ],
         href: rowDayHref(row),
       };
@@ -428,15 +433,18 @@ function recordCards(decodedTable: string, rows: RawRow[]): RecordCard[] {
 
     if (decodedTable === "sleep_sessions") {
       const dateKey = localDateKeyFromDate(rowDate(row));
+      const deepMin = numeric(row, "deep_min");
+      const remMin = numeric(row, "rem_min");
+      const respiratoryRate = numeric(row, "respiratory_rate");
       return {
         icon: "sleep",
         title: dateKey ?? "睡眠记录",
         value: formatHours(numeric(row, "total_sleep_min")),
         meta: `${zhTime(String(row.start_time ?? ""))} - ${zhTime(String(row.end_time ?? ""))}`,
         details: [
-          `深睡 ${formatMinutes(numeric(row, "deep_min"))}`,
-          `REM ${formatMinutes(numeric(row, "rem_min"))}`,
-          `呼吸 ${formatRespiratoryRate(numeric(row, "respiratory_rate"))}`,
+          deepMin === null ? "深睡未记录" : `深睡 ${formatMinutes(deepMin)}`,
+          remMin === null ? "REM 未记录" : `REM ${formatMinutes(remMin)}`,
+          respiratoryRate === null ? "呼吸未记录" : `呼吸 ${formatRespiratoryRate(respiratoryRate)}`,
         ],
         href: rowDayHref(row),
       };
