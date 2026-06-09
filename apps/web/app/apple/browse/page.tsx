@@ -9,7 +9,6 @@ import {
   AppleCategoryIcon,
   BROWSE_CATEGORIES,
   RAW_TABLES,
-  Sparkline,
   formatValue,
   latestValue,
   metricSeriesValues,
@@ -169,6 +168,15 @@ function quickMetricValue(metricId: string, latest: number | null, summary: Appl
   return { value: latest, label: "最新读数" };
 }
 
+function quickMetricTone(metricId: string, value: number | null, trendPct: number | null): "good" | "warn" | "neutral" {
+  if (value === null) return "neutral";
+  if (metricId === "activity.stand_minutes") return value >= 180 ? "good" : "warn";
+  if (metricId === "activity.steps") return value >= 8000 ? "good" : value < 5000 ? "warn" : "neutral";
+  if (metricId === "vital.respiratory_rate") return value >= 12 && value <= 20 ? "good" : "neutral";
+  if (metricId === "vital.heart_rate") return trendPct !== null && Math.abs(trendPct) > 12 ? "warn" : "neutral";
+  return "neutral";
+}
+
 function buildSearchResults(query: string, status: AppleStatus | null): SearchResult[] {
   if (!query) return [];
   const results: RankedSearchResult[] = [];
@@ -247,8 +255,6 @@ function buildSearchResults(query: string, status: AppleStatus | null): SearchRe
 export default async function AppleBrowsePage({ searchParams }: PageProps) {
   const query = searchText((await searchParams)?.q);
   const userCategories = BROWSE_CATEGORIES.filter((category) => category.slug !== "data");
-  const metricCount = new Set(userCategories.flatMap((category) => category.metricIds)).size;
-  const sourceTables = Object.keys(RAW_TABLES);
   const quickMetrics = QUICK_METRIC_IDS.map((id) => APPLE_METRICS.find((metric) => metric.id === id)).filter(
     (metric): metric is (typeof APPLE_METRICS)[number] => Boolean(metric),
   );
@@ -267,12 +273,12 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
             返回健康概览
           </Link>
           <div className="hero-eyebrow">浏览</div>
-          <h2>按健康分类查看</h2>
-          <p>把活动、心脏、睡眠、恢复、身体和心肺数据分开看，先进入分类，再查看具体指标和同步记录。</p>
+          <h2>健康明细</h2>
+          <p>像 Apple 健康一样按分类进入；常看的项目放在前面，更多记录留在分类详情里。</p>
         </div>
         <div className="apple-hero-badges">
-          <span className="apple-badge">{userCategories.length} 个分类</span>
-          <span className="apple-badge good">{relativeZh(rawNewest(status))}</span>
+          <span className="apple-badge">{userCategories.length} 个健康分类</span>
+          <span className="apple-badge good">常看项目优先</span>
         </div>
       </section>
 
@@ -340,37 +346,17 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
         )}
       </section>
 
-      <section className="apple-kpis">
-        <div className="apple-kpi">
-          <span>健康分类</span>
-          <strong>{userCategories.length}</strong>
-          <small>活动、睡眠、恢复等入口</small>
-        </div>
-        <div className="apple-kpi">
-          <span>可查看指标</span>
-          <strong>{metricCount}</strong>
-          <small>来自 Apple Watch 和 iPhone</small>
-        </div>
-        <div className="apple-kpi">
-          <span>同步记录</span>
-          <strong>{rawTotal(status).toLocaleString("zh-CN")}</strong>
-          <small>私密健康记录</small>
-        </div>
-        <div className="apple-kpi">
-          <span>最近同步</span>
-          <strong className="compact">{relativeZh(rawNewest(status)).replace("同步", "")}</strong>
-          <small>仅自己可见</small>
-        </div>
-      </section>
-
       <section className="apple-panel apple-category-section">
         <div className="apple-panel-head">
           <div>
-            <h3>常用指标</h3>
-            <p>站立时间和呼吸次数在这里可以直接进入详情；呼吸次数来自睡眠期间的 Apple Watch 数据。</p>
+            <h3>常看项目</h3>
+            <p>只保留最常需要回看的几项。想看完整记录，从下方分类进入。</p>
           </div>
+          <Link href="/apple/favorites" className="apple-text-link">
+            管理常看
+          </Link>
         </div>
-        <div className="apple-category-metric-grid apple-quick-metric-grid">
+        <div className="apple-browse-focus-grid">
           {quickMetrics.map((metric, index) => {
             const series = quickSeriesList[index];
             const nums = metricSeriesValues(metric, series);
@@ -380,21 +366,19 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
             const latest = nums.length ? nums[nums.length - 1] : latestValue(series);
             const reading = quickMetricValue(metric.id, latest, dailySummary);
             const trend = recentTrend(nums);
+            const tone = quickMetricTone(metric.id, reading.value, trend.pct);
             return (
-              <Link className="apple-category-metric-card apple-quick-metric-card" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
-                <div className="apple-card-title">
-                  <span>{metric.label}</span>
-                  <em className="neutral">{reading.label}</em>
-                </div>
-                <div className="apple-value">
+              <Link className={`apple-browse-focus-card ${tone}`} href={`/apple/metrics/${metric.slug}`} key={metric.id}>
+                <AppleCategoryIcon name={iconForMetric(metric.id)} />
+                <span>{metric.label}</span>
+                <strong>
                   {formatValue(reading.value, metric.digits ?? 0)}
-                  <span>{metric.unit}</span>
-                </div>
-                <Sparkline nums={nums} />
-                <div className="apple-card-meta">
-                  {trendLabel(trend.pct)} · {nums.length.toLocaleString("zh-CN")} 条记录 · {zhDate(firstPoint?.t)} 到 {zhDate(latestPoint?.t)}
-                </div>
-                <p className="apple-metric-note">{metricHint(metric.id)}</p>
+                  <small>{metric.unit}</small>
+                </strong>
+                <p>{metricHint(metric.id)}</p>
+                <em>
+                  {reading.label} · {trendLabel(trend.pct)} · {zhDate(firstPoint?.t)} 到 {zhDate(latestPoint?.t)}
+                </em>
               </Link>
             );
           })}
@@ -405,7 +389,7 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
         <div className="apple-panel-head">
           <div>
             <h3>健康分类</h3>
-            <p>按 Apple 健康的浏览方式，把相关指标和记录放在同一个入口下。</p>
+            <p>每个分类里都有本周、本月、最近记录和相关健康明细。</p>
           </div>
         </div>
         <div className="apple-browse-list">
@@ -428,9 +412,9 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
                   )}
                 </div>
                 <small>
-                  {rawTotal(status, category.rawTables).toLocaleString("zh-CN")} 条
+                  {category.metricIds.length} 项
                   <br />
-                  {relativeZh(newest)}
+                  {relativeZh(newest).replace("同步", "")}
                 </small>
               </Link>
             );
@@ -438,18 +422,27 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
         </div>
       </section>
 
-      <section className="apple-panel apple-category-section">
+      <section className="apple-browse-sync-note">
+        <AppleCategoryIcon name="data" />
+        <div>
+          <strong>设备、同步和隐私状态放在一个地方</strong>
+          <p>需要核对 Apple Watch、iPhone 或同步记录是否完整时，进入设备与同步查看。</p>
+        </div>
+        <Link href="/apple/sources">设备与同步</Link>
+      </section>
+
+      <section className="apple-panel apple-category-section apple-browse-records">
         <div className="apple-panel-head">
           <div>
-            <h3>设备与同步</h3>
-            <p>需要核对同步是否完整时，再进入详细记录。日常查看优先使用上面的分类和单个指标。</p>
+            <h3>记录类别</h3>
+            <p>面向排查和核对，平时优先从上面的健康分类进入。</p>
           </div>
           <Link href="/apple/sources" className="apple-text-link">
             查看设备与同步
           </Link>
         </div>
         <div className="apple-source-grid">
-          {sourceTables.map((table) => {
+          {Object.keys(RAW_TABLES).map((table) => {
             const row = status?.[table] ?? null;
             return (
               <Link className="apple-source-card" href={`/apple/raw/${encodeURIComponent(table)}`} key={table}>
