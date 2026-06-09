@@ -126,6 +126,36 @@ export default async function AppleFavoritesPage() {
     .map((item) => item.series?.end)
     .filter((value): value is string => Boolean(value))
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  const favoriteKpis = [
+    {
+      href: "/apple/browse",
+      label: "收藏指标",
+      value: String(favorites.length),
+      detail: "摘要页优先展示",
+      tone: "",
+    },
+    {
+      href: "/apple/trends",
+      label: "30 天数据点",
+      value: totalPoints.toLocaleString("zh-CN"),
+      detail: "用于小图和趋势",
+      tone: "",
+    },
+    {
+      href: "/apple/trends",
+      label: "可比较",
+      value: String(comparable.length),
+      detail: "已有趋势对比",
+      tone: "",
+    },
+    {
+      href: changed ? `/apple/metrics/${changed.metric.slug}` : "/apple/trends",
+      label: "变化最大",
+      value: changed ? favoriteTrendLabel(changed.trend.pct).replace("30 天", "") : "暂无",
+      detail: changed?.metric.label ?? "等待更多同步记录",
+      tone: changed?.tone ?? "neutral",
+    },
+  ];
 
   return (
     <>
@@ -174,26 +204,13 @@ export default async function AppleFavoritesPage() {
       </section>
 
       <section className="apple-kpis">
-        <div className="apple-kpi">
-          <span>收藏指标</span>
-          <strong>{favorites.length}</strong>
-          <small>摘要页优先展示</small>
-        </div>
-        <div className="apple-kpi">
-          <span>30 天数据点</span>
-          <strong>{totalPoints.toLocaleString("zh-CN")}</strong>
-          <small>用于小图和趋势</small>
-        </div>
-        <div className="apple-kpi">
-          <span>可比较</span>
-          <strong>{comparable.length}</strong>
-          <small>已有趋势对比</small>
-        </div>
-        <div className="apple-kpi">
-          <span>变化最大</span>
-          <strong className={changed?.tone ?? "neutral"}>{changed ? favoriteTrendLabel(changed.trend.pct).replace("30 天", "") : "暂无"}</strong>
-          <small>{changed?.metric.label ?? "等待更多同步记录"}</small>
-        </div>
+        {favoriteKpis.map((item) => (
+          <Link className="apple-kpi clickable" href={item.href} key={item.label}>
+            <span>{item.label}</span>
+            <strong className={item.tone}>{item.value}</strong>
+            <small>{item.detail}</small>
+          </Link>
+        ))}
       </section>
 
       <section className="apple-panel apple-favorites-panel">
