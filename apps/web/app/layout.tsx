@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const synced = agoLabel(readiness?.last_ingested_at ?? readiness?.last_observation_at ?? null);
 
   return (
-    <html lang="zh-CN" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="zh-CN" className={`${sans.variable} ${mono.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* Apply the saved theme before paint so there's no light/dark flash. */}
         <script

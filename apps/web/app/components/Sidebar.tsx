@@ -46,6 +46,14 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M4.2 8h2.2l1-2.2 1.5 4.2 1-2h1.9" />
     </>
   ),
+  coach: (
+    <>
+      <path d="M8 2.5a5.5 5.5 0 0 0-5.5 5.5c0 2.4 1.5 4.4 3.6 5.2" />
+      <path d="M8 2.5a5.5 5.5 0 0 1 5.5 5.5c0 2.4-1.5 4.4-3.6 5.2" />
+      <path d="M5.5 8h1.8l.7-1.6 1.2 3.2.8-1.6h.9" />
+      <path d="M6.2 13.2h3.6" />
+    </>
+  ),
   daily: (
     <>
       <circle cx="8" cy="8" r="5.5" />
@@ -129,6 +137,7 @@ export type NavItem = {
 
 export const NAV: readonly NavItem[] = [
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
+  { href: "/apple/coach", label: "健康教练", icon: "coach" },
   { href: "/apple/daily", label: "每日总结", icon: "daily" },
   { href: "/apple/highlights", label: "亮点", icon: "highlight" },
   { href: "/apple/checklist", label: "健康清单", icon: "checklist" },
@@ -148,9 +157,9 @@ export const NAV: readonly NavItem[] = [
 
 export const MOBILE_NAV: readonly NavItem[] = [
   { href: "/apple", label: "概览", icon: "apple", exact: true },
+  { href: "/apple/coach", label: "教练", icon: "coach" },
   { href: "/apple/daily", label: "总结", icon: "daily", activePrefixes: ["/apple/days/"] },
   { href: "/apple/browse", label: "浏览", icon: "overview", activePrefixes: ["/apple/categories/", "/apple/metrics/"] },
-  { href: "/apple/trends", label: "趋势", icon: "trend" },
   { href: "/apple/sources", label: "同步", icon: "experiments", activePrefixes: ["/apple/raw/", "/apple/categories/data"] },
 ];
 

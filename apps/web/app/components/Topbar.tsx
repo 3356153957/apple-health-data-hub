@@ -8,6 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 const TITLES: Record<string, { title: string; sub: string }> = {
   "/": { title: "健康概览", sub: "Apple Watch 与 iPhone 健康数据。" },
   "/apple": { title: "健康概览", sub: "运动、睡眠、恢复和同步状态。" },
+  "/apple/coach": { title: "健康教练", sub: "每日建议、异常提醒和行动优先级。" },
   "/apple/daily": { title: "每日总结", sub: "昨日运动、睡眠和今天建议。" },
   "/apple/highlights": { title: "健康亮点", sub: "运动、睡眠、恢复和趋势重点。" },
   "/apple/checklist": { title: "健康清单", sub: "关键数据、同步和隐私检查。" },

@@ -613,6 +613,9 @@ export default async function AppleHealthPage() {
             <p>{dailySummary ? `${dailySummary.date} · 运动、睡眠和建议` : "同步完成后显示每日摘要"}</p>
           </div>
           <div className="apple-link-group">
+            <Link href="/apple/coach" className="apple-text-link">
+              健康教练
+            </Link>
             <Link href="/apple/daily" className="apple-text-link">
               每日总结
             </Link>
