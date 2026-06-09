@@ -216,6 +216,31 @@ function pointDate(point: DetailPoint): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function localDayKey(date: Date): string | null {
+  if (Number.isNaN(date.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Shanghai",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  return year && month && day ? `${year}-${month}-${day}` : null;
+}
+
+function pointDayKey(point: DetailPoint): string | null {
+  const date = pointDate(point);
+  return date ? localDayKey(date) : null;
+}
+
+function previousCompleteDayPoint(points: DetailPoint[], now: Date): DetailPoint | null {
+  const today = localDayKey(now);
+  if (!today) return null;
+  return [...points].reverse().find((point) => point.value !== null && (pointDayKey(point) ?? "") < today) ?? null;
+}
+
 function startOfWeek(now: Date): Date {
   const date = new Date(now);
   date.setHours(0, 0, 0, 0);
@@ -614,6 +639,19 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
   const nums = selectedDetailPointsAsc.map((point) => point.value).filter((value): value is number => value !== null);
   const longNums = detailPointsAsc.map((point) => point.value).filter((value): value is number => value !== null);
   const latest = rawPoints[0]?.value ?? (nums.length ? nums[nums.length - 1] : latestValue(selectedSeries));
+  const completeDayPoint = metric.id === "activity.stand_minutes" ? previousCompleteDayPoint(detailPointsAsc, now) : null;
+  const primaryLatestLabel =
+    metric.id === "activity.stand_minutes"
+      ? "今天进度"
+      : metric.id === "vital.respiratory_rate"
+        ? "最新睡眠读数"
+        : latestKpiLabel(metric);
+  const primaryLatestUnit =
+    metric.id === "activity.stand_minutes"
+      ? `${metric.unit} · 今天已同步`
+      : metric.id === "vital.respiratory_rate"
+        ? `${metric.unit} · 睡眠期间`
+        : latestKpiUnit(metric);
   const avg = average(nums);
   const range = minMax(nums);
   const trend = recentTrend(nums);
@@ -720,10 +758,20 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
       <section className="apple-kpis">
         <div className="apple-kpi icon">
           <MetricIcon name="records" />
-          <span>{latestKpiLabel(metric)}</span>
+          <span>{primaryLatestLabel}</span>
           <strong>{formatValue(latest, metric.digits ?? 0)}</strong>
-          <small>{latestKpiUnit(metric)}</small>
+          <small>{primaryLatestUnit}</small>
         </div>
+        {completeDayPoint && (
+          <div className="apple-kpi icon">
+            <MetricIcon name="week" />
+            <span>上一完整日</span>
+            <strong>{formatValue(completeDayPoint.value, metric.digits ?? 0)}</strong>
+            <small>
+              {metric.unit} · {compactDate(completeDayPoint.t)}
+            </small>
+          </div>
+        )}
         <div className="apple-kpi icon">
           <MetricIcon name="week" />
           <span>{windowLabel}平均</span>

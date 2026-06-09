@@ -318,14 +318,14 @@ function buildHomeFavorites(
     {
       title: "站立时间",
       value: formatHours(activity?.stand_minutes),
-      helper: "Apple Watch 站立记录",
+      helper: "昨日完整日站立记录",
       href: "/apple/metrics/stand-time",
       icon: "activity",
     },
     {
       title: "呼吸次数",
       value: formatRespiratoryRate(sleep?.respiratory_rate),
-      helper: "睡眠期间记录",
+      helper: "昨夜睡眠平均",
       href: "/apple/metrics/respiratory-rate",
       icon: "sleep",
     },

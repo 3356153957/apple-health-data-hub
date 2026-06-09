@@ -161,7 +161,7 @@ function buildHighlights({
         ? `最近 30 天${trendLabel(strongest.pct)}，最新 ${formatValue(strongest.latest, strongest.metric.digits ?? 0)} ${strongest.metric.unit}。`
         : "有更多连续记录后，这里会显示变化更明显的健康指标。",
       meta: "趋势",
-      href: "/apple/trends",
+      href: strongest ? `/apple/metrics/${strongest.metric.slug}` : "/apple/trends",
       icon: "cardio",
       tone: strongest?.tone === "warn" ? "warn" : strongest?.tone === "good" ? "good" : "neutral",
       stats: [
@@ -195,6 +195,39 @@ export default async function AppleHighlightsPage() {
   const highlights = buildHighlights({ summary, status, seriesList });
   const warningCount = highlights.filter((item) => item.tone === "warn").length;
   const goodCount = highlights.filter((item) => item.tone === "good").length;
+  const firstHighlight = highlights[0] ?? null;
+  const firstGood = highlights.find((item) => item.tone === "good") ?? null;
+  const firstWarning = highlights.find((item) => item.tone === "warn") ?? null;
+  const highlightKpis = [
+    {
+      href: firstHighlight?.href ?? "/apple/daily",
+      label: "亮点",
+      value: String(highlights.length),
+      detail: "按日常查看顺序排列",
+      tone: "",
+    },
+    {
+      href: firstGood?.href ?? "/apple/daily",
+      label: "状态较好",
+      value: String(goodCount),
+      detail: "活动、睡眠或同步正常",
+      tone: "good",
+    },
+    {
+      href: firstWarning?.href ?? "/apple/daily",
+      label: "需要关注",
+      value: String(warningCount),
+      detail: "可能需要调整节奏",
+      tone: warningCount ? "warn" : "neutral",
+    },
+    {
+      href: "/apple/sources",
+      label: "最近同步",
+      value: relativeZh(rawNewest(status)).replace("同步", ""),
+      detail: "私密记录",
+      tone: "compact",
+    },
+  ];
 
   return (
     <>
@@ -214,26 +247,13 @@ export default async function AppleHighlightsPage() {
       </section>
 
       <section className="apple-kpis">
-        <div className="apple-kpi">
-          <span>亮点</span>
-          <strong>{highlights.length}</strong>
-          <small>按日常查看顺序排列</small>
-        </div>
-        <div className="apple-kpi">
-          <span>状态较好</span>
-          <strong className="good">{goodCount}</strong>
-          <small>活动、睡眠或同步正常</small>
-        </div>
-        <div className="apple-kpi">
-          <span>需要关注</span>
-          <strong className={warningCount ? "warn" : "neutral"}>{warningCount}</strong>
-          <small>可能需要调整节奏</small>
-        </div>
-        <div className="apple-kpi">
-          <span>最近同步</span>
-          <strong className="compact">{relativeZh(rawNewest(status)).replace("同步", "")}</strong>
-          <small>私密记录</small>
-        </div>
+        {highlightKpis.map((item) => (
+          <Link className="apple-kpi clickable" href={item.href} key={item.label}>
+            <span>{item.label}</span>
+            <strong className={item.tone}>{item.value}</strong>
+            <small>{item.detail}</small>
+          </Link>
+        ))}
       </section>
 
       <section className="apple-panel apple-highlights-panel">
