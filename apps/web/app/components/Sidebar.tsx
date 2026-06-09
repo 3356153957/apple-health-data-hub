@@ -164,10 +164,9 @@ export const NAV: readonly NavItem[] = [
     href: "/apple/coach",
     label: "今日教练",
     icon: "coach",
-    activePrefixes: ["/apple/alerts", "/apple/goals", "/apple/report", "/apple/assistant", "/experiments"],
+    activePrefixes: ["/apple/alerts", "/apple/daily", "/apple/days/", "/apple/calendar", "/apple/goals", "/apple/report", "/apple/assistant", "/experiments"],
   },
   { href: "/apple", label: "健康概览", icon: "apple", exact: true },
-  { href: "/apple/daily", label: "每日总结", icon: "daily", activePrefixes: ["/apple/days/", "/apple/calendar"] },
   {
     href: "/apple/browse",
     label: "健康明细",
@@ -179,9 +178,8 @@ export const NAV: readonly NavItem[] = [
 ];
 
 export const MOBILE_NAV: readonly NavItem[] = [
-  { href: "/apple/coach", label: "教练", icon: "coach" },
+  { href: "/apple/coach", label: "教练", icon: "coach", activePrefixes: ["/apple/daily", "/apple/days/", "/apple/calendar"] },
   { href: "/apple", label: "概览", icon: "apple", exact: true },
-  { href: "/apple/daily", label: "总结", icon: "daily", activePrefixes: ["/apple/days/"] },
   { href: "/apple/browse", label: "明细", icon: "overview", activePrefixes: ["/apple/categories/", "/apple/metrics/", "/apple/raw/"] },
   { href: "/apple/sources", label: "同步", icon: "experiments", activePrefixes: ["/apple/checklist", "/apple/categories/data"] },
 ];

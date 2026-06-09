@@ -30,6 +30,17 @@ type RecentDay = {
   tone: Tone;
 };
 
+type DailyStoryItem = {
+  href: string;
+  icon: "activity" | "sleep" | "cardio";
+  label: string;
+  title: string;
+  value: string;
+  body: string;
+  meta: string;
+  tone: Tone;
+};
+
 function rawNumber(row: Record<string, string | number | null> | undefined, key: string): number | null {
   if (!row) return null;
   const value = row[key];
@@ -126,6 +137,95 @@ function actionItems(summary: AppleDailySummary | null): string[] {
   return Array.from(new Set(items)).slice(0, 4);
 }
 
+function activityStory(summary: AppleDailySummary | null, dayDetailHref: string): DailyStoryItem {
+  const activity = summary?.activity ?? null;
+  if (!activity) {
+    return {
+      href: dayDetailHref,
+      icon: "activity",
+      label: "活动",
+      title: "等待活动记录",
+      value: "暂无",
+      body: "同步完成后，会把步数、活动分钟和站立时间合成一条昨日活动判断。",
+      meta: "运动节奏",
+      tone: "neutral",
+    };
+  }
+  const tone: Tone = activity.level === "充足" ? "good" : activity.level === "偏少" ? "warn" : "neutral";
+  const title = activity.level === "充足" ? "活动量够用" : activity.level === "偏少" ? "活动量偏少" : "活动节奏平稳";
+  return {
+    href: dayDetailHref,
+    icon: "activity",
+    label: "活动",
+    title,
+    value: `${formatValue(activity.steps)} 步`,
+    body: `昨天活动 ${formatValue(activity.active_minutes)} 分钟，站立 ${formatHours(activity.stand_minutes)}，消耗 ${formatValue(activity.active_calories)} kcal。`,
+    meta: activity.delta_pct?.steps !== null && activity.delta_pct?.steps !== undefined
+      ? `步数较近 7 天${activity.delta_pct.steps >= 0 ? "高" : "低"} ${formatValue(Math.abs(activity.delta_pct.steps), 1)}%`
+      : "昨日活动复盘",
+    tone,
+  };
+}
+
+function sleepStory(summary: AppleDailySummary | null, dayDetailHref: string): DailyStoryItem {
+  const sleep = summary?.sleep ?? null;
+  if (!sleep) {
+    return {
+      href: dayDetailHref,
+      icon: "sleep",
+      label: "睡眠",
+      title: "等待睡眠记录",
+      value: "暂无",
+      body: "同步完成后，会把睡眠时长、效率、结构和呼吸次数整理成昨夜恢复判断。",
+      meta: "恢复节奏",
+      tone: "neutral",
+    };
+  }
+  const tone: Tone = sleep.level === "偏少" ? "warn" : sleep.level === "恢复较好" ? "good" : "neutral";
+  const title = sleep.level === "偏少" ? "恢复不足" : sleep.level === "恢复较好" ? "恢复不错" : "睡眠基本够用";
+  return {
+    href: dayDetailHref,
+    icon: "sleep",
+    label: "睡眠",
+    title,
+    value: formatHours(sleep.total_sleep_min),
+    body: `昨夜睡眠效率 ${formatValue(sleep.efficiency_pct, 1)}%，深睡 ${minutes(sleep.deep_min)}，REM ${minutes(sleep.rem_min)}。`,
+    meta: respirationBrief(sleep.respiratory_rate),
+    tone,
+  };
+}
+
+function workoutStory(summary: AppleDailySummary | null): DailyStoryItem {
+  const workouts = summary?.workouts ?? [];
+  const firstWorkout = workouts[0];
+  if (!firstWorkout) {
+    return {
+      href: "/apple/raw/workouts",
+      icon: "cardio",
+      label: "训练",
+      title: "昨日没有训练",
+      value: "0 次",
+      body: "这不是问题。训练日看强度和恢复，非训练日更适合看步数、站立和睡眠是否稳定。",
+      meta: "训练安排",
+      tone: "neutral",
+    };
+  }
+  return {
+    href: "/apple/raw/workouts",
+    icon: "cardio",
+    label: "训练",
+    title: workoutLabel(firstWorkout.sport_type),
+    value: `${workouts.length} 次`,
+    body: `${zhTime(firstWorkout.start_time)} 开始，持续 ${minutes(firstWorkout.duration_min)}。${workoutMeta(firstWorkout)}。`,
+    meta: workouts.length > 1 ? `另有 ${workouts.length - 1} 次训练` : "训练复盘",
+    tone: "good",
+  };
+}
+
+function dailyStory(summary: AppleDailySummary | null, dayDetailHref: string): DailyStoryItem[] {
+  return [sleepStory(summary, dayDetailHref), activityStory(summary, dayDetailHref), workoutStory(summary)];
+}
+
 function workoutMeta(workout: AppleDailySummary["workouts"][number]): string {
   const items: string[] = [];
   if (workout.calories !== null) items.push(`${formatValue(workout.calories, 1)} kcal`);
@@ -206,44 +306,7 @@ export default async function AppleDailyPage() {
   const tone = dailyTone(summary);
   const days = recentDays(activityRaw?.rows ?? [], sleepRaw?.rows ?? []);
   const dayDetailHref = summary?.date ? `/apple/days/${encodeURIComponent(summary.date)}` : "/apple/calendar";
-  const dailyKpis = [
-    {
-      href: "/apple/metrics/steps",
-      label: "昨日步数",
-      value: formatValue(activity?.steps),
-      detail: activity?.level ?? "暂无活动记录",
-    },
-    {
-      href: "/apple/categories/activity",
-      label: "活动分钟",
-      value: formatValue(activity?.active_minutes),
-      detail: "目标 30 分钟",
-    },
-    {
-      href: "/apple/metrics/stand-time",
-      label: "站立时间",
-      value: formatHours(activity?.stand_minutes),
-      detail: "目标 3 小时",
-    },
-    {
-      href: dayDetailHref,
-      label: "昨夜睡眠",
-      value: formatHours(sleep?.total_sleep_min),
-      detail: `效率 ${formatValue(sleep?.efficiency_pct, 1)}%`,
-    },
-    {
-      href: "/apple/metrics/respiratory-rate",
-      label: "呼吸次数",
-      value: formatRespiratoryRate(sleep?.respiratory_rate),
-      detail: "睡眠期间",
-    },
-    {
-      href: "/apple/raw/workouts",
-      label: "训练记录",
-      value: String(workouts.length),
-      detail: workouts[0] ? workoutLabel(workouts[0].sport_type) : "昨日未记录训练",
-    },
-  ];
+  const storyItems = dailyStory(summary, dayDetailHref);
 
   return (
     <>
@@ -297,14 +360,32 @@ export default async function AppleDailyPage() {
         </article>
       </section>
 
-      <section className="apple-kpis">
-        {dailyKpis.map((item) => (
-          <Link className="apple-kpi clickable" href={item.href} key={item.label}>
-            <span>{item.label}</span>
-            <strong>{item.value}</strong>
-            <small>{item.detail}</small>
+      <section className="apple-panel apple-daily-story">
+        <div className="apple-panel-head">
+          <div>
+            <h3>昨日复盘</h3>
+            <p>把同一批记录合成几条能判断的结论，想看细节再点进去。</p>
+          </div>
+          <Link href={dayDetailHref} className="apple-text-link">
+            查看当天
           </Link>
-        ))}
+        </div>
+        <div className="apple-daily-story-list">
+          {storyItems.map((item) => (
+            <Link className={`apple-daily-story-row ${item.tone}`} href={item.href} key={item.label}>
+              <AppleCategoryIcon name={item.icon} />
+              <div>
+                <span>{item.label}</span>
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
+              </div>
+              <em>
+                {item.value}
+                <small>{item.meta}</small>
+              </em>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="apple-two-col apple-daily-main">

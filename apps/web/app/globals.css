@@ -442,7 +442,7 @@ a {
     left: 0;
     z-index: 25;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2px;
     padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);
@@ -1615,7 +1615,7 @@ html {
 
 .apple-hero-side {
   display: grid;
-  justify-items: end;
+  justify-items: flex-end;
   align-content: start;
   gap: 16px;
   flex: 0 0 360px;
@@ -1797,6 +1797,101 @@ html {
   color: var(--signal);
   font-style: normal;
   font-weight: 700;
+}
+
+.apple-daily-story {
+  margin-top: 14px;
+}
+
+.apple-daily-story-list {
+  display: grid;
+  gap: 0;
+  margin-top: 14px;
+}
+
+.apple-daily-story-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) minmax(142px, max-content);
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    transform 0.14s ease,
+    background 0.14s ease;
+}
+
+.apple-daily-story-row:first-child {
+  border-top: 0;
+}
+
+.apple-daily-story-row:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(90deg, transparent, var(--surface-3), transparent);
+}
+
+.apple-daily-story-row:active {
+  transform: translateY(0);
+  opacity: 0.82;
+}
+
+.apple-daily-story-row .apple-category-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+}
+
+.apple-daily-story-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-daily-story-row strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.apple-daily-story-row p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.apple-daily-story-row em {
+  display: grid;
+  justify-items: flex-end;
+  gap: 6px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 24px;
+  font-style: normal;
+  line-height: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-daily-story-row em small {
+  max-width: 190px;
+  color: var(--faint);
+  font-family: var(--sans);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.apple-daily-story-row.good em {
+  color: var(--up);
+}
+
+.apple-daily-story-row.warn em {
+  color: var(--warn);
 }
 
 .apple-related-metrics {
@@ -2109,7 +2204,7 @@ html {
   place-items: center;
   width: 104px;
   aspect-ratio: 1;
-  justify-self: end;
+  justify-self: flex-end;
   border-radius: 50%;
   background: conic-gradient(var(--signal) var(--coach-status-pct), var(--raise) 0);
 }
@@ -2854,7 +2949,7 @@ a.apple-home-favorite:active {
   place-items: center;
   width: 98px;
   aspect-ratio: 1;
-  justify-self: end;
+  justify-self: flex-end;
   border-radius: 50%;
   background: conic-gradient(var(--warn) var(--alert-pct), var(--raise) 0);
 }
@@ -3833,7 +3928,7 @@ a.apple-home-favorite:active {
 }
 
 .apple-favorite-row em {
-  justify-self: end;
+  justify-self: flex-end;
   max-width: 180px;
   padding: 4px 9px;
   border-radius: 999px;
@@ -5798,7 +5893,7 @@ a.apple-home-favorite:active {
 }
 
 .health-chat-bubble.user {
-  justify-self: end;
+  justify-self: flex-end;
   max-width: min(520px, 92%);
   padding: 12px 14px;
   background: var(--raise);
@@ -5903,7 +5998,7 @@ a.apple-home-favorite:active {
   place-items: center;
   width: 96px;
   aspect-ratio: 1;
-  justify-self: end;
+  justify-self: flex-end;
   border-radius: 50%;
   background: conic-gradient(var(--signal) var(--coach-loop-pct), var(--raise) 0);
 }
@@ -7169,6 +7264,19 @@ a.apple-record-card:active {
   .apple-record-grid,
   .apple-record-grid.raw {
     grid-template-columns: 1fr;
+  }
+
+  .apple-daily-story-row {
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .apple-daily-story-row em {
+    grid-column: 2;
+    justify-items: start;
+    margin-top: -4px;
+    font-size: 20px;
+    text-align: left;
   }
 
   .health-chat-panel {
