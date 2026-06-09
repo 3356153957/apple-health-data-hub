@@ -242,8 +242,8 @@ function buildSummaryFeed(summary: AppleDailySummary | null): SummaryFeedItem[] 
       tone: sleep?.level === "偏少" ? "warn" : activity?.level === "充足" ? "good" : "neutral",
       stats: [
         { label: "步数", value: formatValue(activity?.steps) },
-        { label: "睡眠", value: formatHours(sleep?.total_sleep_min) },
-        { label: "训练", value: `${summary?.workouts.length ?? 0} 次` },
+        { label: "站立", value: formatHours(activity?.stand_minutes) },
+        { label: "呼吸", value: formatRespiratoryRate(sleep?.respiratory_rate) },
       ],
     },
     {
@@ -273,7 +273,7 @@ function buildSummaryFeed(summary: AppleDailySummary | null): SummaryFeedItem[] 
       stats: [
         { label: "深睡", value: `${formatValue(sleep?.deep_min)} 分钟` },
         { label: "REM", value: `${formatValue(sleep?.rem_min)} 分钟` },
-        { label: "清醒", value: `${formatValue(sleep?.awake_min)} 分钟` },
+        { label: "呼吸", value: formatRespiratoryRate(sleep?.respiratory_rate) },
       ],
     },
     {
