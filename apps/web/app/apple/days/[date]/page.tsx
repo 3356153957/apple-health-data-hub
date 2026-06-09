@@ -140,6 +140,38 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
   const nextDate = shiftDateKey(dateKey, 1);
   const today = todayDateKey();
   const canOpenNextDate = !today || nextDate <= today;
+  const dayKpis = [
+    {
+      href: "/apple/metrics/steps",
+      label: "步数",
+      value: formatValue(activity?.steps),
+      detail: changeText(activity?.delta_pct?.steps),
+    },
+    {
+      href: "/apple/categories/sleep",
+      label: "睡眠",
+      value: formatHours(sleep?.total_sleep_min),
+      detail: `效率 ${formatValue(sleep?.efficiency_pct, 1)}%`,
+    },
+    {
+      href: "/apple/metrics/stand-time",
+      label: "站立时间",
+      value: formatHours(activity?.stand_minutes),
+      detail: "Apple Watch 站立记录",
+    },
+    {
+      href: "/apple/metrics/respiratory-rate",
+      label: "呼吸次数",
+      value: formatRespiratoryRate(sleep?.respiratory_rate),
+      detail: "睡眠期间记录",
+    },
+    {
+      href: "/apple/raw/workouts",
+      label: "训练",
+      value: String(workouts.length),
+      detail: workouts[0] ? workoutLabel(workouts[0].sport_type) : "未记录训练",
+    },
+  ];
 
   return (
     <>
@@ -186,26 +218,13 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
       </nav>
 
       <section className="apple-kpis">
-        <div className="apple-kpi">
-          <span>步数</span>
-          <strong>{formatValue(activity?.steps)}</strong>
-          <small>{changeText(activity?.delta_pct?.steps)}</small>
-        </div>
-        <div className="apple-kpi">
-          <span>睡眠</span>
-          <strong>{formatHours(sleep?.total_sleep_min)}</strong>
-          <small>效率 {formatValue(sleep?.efficiency_pct, 1)}%</small>
-        </div>
-        <div className="apple-kpi">
-          <span>站立时间</span>
-          <strong>{formatHours(activity?.stand_minutes)}</strong>
-          <small>Apple Watch 站立记录</small>
-        </div>
-        <div className="apple-kpi">
-          <span>训练</span>
-          <strong>{workouts.length}</strong>
-          <small>{workouts[0] ? workoutLabel(workouts[0].sport_type) : "未记录训练"}</small>
-        </div>
+        {dayKpis.map((item) => (
+          <Link className="apple-kpi clickable" href={item.href} key={item.label}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+            <small>{item.detail}</small>
+          </Link>
+        ))}
       </section>
 
       <section className="apple-day-detail-grid">
