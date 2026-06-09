@@ -3,3 +3,5 @@ node_modules
 out
 *.tsbuildinfo
 .env.local
+logs/
+--full-page

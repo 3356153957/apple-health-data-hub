@@ -1,6 +1,6 @@
 # Health Data Hub
 
-[![CI](https://github.com/umutkeltek/health-data-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/umutkeltek/health-data-hub/actions/workflows/ci.yml)
+[![CI](https://github.com/3356153957/health-data-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/3356153957/health-data-hub/actions/workflows/ci.yml)
 [![License: Elastic 2.0](https://img.shields.io/badge/License-Elastic--2.0-005571.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -18,6 +18,80 @@
 Your own server, on your own hardware, turning the health data your phone already collects into an AI-written daily briefing - no cloud, no subscription, no one else reading your numbers.
 
 You point your iPhone at it. It stores everything from your Apple Watch (heart rate, HRV, SpO2, sleep, workouts, steps, and more), graphs it in Grafana, and - if you turn it on - runs a small local AI model that writes you a short narrative every morning about how your body is actually doing.
+
+## This Public Fork
+
+This public repository is the reusable, privacy-preserving part of a personal
+Apple Watch and iPhone health-data system. It contains the backend, data model,
+API contracts, Docker setup, and a polished Chinese web dashboard for everyday
+health review.
+
+The private companion repository is kept separate and is not required for
+reading or reusing this code. It contains personal deployment notes, iOS signing
+workflow configuration, and local operating details. Real secrets, certificates,
+IPA files, local logs, database dumps, and personal health records are not
+committed to this public repository.
+
+## Use Cases
+
+- Self-host Apple Health data from iPhone and Apple Watch.
+- Keep long-term health history in a database you control.
+- Review daily movement, sleep, recovery, heart, respiratory, and workout data.
+- Use the `/apple/coach` dashboard as a daily health coach instead of a raw data
+  table.
+- Build abnormal-signal reminders, weekly reports, personal experiments, or
+  local AI summaries on top of your own health data.
+- Run the dashboard inside a trusted LAN with a local password gate.
+
+## Public Dashboard Quick Start
+
+The full backend can run with Docker as described below. The web dashboard can
+also be started manually during development:
+
+```bash
+cd apps/web
+npm install
+```
+
+Create `apps/web/.env.local` locally. Do not commit this file.
+
+```env
+API_BASE=http://localhost:8000
+API_KEY=replace-with-your-local-api-key
+HEALTH_WEB_PASSWORD=choose-a-local-dashboard-password
+```
+
+Start the dashboard:
+
+```bash
+npm run dev
+```
+
+Open:
+
+```text
+http://127.0.0.1:5173/unlock
+```
+
+After entering the local dashboard password, the main Apple Health coach page is:
+
+```text
+http://127.0.0.1:5173/apple/coach
+```
+
+## Privacy Boundary
+
+- `API_KEY`, `HEALTH_WEB_PASSWORD`, `.env`, and `.env.local` are local-only.
+- The dashboard password is read from `HEALTH_WEB_PASSWORD`; no real password is
+  hardcoded in source.
+- API calls are made by the self-hosted Next.js server, not directly from the
+  browser with a public API key.
+- Health records, sync logs, database volumes, certificates, and IPA artifacts
+  should remain outside Git.
+- LAN discovery and sync clients should require the same API key before sending
+  data.
+- Do not expose the HTTP services directly to the public internet. Use a reverse
+  proxy and TLS if remote access is needed.
 
 ## Don't want to self-host?
 
