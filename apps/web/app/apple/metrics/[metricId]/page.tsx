@@ -359,6 +359,13 @@ function metricAmount(metric: AppleMetric, value: number | null): string {
   return `${formatValue(value, metric.digits ?? 0)} ${metric.unit}`;
 }
 
+function relatedMetricStatus(metric: AppleMetric, value: number | null): string {
+  if (value === null) return "暂无近期记录";
+  if (metric.id === "activity.stand_minutes") return `今天进度 ${formatValue(value, metric.digits ?? 0)} ${metric.unit}`;
+  if (metric.id === "vital.respiratory_rate") return `睡眠读数 ${formatValue(value, metric.digits ?? 0)} ${metric.unit}`;
+  return `最近读数 ${formatValue(value, metric.digits ?? 0)} ${metric.unit}`;
+}
+
 function positionTone(metric: AppleMetric, position: number | null): "good" | "warn" | "neutral" {
   if (position === null || metric.higherIsBetter === undefined) return "neutral";
   if (position >= 0.8) return metric.higherIsBetter ? "good" : "warn";
@@ -723,10 +730,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
               <span>{item.active ? "当前指标" : item.kicker}</span>
               <strong>{item.metric.label}</strong>
               <p>{item.description}</p>
-              <em>
-                {item.latest === null ? "暂无近期记录" : `已同步 ${formatValue(item.latest, item.metric.digits ?? 0)}`}
-                {item.latest === null ? "" : ` ${item.metric.unit}`}
-              </em>
+              <em>{relatedMetricStatus(item.metric, item.latest)}</em>
             </div>
           </Link>
         ))}

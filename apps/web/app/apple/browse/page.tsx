@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
-import type { AppleStatus } from "../../lib/api";
-import { safeAppleStatus, safeSeries } from "../../lib/load";
+import type { AppleDailySummary, AppleStatus } from "../../lib/api";
+import { safeAppleDailySummary, safeAppleStatus, safeSeries } from "../../lib/load";
 import {
   APPLE_METRICS,
   type AppleIconName,
@@ -16,7 +16,6 @@ import {
   orderedSeriesPoints,
   recentTrend,
   relativeZh,
-  trendTone,
   zhDate,
   zhTime,
 } from "../appleHealth";
@@ -35,6 +34,11 @@ type SearchResult = {
   body: string;
   href: string;
   meta: string;
+};
+
+type RankedSearchResult = SearchResult & {
+  order: number;
+  score: number;
 };
 
 function rawNewest(status: AppleStatus | null, tables?: string[]): string | null {
@@ -96,8 +100,8 @@ function trendLabel(pct: number | null): string {
 }
 
 function metricHint(metricId: string): string {
-  if (metricId === "activity.stand_minutes") return "按天汇总 Apple Watch 站立与活动时间。";
-  if (metricId === "vital.respiratory_rate") return "睡眠期间记录，白天通常不会持续产生读数。";
+  if (metricId === "activity.stand_minutes") return "站立时间有数据，按天累计查看更接近 Apple 健康的口径。";
+  if (metricId === "vital.respiratory_rate") return "呼吸次数有数据，主要来自睡眠期间的 Apple Watch 记录。";
   return "点进去查看本周、本月和最近记录。";
 }
 
@@ -106,14 +110,24 @@ function searchText(raw: string | string[] | undefined): string {
   return (value ?? "").trim().slice(0, 32);
 }
 
-function haystack(parts: Array<string | number | null | undefined>): string {
-  return parts.filter((part) => part !== null && part !== undefined).join(" ").toLowerCase();
+function normalizeSearch(value: string | number | null | undefined): string {
+  return String(value ?? "").trim().toLowerCase();
 }
 
-function matchesSearch(query: string, parts: Array<string | number | null | undefined>): boolean {
-  if (!query) return false;
-  const normalized = query.toLowerCase();
-  return haystack(parts).includes(normalized);
+function bestSearchScore(query: string, groups: Array<{ parts: Array<string | number | null | undefined>; score: number }>): number {
+  const normalized = normalizeSearch(query);
+  if (!normalized) return 0;
+  let best = 0;
+  groups.forEach((group) => {
+    group.parts.forEach((part) => {
+      const text = normalizeSearch(part);
+      if (!text) return;
+      if (text === normalized) best = Math.max(best, group.score + 20);
+      else if (text.startsWith(normalized)) best = Math.max(best, group.score + 10);
+      else if (text.includes(normalized)) best = Math.max(best, group.score);
+    });
+  });
+  return best;
 }
 
 function categoryHref(slug: string): string {
@@ -133,22 +147,41 @@ function metricGroup(metricId: string): string {
   return BROWSE_CATEGORIES.find((category) => category.metricIds.includes(metricId))?.title ?? "健康指标";
 }
 
+function quickMetricValue(metricId: string, latest: number | null, summary: AppleDailySummary | null): { value: number | null; label: string } {
+  if (metricId === "activity.stand_minutes") {
+    return {
+      value: summary?.activity?.stand_minutes ?? latest,
+      label: summary?.activity?.stand_minutes !== null && summary?.activity?.stand_minutes !== undefined ? "上一完整日" : "最近记录",
+    };
+  }
+  if (metricId === "vital.respiratory_rate") {
+    return {
+      value: summary?.sleep?.respiratory_rate ?? latest,
+      label: summary?.sleep?.respiratory_rate !== null && summary?.sleep?.respiratory_rate !== undefined ? "昨夜睡眠平均" : "最近睡眠读数",
+    };
+  }
+  if (metricId === "activity.steps") {
+    return {
+      value: summary?.activity?.steps ?? latest,
+      label: summary?.activity?.steps !== null && summary?.activity?.steps !== undefined ? "上一完整日" : "最近记录",
+    };
+  }
+  return { value: latest, label: "最新读数" };
+}
+
 function buildSearchResults(query: string, status: AppleStatus | null): SearchResult[] {
   if (!query) return [];
-  const results: SearchResult[] = [];
+  const results: RankedSearchResult[] = [];
+  let order = 0;
 
   APPLE_METRICS.forEach((metric) => {
-    if (
-      matchesSearch(query, [
-        metric.id,
-        metric.slug,
-        metric.label,
-        metric.note,
-        metric.description,
-        metric.unit,
-        ...(SEARCH_ALIASES[metric.id] ?? []),
-      ])
-    ) {
+    const score = bestSearchScore(query, [
+      { parts: [metric.label], score: 90 },
+      { parts: [metric.note, ...(SEARCH_ALIASES[metric.id] ?? [])], score: 70 },
+      { parts: [metric.id, metric.slug, metric.unit], score: 55 },
+      { parts: [metric.description], score: 35 },
+    ]);
+    if (score > 0) {
       results.push({
         icon: iconForMetric(metric.id),
         kind: "指标",
@@ -156,6 +189,8 @@ function buildSearchResults(query: string, status: AppleStatus | null): SearchRe
         body: metric.description,
         href: `/apple/metrics/${metric.slug}`,
         meta: `${metricGroup(metric.id)} · ${metric.note}`,
+        order: order++,
+        score,
       });
     }
   });
@@ -163,16 +198,12 @@ function buildSearchResults(query: string, status: AppleStatus | null): SearchRe
   BROWSE_CATEGORIES.forEach((category) => {
     const labels = metricLabels(category.metricIds).join(" ");
     const metricAliases = category.metricIds.flatMap((metricId) => SEARCH_ALIASES[metricId] ?? []);
-    if (
-      matchesSearch(query, [
-        category.slug,
-        category.title,
-        category.subtitle,
-        category.description,
-        labels,
-        ...metricAliases,
-      ])
-    ) {
+    const score = bestSearchScore(query, [
+      { parts: [category.title], score: 95 },
+      { parts: [category.subtitle, labels, ...metricAliases], score: 72 },
+      { parts: [category.slug, category.description], score: 42 },
+    ]);
+    if (score > 0) {
       results.push({
         icon: category.icon,
         kind: "分类",
@@ -180,13 +211,20 @@ function buildSearchResults(query: string, status: AppleStatus | null): SearchRe
         body: category.description,
         href: categoryHref(category.slug),
         meta: `${category.metricIds.length || category.rawTables.length} 个入口`,
+        order: order++,
+        score,
       });
     }
   });
 
   Object.entries(RAW_TABLES).forEach(([table, spec]) => {
     const row = status?.[table] ?? null;
-    if (matchesSearch(query, [table, spec.label, spec.description, ...(SEARCH_ALIASES[table] ?? [])])) {
+    const score = bestSearchScore(query, [
+      { parts: [spec.label], score: 88 },
+      { parts: [table, ...(SEARCH_ALIASES[table] ?? [])], score: 66 },
+      { parts: [spec.description], score: 40 },
+    ]);
+    if (score > 0) {
       results.push({
         icon: table === "sleep_sessions" ? "sleep" : table === "daily_activity" || table === "workouts" ? "activity" : "data",
         kind: "记录类别",
@@ -194,11 +232,16 @@ function buildSearchResults(query: string, status: AppleStatus | null): SearchRe
         body: spec.description,
         href: `/apple/raw/${encodeURIComponent(table)}`,
         meta: `${(row?.count ?? 0).toLocaleString("zh-CN")} 条 · ${row?.newest ? relativeZh(row.newest) : "暂无同步"}`,
+        order: order++,
+        score,
       });
     }
   });
 
-  return results.slice(0, 12);
+  return results
+    .sort((a, b) => b.score - a.score || a.order - b.order)
+    .slice(0, 12)
+    .map(({ order: _order, score: _score, ...result }) => result);
 }
 
 export default async function AppleBrowsePage({ searchParams }: PageProps) {
@@ -209,8 +252,9 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
   const quickMetrics = QUICK_METRIC_IDS.map((id) => APPLE_METRICS.find((metric) => metric.id === id)).filter(
     (metric): metric is (typeof APPLE_METRICS)[number] => Boolean(metric),
   );
-  const [status, quickSeriesList] = await Promise.all([
+  const [status, dailySummary, quickSeriesList] = await Promise.all([
     safeAppleStatus(),
+    safeAppleDailySummary(),
     Promise.all(quickMetrics.map((metric) => safeSeries(metric.id, "30d"))),
   ]);
   const searchResults = buildSearchResults(query, status);
@@ -334,21 +378,21 @@ export default async function AppleBrowsePage({ searchParams }: PageProps) {
             const firstPoint = points[0];
             const latestPoint = points[points.length - 1];
             const latest = nums.length ? nums[nums.length - 1] : latestValue(series);
+            const reading = quickMetricValue(metric.id, latest, dailySummary);
             const trend = recentTrend(nums);
-            const tone = trendTone(metric, trend.delta);
             return (
               <Link className="apple-category-metric-card apple-quick-metric-card" href={`/apple/metrics/${metric.slug}`} key={metric.id}>
                 <div className="apple-card-title">
                   <span>{metric.label}</span>
-                  <em className={tone}>{trendLabel(trend.pct)}</em>
+                  <em className="neutral">{reading.label}</em>
                 </div>
                 <div className="apple-value">
-                  {formatValue(latest, metric.digits ?? 0)}
+                  {formatValue(reading.value, metric.digits ?? 0)}
                   <span>{metric.unit}</span>
                 </div>
                 <Sparkline nums={nums} />
                 <div className="apple-card-meta">
-                  {nums.length.toLocaleString("zh-CN")} 个点 · {zhDate(firstPoint?.t)} 到 {zhDate(latestPoint?.t)}
+                  {trendLabel(trend.pct)} · {nums.length.toLocaleString("zh-CN")} 个点 · {zhDate(firstPoint?.t)} 到 {zhDate(latestPoint?.t)}
                 </div>
                 <p className="apple-metric-note">{metricHint(metric.id)}</p>
               </Link>
