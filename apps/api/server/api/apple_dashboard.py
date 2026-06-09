@@ -23,8 +23,30 @@ router = APIRouter(prefix="/api/apple", dependencies=[Depends(verify_api_key)])
 CN_TZ = ZoneInfo("Asia/Shanghai")
 
 
+def _dashboard_dates(target_date: date | None, now: datetime | None = None) -> tuple[date, date]:
+    if target_date is not None:
+        return target_date, target_date
+
+    current_dt = now or datetime.now(CN_TZ)
+    if current_dt.tzinfo is None:
+        current_dt = current_dt.replace(tzinfo=CN_TZ)
+    today = current_dt.astimezone(CN_TZ).date()
+    return today - timedelta(days=1), today
+
+
 def _default_target_date() -> date:
-    return datetime.now(CN_TZ).date() - timedelta(days=1)
+    return _dashboard_dates(None)[0]
+
+
+def _default_sleep_date() -> date:
+    return _dashboard_dates(None)[1]
+
+
+def _sleep_window(sleep_day: date) -> tuple[datetime, datetime]:
+    return (
+        datetime.combine(sleep_day - timedelta(days=1), time(18, 0)),
+        datetime.combine(sleep_day, time(12, 0)),
+    )
 
 
 def _minutes(ms: int | float | None) -> float | None:
@@ -120,7 +142,7 @@ async def apple_daily_summary(
 ) -> dict[str, Any]:
     """Return yesterday's activity, last-night sleep, and practical advice."""
     owner_id = resolve_owner_id(request.headers.get(OWNER_HEADER))
-    day = target_date or _default_target_date()
+    day, sleep_day = _dashboard_dates(target_date)
     params = {
         "owner_id": str(owner_id),
         "target_date": day,
@@ -166,8 +188,7 @@ async def apple_daily_summary(
         )
     ).mappings().first()
 
-    sleep_start = datetime.combine(day - timedelta(days=1), time(18, 0))
-    sleep_end = datetime.combine(day, time(12, 0))
+    sleep_start, sleep_end = _sleep_window(sleep_day)
     sleep_params = {
         **params,
         "sleep_start": sleep_start,
