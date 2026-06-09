@@ -5,7 +5,16 @@ import type { Metadata } from "next";
 
 import type { AppleDailySummary } from "../../../lib/api";
 import { safeAppleDailySummary } from "../../../lib/load";
-import { AppleCategoryIcon, SleepStageOverview, formatHours, formatRespiratoryRate, formatValue, workoutLabel, zhTime } from "../../appleHealth";
+import {
+  type AppleIconName,
+  AppleCategoryIcon,
+  SleepStageOverview,
+  formatHours,
+  formatRespiratoryRate,
+  formatValue,
+  workoutLabel,
+  zhTime,
+} from "../../appleHealth";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +23,15 @@ type PageProps = {
 };
 
 type Tone = "good" | "warn" | "neutral";
+
+type DayFocusItem = {
+  href: string;
+  icon: AppleIconName;
+  meta: string;
+  title: string;
+  body: string;
+  tone: Tone;
+};
 
 function validDateKey(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -119,6 +137,51 @@ function formatMinutes(value: number | null | undefined): string {
   return `${formatValue(value, 0)} 分钟`;
 }
 
+function sleepEfficiencyText(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "睡眠效率未记录";
+  return `睡眠效率 ${formatValue(value, 1)}%`;
+}
+
+function buildDayFocusItems(summary: AppleDailySummary | null): DayFocusItem[] {
+  const activity = summary?.activity ?? null;
+  const sleep = summary?.sleep ?? null;
+  const workouts = summary?.workouts ?? [];
+  const advice = summary?.advice?.[0] ? dayCopy(summary.advice[0]) : "同步更多活动和睡眠后，这里会给出当天建议。";
+
+  return [
+    {
+      href: "/apple/raw/daily_activity",
+      icon: "activity",
+      meta: "活动",
+      title: activity ? (activity.level === "充足" ? "活动完成不错" : "活动量需要补足") : "等待活动记录",
+      body: activity
+        ? `${formatValue(activity.steps)} 步，活动 ${formatMinutes(activity.active_minutes)}，站立 ${formatHours(activity.stand_minutes)}。`
+        : "同步后会显示这一天的步数、活动分钟和站立时间。",
+      tone: activityTone(activity?.level),
+    },
+    {
+      href: "/apple/raw/sleep_sessions",
+      icon: "sleep",
+      meta: "睡眠",
+      title: sleep ? (sleep.level === "偏少" ? "恢复时间偏少" : "睡眠恢复可参考") : "等待睡眠记录",
+      body: sleep
+        ? `${formatHours(sleep.total_sleep_min)}，${sleepEfficiencyText(sleep.efficiency_pct)}，呼吸 ${formatRespiratoryRate(sleep.respiratory_rate)}。`
+        : "佩戴 Apple Watch 入睡后，这里会显示睡眠阶段和呼吸次数。",
+      tone: sleepTone(sleep?.level),
+    },
+    {
+      href: workouts.length ? "/apple/raw/workouts" : "/apple/report",
+      icon: workouts.length ? "cardio" : "recovery",
+      meta: workouts.length ? "训练" : "建议",
+      title: workouts.length ? `${workouts.length} 次训练记录` : "接下来怎么安排",
+      body: workouts.length
+        ? `最近一次是${workoutLabel(workouts[0].sport_type)}，持续 ${formatMinutes(workouts[0].duration_min)}；也要结合睡眠恢复看强度。`
+        : advice,
+      tone: sleep?.level === "偏少" ? "warn" : workouts.length ? "good" : "neutral",
+    },
+  ];
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { date } = await params;
   const dateKey = decodeURIComponent(date);
@@ -140,6 +203,7 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
   const nextDate = shiftDateKey(dateKey, 1);
   const today = todayDateKey();
   const canOpenNextDate = !today || nextDate <= today;
+  const focusItems = buildDayFocusItems(summary);
   const dayKpis = [
     {
       href: "/apple/metrics/steps",
@@ -216,6 +280,19 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
           </div>
         )}
       </nav>
+
+      <section className="apple-focus-grid" aria-label="当天重点">
+        {focusItems.map((item) => (
+          <Link className={`apple-focus-card ${item.tone}`} href={item.href} key={item.title}>
+            <AppleCategoryIcon name={item.icon} />
+            <div>
+              <span>{item.meta}</span>
+              <strong>{item.title}</strong>
+              <p>{item.body}</p>
+            </div>
+          </Link>
+        ))}
+      </section>
 
       <section className="apple-kpis">
         {dayKpis.map((item) => (
@@ -350,23 +427,37 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
             </Link>
           </div>
           <div className="apple-record-grid day-workouts">
-            {workouts.map((workout) => (
-              <article className="apple-record-card" key={`${workout.start_time}-${workout.sport_type}`}>
-                <AppleCategoryIcon name="cardio" />
-                <div>
-                  <span>{workoutLabel(workout.sport_type)}</span>
-                  <strong>
-                    {formatMinutes(workout.duration_min)}
-                  </strong>
-                  <p>{zhTime(workout.start_time)} 开始</p>
-                  <div className="apple-record-tags">
-                    <em>{formatValue(workout.calories, 1)} kcal</em>
-                    <em>{formatValue(workout.distance_km, 2)} km</em>
-                    <em>最高 {formatValue(workout.max_hr)} bpm</em>
+            {workouts.map((workout) => {
+              const caloriesText =
+                workout.calories === null || workout.calories === undefined
+                  ? "训练能量未记录"
+                  : `${formatValue(workout.calories, 1)} kcal`;
+              const distanceText =
+                workout.distance_km === null || workout.distance_km === undefined
+                  ? "距离未记录"
+                  : `${formatValue(workout.distance_km, 2)} km`;
+              const heartText =
+                workout.max_hr === null || workout.max_hr === undefined
+                  ? "最高心率未记录"
+                  : `最高 ${formatValue(workout.max_hr)} bpm`;
+              return (
+                <article className="apple-record-card" key={`${workout.start_time}-${workout.sport_type}`}>
+                  <AppleCategoryIcon name="cardio" />
+                  <div>
+                    <span>{workoutLabel(workout.sport_type)}</span>
+                    <strong>
+                      {formatMinutes(workout.duration_min)}
+                    </strong>
+                    <p>{zhTime(workout.start_time)} 开始</p>
+                    <div className="apple-record-tags">
+                      <em>{caloriesText}</em>
+                      <em>{distanceText}</em>
+                      <em>{heartText}</em>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
             {!workouts.length && <div className="apple-empty-chart compact">这一天没有训练记录</div>}
           </div>
         </article>
