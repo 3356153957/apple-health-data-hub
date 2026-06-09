@@ -333,6 +333,126 @@ a {
   max-width: 1320px;
 }
 
+.unlock-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(94, 234, 212, 0.12), transparent 34%),
+    var(--bg);
+}
+
+.unlock-card {
+  width: min(100%, 430px);
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.unlock-mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--signal-line);
+  border-radius: 16px;
+  background: var(--signal-weak);
+  color: var(--signal);
+}
+
+.unlock-mark svg {
+  width: 24px;
+  height: 24px;
+}
+
+.unlock-card > span {
+  display: block;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.unlock-card h1 {
+  margin: 8px 0 0;
+  color: var(--ink);
+  font-size: 28px;
+  line-height: 1.16;
+}
+
+.unlock-card > p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.unlock-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.unlock-form label span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.unlock-form input[type="password"] {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--raise);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 18px;
+  outline: none;
+}
+
+.unlock-form input[type="password"]:focus {
+  border-color: var(--signal-line);
+  box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.12);
+}
+
+.unlock-form p {
+  margin: 0;
+  color: var(--warn);
+  font-size: 13px;
+}
+
+.unlock-form button {
+  min-height: 48px;
+  border: 1px solid var(--signal-line);
+  border-radius: var(--radius-sm);
+  background: var(--signal);
+  color: #03110f;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    opacity 0.14s ease;
+}
+
+.unlock-form button:hover {
+  transform: translateY(-1px);
+}
+
+.unlock-form button:active {
+  transform: translateY(0);
+  opacity: 0.86;
+}
+
+.unlock-form button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 /* ── Layout helpers ────────────────────────────────────────────────── */
 
 .lead {
@@ -2200,8 +2320,10 @@ html {
 
 .health-coach-status-score {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 104px;
   aspect-ratio: 1;
   justify-self: flex-end;
@@ -2230,15 +2352,17 @@ html {
 .health-coach-status-score b {
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 30px;
+  font-size: 32px;
   line-height: 1;
 }
 
 .health-coach-status-score small {
-  margin-top: 34px;
-  margin-left: -18px;
+  margin-top: 3px;
+  margin-left: 0;
   color: var(--muted);
   font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .health-coach-factor-grid {
@@ -2282,7 +2406,7 @@ html {
   height: 38px;
 }
 
-.health-coach-factor span {
+.health-coach-factor > span:not(.apple-category-icon) {
   display: block;
   color: var(--muted);
   font-size: 11px;
@@ -4404,7 +4528,7 @@ a.apple-home-favorite:active {
   height: 42px;
 }
 
-.apple-category-guide-card span {
+.apple-category-guide-card > span:not(.apple-category-icon) {
   display: block;
   color: var(--muted);
   font-family: var(--mono);
@@ -7504,8 +7628,8 @@ a.apple-record-card:active {
   }
 
   .health-coach-status-score small {
-    margin-top: 28px;
-    margin-left: -15px;
+    margin-top: 3px;
+    margin-left: 0;
   }
 
   .health-coach-status-head strong {

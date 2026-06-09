@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 
 import { Shell } from "./components/Shell";
@@ -17,6 +18,26 @@ export const metadata: Metadata = {
 // The shell fetches the egress posture + freshness for the sidebar/topbar status.
 // Best-effort: defaults keep the chrome sensible when the backend is unreachable.
 export default async function RootLayout({ children }: { children: ReactNode }) {
+  const headerStore = await headers();
+  const pathname = headerStore.get("x-health-pathname");
+  const isUnlockPage = pathname === "/unlock";
+
+  if (isUnlockPage) {
+    return (
+      <html lang="zh-CN" className={`${sans.variable} ${mono.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html:
+                "(function(){try{var t=localStorage.getItem('theme');document.documentElement.dataset.theme=(t==='light'||t==='dark')?t:'dark';}catch(e){document.documentElement.dataset.theme='dark';}})();",
+            }}
+          />
+        </head>
+        <body>{children}</body>
+      </html>
+    );
+  }
+
   const [privacy, readiness] = await Promise.all([safePrivacy(), safeReadiness()]);
   const provider = privacy?.provider ?? "本地模型";
   const isLocal = privacy?.is_local ?? true;
