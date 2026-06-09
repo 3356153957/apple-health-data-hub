@@ -6,6 +6,7 @@ import type { AppleDailySummary } from "../../lib/api";
 import { safeAppleDailySummary, safeAppleRawDetail } from "../../lib/load";
 import {
   AppleCategoryIcon,
+  SleepStageOverview,
   cleanRespiratoryRate,
   formatHours,
   formatRespiratoryRate,
@@ -318,6 +319,13 @@ export default async function AppleDailyPage() {
               查看睡眠
             </Link>
           </div>
+          <SleepStageOverview
+            deepMin={sleep?.deep_min}
+            coreMin={sleep?.core_min}
+            remMin={sleep?.rem_min}
+            awakeMin={sleep?.awake_min}
+            totalMin={sleep?.in_bed_min}
+          />
           <div className="apple-sleep-bars day">
             {[
               ["深睡", sleep?.deep_min, "deep"],

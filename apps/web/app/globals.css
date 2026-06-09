@@ -5139,6 +5139,90 @@ a.apple-record-card:active {
   margin-top: 22px;
 }
 
+.apple-sleep-stage-overview {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.apple-sleep-stage-ribbon {
+  display: flex;
+  align-items: stretch;
+  min-height: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: var(--raise);
+}
+
+.apple-sleep-stage-ribbon span {
+  display: grid;
+  width: 100%;
+  place-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apple-sleep-stage-segment {
+  display: block;
+  min-width: 4px;
+  height: 18px;
+}
+
+.apple-sleep-stage-segment.deep,
+.apple-sleep-stage-legend .deep i {
+  background: var(--sleep-deep);
+}
+
+.apple-sleep-stage-segment.core,
+.apple-sleep-stage-legend .core i {
+  background: var(--sleep-core);
+}
+
+.apple-sleep-stage-segment.rem,
+.apple-sleep-stage-legend .rem i {
+  background: var(--sleep-rem);
+}
+
+.apple-sleep-stage-segment.awake,
+.apple-sleep-stage-legend .awake i {
+  background: var(--sleep-awake);
+}
+
+.apple-sleep-stage-legend {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.apple-sleep-stage-legend span {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  column-gap: 6px;
+  row-gap: 2px;
+  align-items: center;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.apple-sleep-stage-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.apple-sleep-stage-legend strong {
+  grid-column: 2;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .apple-sleep-extra {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

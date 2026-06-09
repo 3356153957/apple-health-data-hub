@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 import type { AppleDailySummary } from "../../../lib/api";
 import { safeAppleDailySummary } from "../../../lib/load";
-import { AppleCategoryIcon, formatHours, formatRespiratoryRate, formatValue, workoutLabel, zhTime } from "../../appleHealth";
+import { AppleCategoryIcon, SleepStageOverview, formatHours, formatRespiratoryRate, formatValue, workoutLabel, zhTime } from "../../appleHealth";
 
 export const dynamic = "force-dynamic";
 
@@ -266,6 +266,13 @@ export default async function AppleDayDetailPage({ params }: PageProps) {
               睡眠详情
             </Link>
           </div>
+          <SleepStageOverview
+            deepMin={sleep?.deep_min}
+            coreMin={sleep?.core_min}
+            remMin={sleep?.rem_min}
+            awakeMin={sleep?.awake_min}
+            totalMin={sleep?.in_bed_min}
+          />
           <div className="apple-sleep-bars day">
             {[
               ["深睡", sleep?.deep_min, "deep"],

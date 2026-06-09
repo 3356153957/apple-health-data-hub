@@ -299,6 +299,77 @@ export function formatHours(minutes: number | null | undefined): string {
   return `${formatValue(minutes / 60, 1)} 小时`;
 }
 
+type SleepStageKey = "deep" | "core" | "rem" | "awake";
+
+type SleepStage = {
+  key: SleepStageKey;
+  label: string;
+  value: number | null | undefined;
+};
+
+function stageMinutes(value: number | null | undefined): number {
+  return value !== null && value !== undefined && Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+function stageWidth(value: number, total: number): string {
+  if (!total) return "0%";
+  return `${Math.max(0, Math.min(100, (value / total) * 100))}%`;
+}
+
+export function SleepStageOverview({
+  deepMin,
+  coreMin,
+  remMin,
+  awakeMin,
+  totalMin,
+}: {
+  deepMin: number | null | undefined;
+  coreMin: number | null | undefined;
+  remMin: number | null | undefined;
+  awakeMin: number | null | undefined;
+  totalMin?: number | null | undefined;
+}) {
+  const stages: SleepStage[] = [
+    { key: "deep", label: "深睡", value: deepMin },
+    { key: "core", label: "核心", value: coreMin },
+    { key: "rem", label: "REM", value: remMin },
+    { key: "awake", label: "清醒", value: awakeMin },
+  ];
+  const total = stageMinutes(totalMin) || stages.reduce((sum, stage) => sum + stageMinutes(stage.value), 0);
+  const visibleStages = stages.filter((stage) => stageMinutes(stage.value) > 0);
+
+  return (
+    <div className="apple-sleep-stage-overview">
+      <div className="apple-sleep-stage-ribbon" aria-label="睡眠阶段总览">
+        {visibleStages.length ? (
+          visibleStages.map((stage) => {
+            const value = stageMinutes(stage.value);
+            return (
+              <i
+                aria-label={`${stage.label} ${formatValue(value)} 分钟`}
+                className={`apple-sleep-stage-segment ${stage.key}`}
+                key={stage.key}
+                style={{ width: stageWidth(value, total) }}
+              />
+            );
+          })
+        ) : (
+          <span>暂无睡眠阶段</span>
+        )}
+      </div>
+      <div className="apple-sleep-stage-legend">
+        {stages.map((stage) => (
+          <span className={stage.key} key={stage.key}>
+            <i aria-hidden />
+            {stage.label}
+            <strong>{formatValue(stageMinutes(stage.value))} 分钟</strong>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function workoutLabel(value: string | null | undefined): string {
   if (!value) return "暂无训练类型";
   const labels: Record<string, string> = {
