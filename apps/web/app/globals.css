@@ -1788,7 +1788,7 @@ html {
 
 .apple-related-metrics {
   display: grid;
-  grid-template-columns: minmax(240px, 1.25fr) repeat(2, minmax(190px, 1fr));
+  grid-template-columns: minmax(220px, 1.08fr) repeat(3, minmax(170px, 1fr));
   gap: 12px;
   margin-top: 14px;
 }

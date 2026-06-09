@@ -13,6 +13,7 @@ const TITLES: Record<string, { title: string; sub: string }> = {
   "/apple/highlights": { title: "健康亮点", sub: "运动、睡眠、恢复和趋势重点。" },
   "/apple/checklist": { title: "健康清单", sub: "关键数据、同步和隐私检查。" },
   "/apple/calendar": { title: "健康日历", sub: "按日期回看运动、站立、睡眠和训练。" },
+  "/apple/goals": { title: "目标闭环", sub: "把一周目标、差距和下一步动作放在一起。" },
   "/apple/report": { title: "健康报告", sub: "本周运动、睡眠、恢复和建议。" },
   "/apple/favorites": { title: "收藏", sub: "每天优先查看的健康指标。" },
   "/apple/browse": { title: "浏览", sub: "按活动、睡眠、心脏和恢复查看。" },

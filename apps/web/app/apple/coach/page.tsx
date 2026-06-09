@@ -260,8 +260,8 @@ function phaseCards(): CoachCard[] {
     },
     {
       title: "目标闭环 + 每周报告",
-      body: "下一步把减脂、增肌、体能、睡眠等目标变成周计划和完成度。",
-      href: "/apple/report",
+      body: "把步数、活动分钟、站立、睡眠和训练变成周目标、完成度和下一步动作。",
+      href: "/apple/goals",
       icon: "activity",
       tone: "neutral",
       meta: "第二阶段",

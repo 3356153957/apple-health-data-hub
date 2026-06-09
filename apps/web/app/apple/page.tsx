@@ -619,6 +619,9 @@ export default async function AppleHealthPage() {
             <Link href="/apple/daily" className="apple-text-link">
               每日总结
             </Link>
+            <Link href="/apple/goals" className="apple-text-link">
+              目标闭环
+            </Link>
             <Link href="/apple/highlights" className="apple-text-link">
               全部亮点
             </Link>

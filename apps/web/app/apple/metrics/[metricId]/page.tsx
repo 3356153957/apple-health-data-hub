@@ -6,6 +6,7 @@ import type { AppleMetric } from "../../appleHealth";
 import { safeAppleRawDetail, safeSeries } from "../../../lib/load";
 import {
   APPLE_METRICS,
+  BROWSE_CATEGORIES,
   average,
   formatValue,
   latestValue,
@@ -163,28 +164,31 @@ const SPECIAL_METRIC_CONTEXT: Record<string, MetricMethodContext> = {
   },
 };
 
-const RELATED_METRICS: Array<{
-  id: string;
-  href: string;
-  icon: IconName;
-  kicker: string;
-  description: string;
-}> = [
-  {
-    id: "activity.stand_minutes",
-    href: "/apple/metrics/stand-time",
-    icon: "records",
-    kicker: "活动",
-    description: "按天汇总 Apple Watch 站立分钟数，不会混在心率曲线里。",
-  },
-  {
-    id: "vital.respiratory_rate",
-    href: "/apple/metrics/respiratory-rate",
-    icon: "trend",
-    kicker: "睡眠",
-    description: "通常在睡眠期间产生读数，适合和睡眠质量、疲劳状态一起看。",
-  },
-];
+const RELATED_METRIC_GROUPS: Record<string, string[]> = {
+  "activity.steps": ["activity.steps", "activity.active_energy", "activity.stand_minutes"],
+  "activity.active_energy": ["activity.active_energy", "activity.steps", "activity.stand_minutes"],
+  "activity.stand_minutes": ["activity.stand_minutes", "activity.steps", "activity.active_energy"],
+  "vital.heart_rate": ["vital.heart_rate", "vital.resting_heart_rate", "vital.hrv_sdnn"],
+  "vital.resting_heart_rate": ["vital.resting_heart_rate", "vital.hrv_sdnn", "vital.heart_rate"],
+  "vital.hrv_sdnn": ["vital.hrv_sdnn", "vital.resting_heart_rate", "vital.respiratory_rate"],
+  "vital.blood_oxygen": ["vital.blood_oxygen", "vital.respiratory_rate", "vital.hrv_sdnn"],
+  "vital.respiratory_rate": ["vital.respiratory_rate", "vital.hrv_sdnn", "body.wrist_temperature"],
+  "body.wrist_temperature": ["body.wrist_temperature", "vital.respiratory_rate", "vital.hrv_sdnn"],
+  "cardio.vo2_max": ["cardio.vo2_max", "vital.heart_rate", "activity.active_energy"],
+};
+
+const RELATED_DESCRIPTIONS: Record<string, string> = {
+  "activity.steps": "看一天里的基础活动量，适合和能量、站立时间一起判断日常节奏。",
+  "activity.active_energy": "反映主动消耗，适合和步数、训练安排一起看运动负荷。",
+  "activity.stand_minutes": "按天汇总 Apple Watch 站立分钟数，适合观察久坐和活动间隔。",
+  "vital.heart_rate": "连续心率可以帮助观察活动、睡眠和恢复时的身体反应。",
+  "vital.resting_heart_rate": "静息状态参考，适合和 HRV、睡眠一起看恢复压力。",
+  "vital.hrv_sdnn": "恢复压力参考，短期波动正常，更适合和睡眠、呼吸一起看趋势。",
+  "vital.blood_oxygen": "夜间与静息时的稳定性参考，适合和呼吸、恢复指标搭配看。",
+  "vital.respiratory_rate": "睡眠期间产生的呼吸读数，适合和睡眠质量、疲劳状态一起看。",
+  "body.wrist_temperature": "夜间体温趋势，适合和睡眠、恢复状态一起观察。",
+  "cardio.vo2_max": "心肺能力估算，适合和心率、活动能量一起看长期体能变化。",
+};
 
 const ICON_PATHS: Record<IconName, string[]> = {
   week: ["M7 2v4", "M17 2v4", "M3 9h18", "M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"],
@@ -364,6 +368,24 @@ function relatedMetricStatus(metric: AppleMetric, value: number | null): string 
   if (metric.id === "activity.stand_minutes") return `今天进度 ${formatValue(value, metric.digits ?? 0)} ${metric.unit}`;
   if (metric.id === "vital.respiratory_rate") return `睡眠读数 ${formatValue(value, metric.digits ?? 0)} ${metric.unit}`;
   return `最近读数 ${formatValue(value, metric.digits ?? 0)} ${metric.unit}`;
+}
+
+function metricGroup(metricId: string): string {
+  return BROWSE_CATEGORIES.find((category) => category.slug !== "data" && category.metricIds.includes(metricId))?.title ?? "健康";
+}
+
+function relatedIcon(metricId: string): IconName {
+  if (metricId.startsWith("activity.")) return "records";
+  if (metricId.startsWith("cardio.")) return "month";
+  if (metricId.startsWith("body.") || metricId === "vital.blood_oxygen") return "week";
+  return "trend";
+}
+
+function relatedMetricIds(metric: AppleMetric): string[] {
+  const categoryIds =
+    BROWSE_CATEGORIES.find((category) => category.slug !== "data" && category.metricIds.includes(metric.id))?.metricIds ?? [];
+  const ids = [metric.id, ...(RELATED_METRIC_GROUPS[metric.id] ?? []), ...categoryIds, "vital.heart_rate", "vital.hrv_sdnn", "vital.respiratory_rate"];
+  return Array.from(new Set(ids)).filter((id) => APPLE_METRICS.some((item) => item.id === id)).slice(0, 3);
 }
 
 function positionTone(metric: AppleMetric, position: number | null): "good" | "warn" | "neutral" {
@@ -685,18 +707,27 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
   const recentRows = rawPoints.length
     ? rawPoints.slice(0, 120)
     : selectedPointsDesc.slice(0, 80);
-  const relatedSeries = await Promise.all(RELATED_METRICS.map((item) => safeSeries(item.id, "30d")));
-  const relatedCards = RELATED_METRICS.map((item, index) => {
-    const relatedMetric = APPLE_METRICS.find((candidate) => candidate.id === item.id);
+  const relatedIds = relatedMetricIds(metric);
+  const relatedSeries = await Promise.all(relatedIds.map((id) => safeSeries(id, "30d")));
+  const relatedCards = relatedIds.map((id, index) => {
+    const relatedMetric = APPLE_METRICS.find((candidate) => candidate.id === id);
     if (!relatedMetric) return null;
     const relatedLatest = normalizeMetricValue(relatedMetric, latestValue(relatedSeries[index]));
     return {
-      ...item,
-      active: item.id === metric.id,
+      id,
+      href: `/apple/metrics/${relatedMetric.slug}`,
+      icon: relatedIcon(id),
+      kicker: metricGroup(id),
+      description: RELATED_DESCRIPTIONS[id] ?? relatedMetric.description,
+      active: id === metric.id,
       metric: relatedMetric,
       latest: relatedLatest,
     };
   }).filter((item): item is NonNullable<typeof item> => item !== null);
+  const relatedNames = relatedCards
+    .filter((item) => !item.active)
+    .map((item) => item.metric.label)
+    .join("、");
 
   return (
     <>
@@ -720,7 +751,7 @@ export default async function AppleMetricDetailPage({ params, searchParams }: Pa
           <span>相关指标</span>
           <strong>搭配查看更完整</strong>
           <p>
-            {metric.label}可以和活动、睡眠、恢复指标一起看，下面是最常用的搭配入口。
+            {metric.label}属于{metricGroup(metric.id)}，可以搭配 {relatedNames || "相关指标"} 一起看。
           </p>
         </div>
         {relatedCards.map((item) => (

@@ -108,6 +108,16 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M11.5 11V8.5" />
     </>
   ),
+  goals: (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <circle cx="8" cy="8" r="2.6" />
+      <path d="M8 2.5v2" />
+      <path d="M8 11.5v2" />
+      <path d="M2.5 8h2" />
+      <path d="M11.5 8h2" />
+    </>
+  ),
   stand: (
     <>
       <path d="M8 2.5v11" />
@@ -142,6 +152,7 @@ export const NAV: readonly NavItem[] = [
   { href: "/apple/highlights", label: "亮点", icon: "highlight" },
   { href: "/apple/checklist", label: "健康清单", icon: "checklist" },
   { href: "/apple/calendar", label: "日历", icon: "calendar", activePrefixes: ["/apple/days/"] },
+  { href: "/apple/goals", label: "目标闭环", icon: "goals" },
   { href: "/apple/report", label: "报告", icon: "report" },
   { href: "/apple/favorites", label: "收藏", icon: "favorite" },
   { href: "/apple/browse", label: "浏览", icon: "overview" },
